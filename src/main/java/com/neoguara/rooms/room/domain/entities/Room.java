@@ -4,7 +4,6 @@ import com.neoguara.rooms.room.domain.valueobjects.RoomId;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -24,9 +23,7 @@ public class Room {
     private int capacity;
     private boolean isActive;
 
-    @CreationTimestamp
     private LocalDateTime createdAt;
-
     private LocalDateTime updatedAt;
     private LocalDateTime deletedAt;
 
@@ -42,6 +39,7 @@ public class Room {
         this.floor = floor;
         this.capacity = capacity;
         this.isActive = true;
+        this.createdAt = LocalDateTime.now();
     }
 
     public void update(String name, String code, String type, String building, String resources, int floor, int capacity) {
