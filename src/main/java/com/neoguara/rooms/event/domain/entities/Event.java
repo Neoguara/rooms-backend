@@ -10,6 +10,20 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "events")
 public class Event {
+
+    public static Event create(EventId id, String title, String description, LocalDateTime startAt,
+                               LocalDateTime endAt, boolean isAllDay, String recurrenceRule) {
+        Event event = new Event();
+        event.id = id;
+        event.title = title;
+        event.description = description;
+        event.startAt = startAt;
+        event.endAt = endAt;
+        event.isAllDay = isAllDay;
+        event.recurrenceRule = recurrenceRule;
+        event.createdAt = LocalDateTime.now();
+        return event;
+    }
     @EmbeddedId
     private EventId id;
 
