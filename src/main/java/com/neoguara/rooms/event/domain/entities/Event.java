@@ -12,12 +12,17 @@ import java.time.LocalDateTime;
 public class Event {
     @EmbeddedId
     private EventId id;
+
     private String title;
+
     private String description;
 
     private LocalDateTime startAt;
+
     private LocalDateTime endAt;
+
     private boolean isAllDay;
+
     private String recurrenceRule;
 
     private LocalDateTime createdAt;

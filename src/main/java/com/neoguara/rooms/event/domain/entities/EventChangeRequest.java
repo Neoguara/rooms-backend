@@ -12,6 +12,7 @@ public class EventChangeRequest {
     @EmbeddedId
     private EventChangeRequestId id;
 
+
     private String status;
 
 }
