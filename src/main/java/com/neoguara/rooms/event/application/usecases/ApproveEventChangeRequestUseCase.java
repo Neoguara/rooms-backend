@@ -33,6 +33,10 @@ public class ApproveEventChangeRequestUseCase {
         var changeRequest = changeRequestRepository.findById(requestId)
                 .orElseThrow(() -> new IllegalArgumentException("Change request not found: " + changeRequestId));
 
+        if (changeRequest.isApproved()) {
+            throw new IllegalStateException("Change request already approved: " + changeRequestId);
+        }
+
         var changeItem = changeItemRepository.findByEventChangeRequestId(requestId)
                 .orElseThrow(() -> new IllegalArgumentException("Change item not found for request: " + changeRequestId));
 

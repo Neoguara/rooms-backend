@@ -68,6 +68,10 @@ public class EventChangeRequest {
     public String getJustification() { return justification; }
     public LocalDateTime getCreatedAt() { return createdAt; }
 
+    public boolean isApproved() {
+        return EventChangeRequestStatus.APPROVED.name().equals(this.status);
+    }
+
     public void approve() {
         this.status = EventChangeRequestStatus.APPROVED.name();
     }

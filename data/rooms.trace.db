@@ -1,0 +1,3 @@
+2026-05-01 20:06:09.751695-03:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "EVENT_PUBLICATION" not found (this database is empty); SQL statement:
+select djep1_0.id,djep1_0.completion_attempts,djep1_0.completion_date,djep1_0.event_type,djep1_0.last_resubmission_date,djep1_0.listener_id,djep1_0.publication_date,djep1_0.serialized_event,djep1_0.status from event_publication djep1_0 where djep1_0.completion_date is null order by djep1_0.publication_date [42104-240]
