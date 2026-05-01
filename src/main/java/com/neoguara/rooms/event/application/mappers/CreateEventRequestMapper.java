@@ -2,7 +2,6 @@ package com.neoguara.rooms.event.application.mappers;
 
 import com.neoguara.rooms.event.application.dtos.CreateEventRequest;
 import com.neoguara.rooms.event.application.dtos.CreateEventRequestResponse;
-import com.neoguara.rooms.event.application.dtos.EventChangeRequestResponse;
 import com.neoguara.rooms.event.domain.entities.EventChangeRequest;
 import com.neoguara.rooms.event.domain.valueobjects.UserId;
 

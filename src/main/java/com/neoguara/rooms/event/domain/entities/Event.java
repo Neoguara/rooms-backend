@@ -86,4 +86,23 @@ public class Event {
         return deletedAt;
     }
 
+    public void update(
+            RoomId roomId,
+            String title,
+            String description,
+            LocalDateTime startAt,
+            LocalDateTime endAt,
+            boolean isAllDay,
+            String recurrenceRule
+    ) {
+        this.roomId = roomId;
+        this.title = title;
+        this.description = description;
+        this.startAt = startAt;
+        this.endAt = endAt;
+        this.isAllDay = isAllDay;
+        this.recurrenceRule = recurrenceRule;
+        this.updatedAt = LocalDateTime.now();
+    }
+
 }

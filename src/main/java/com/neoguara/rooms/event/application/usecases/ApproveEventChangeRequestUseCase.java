@@ -39,15 +39,30 @@ public class ApproveEventChangeRequestUseCase {
 
         changeRequestRepository.save(changeRequest);
 
-        eventRepository.save(new Event(
-            changeItem.getNewRoomId(),
-                changeItem.getNewTitle(),
-                changeItem.getNewDescription(),
-                changeItem.getNewStartAt(),
-                changeItem.getNewEndAt(),
-                changeItem.getNewIsAllDay(),
-                changeItem.getNewRecurrenceRule()
-        ));
+        if (changeRequest.getEventId() != null) {
+            var event = eventRepository.findById(changeRequest.getEventId())
+                    .orElseThrow(() -> new IllegalArgumentException("Event not found: " + changeRequest.getEventId()));
+            event.update(
+                    changeItem.getNewRoomId(),
+                    changeItem.getNewTitle(),
+                    changeItem.getNewDescription(),
+                    changeItem.getNewStartAt(),
+                    changeItem.getNewEndAt(),
+                    changeItem.getNewIsAllDay(),
+                    changeItem.getNewRecurrenceRule()
+            );
+            eventRepository.save(event);
+        } else {
+            eventRepository.save(new Event(
+                    changeItem.getNewRoomId(),
+                    changeItem.getNewTitle(),
+                    changeItem.getNewDescription(),
+                    changeItem.getNewStartAt(),
+                    changeItem.getNewEndAt(),
+                    changeItem.getNewIsAllDay(),
+                    changeItem.getNewRecurrenceRule()
+            ));
+        }
 
     }
 

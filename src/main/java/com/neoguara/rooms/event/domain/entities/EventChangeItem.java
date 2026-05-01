@@ -63,6 +63,34 @@ public class EventChangeItem {
         this.newRecurrenceRule = newRecurrenceRule;
     }
 
+    public EventChangeItem(
+        EventChangeRequestId eventChangeRequestId,
+        RoomId oldRoomId, RoomId newRoomId,
+        String oldTitle, String newTitle,
+        String oldDescription, String newDescription,
+        LocalDateTime oldStartAt, LocalDateTime newStartAt,
+        LocalDateTime oldEndAt, LocalDateTime newEndAt,
+        Boolean oldIsAllDay, Boolean newIsAllDay,
+        String oldRecurrenceRule, String newRecurrenceRule
+    ) {
+        this.id = new EventChangeItemId();
+        this.eventChangeRequestId = eventChangeRequestId;
+        this.oldRoomId = oldRoomId;
+        this.newRoomId = newRoomId;
+        this.oldTitle = oldTitle;
+        this.newTitle = newTitle;
+        this.oldDescription = oldDescription;
+        this.newDescription = newDescription;
+        this.oldStartAt = oldStartAt;
+        this.newStartAt = newStartAt;
+        this.oldEndAt = oldEndAt;
+        this.newEndAt = newEndAt;
+        this.oldIsAllDay = oldIsAllDay;
+        this.newIsAllDay = newIsAllDay;
+        this.oldRecurrenceRule = oldRecurrenceRule;
+        this.newRecurrenceRule = newRecurrenceRule;
+    }
+
     public EventChangeItemId getId() { return id; }
 
     public RoomId getOldRoomId() {return oldRoomId;}
