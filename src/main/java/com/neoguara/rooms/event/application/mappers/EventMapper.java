@@ -10,6 +10,7 @@ public class EventMapper {
     public static EventResponse toResponse(Event event) {
         return new EventResponse(
                 event.getId().id(),
+                event.getRoomId().id(),
                 event.getTitle(),
                 event.getDescription(),
                 event.getStartAt(),

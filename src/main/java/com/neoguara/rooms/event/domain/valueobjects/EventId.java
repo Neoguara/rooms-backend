@@ -11,6 +11,10 @@ public record EventId(UUID id) {
         Assert.notNull(id, "id must not be null");
     }
 
+    public EventId() {
+        this(UUID.randomUUID());
+    }
+
     public static EventId of (UUID id) {
         return new EventId(id);
     }

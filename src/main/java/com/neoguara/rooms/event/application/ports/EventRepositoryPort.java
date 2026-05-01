@@ -6,4 +6,5 @@ import java.util.List;
 
 public interface EventRepositoryPort {
     List<Event> findAll();
+    Event save (Event event);
 }

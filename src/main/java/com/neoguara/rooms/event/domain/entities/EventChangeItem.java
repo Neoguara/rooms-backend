@@ -2,6 +2,7 @@ package com.neoguara.rooms.event.domain.entities;
 
 import com.neoguara.rooms.event.domain.valueobjects.EventChangeItemId;
 import com.neoguara.rooms.event.domain.valueobjects.EventChangeRequestId;
+import com.neoguara.rooms.event.domain.valueobjects.RoomId;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -15,6 +16,14 @@ public class EventChangeItem {
     @Embedded
     @AttributeOverride(name = "id", column = @Column(name = "event_change_request_id"))
     private EventChangeRequestId eventChangeRequestId;
+
+    @Embedded
+    @AttributeOverride(name = "id", column = @Column(name = "old_room_id"))
+    private RoomId oldRoomId;
+
+    @Embedded
+    @AttributeOverride(name = "id", column = @Column(name = "new_room_id"))
+    private RoomId newRoomId;
 
     private String oldTitle;
     private String newTitle;
@@ -31,8 +40,47 @@ public class EventChangeItem {
     private boolean oldIsAllDay;
     private boolean newIsAllDay;
 
-    private String OldRecurrenceRule;
+    private String oldRecurrenceRule;
     private String newRecurrenceRule;
 
+    EventChangeItem() {}
+
+    public EventChangeItem (
+        EventChangeRequestId eventChangeRequestId,
+        RoomId roomId,
+        String newTitle, String newDescription,
+        LocalDateTime newStartAt, LocalDateTime newEndAt,
+        Boolean newIsAllDay, String newRecurrenceRule
+    ) {
+        this.id = new EventChangeItemId();
+        this.eventChangeRequestId = eventChangeRequestId;
+        this.newRoomId = roomId;
+        this.newTitle = newTitle;
+        this.newDescription = newDescription;
+        this.newStartAt = newStartAt;
+        this.newEndAt = newEndAt;
+        this.newIsAllDay = newIsAllDay;
+        this.newRecurrenceRule = newRecurrenceRule;
+    }
+
+    public EventChangeItemId getId() { return id; }
+
+    public RoomId getOldRoomId() {return oldRoomId;}
+    public RoomId getNewRoomId() {return newRoomId;}
+    public boolean isOldIsAllDay() {return oldIsAllDay;}
+    public boolean isNewIsAllDay() {return newIsAllDay;}
+    public EventChangeRequestId getEventChangeRequestId() { return eventChangeRequestId; }
+    public String getOldTitle() { return oldTitle; }
+    public String getNewTitle() { return newTitle; }
+    public String getOldDescription() { return oldDescription; }
+    public String getNewDescription() { return newDescription; }
+    public LocalDateTime getOldStartAt() { return oldStartAt; }
+    public LocalDateTime getNewStartAt() { return newStartAt; }
+    public LocalDateTime getOldEndAt() { return oldEndAt; }
+    public LocalDateTime getNewEndAt() { return newEndAt; }
+    public Boolean getOldIsAllDay() { return oldIsAllDay; }
+    public Boolean getNewIsAllDay() { return newIsAllDay; }
+    public String getOldRecurrenceRule() { return oldRecurrenceRule; }
+    public String getNewRecurrenceRule() { return newRecurrenceRule; }
 
 }

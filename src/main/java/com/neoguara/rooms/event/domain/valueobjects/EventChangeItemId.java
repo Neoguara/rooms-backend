@@ -9,6 +9,10 @@ public record EventChangeItemId(UUID id) {
         Assert.notNull(id, "id must not be null");
     }
 
+    public EventChangeItemId() {
+        this(UUID.randomUUID());
+    }
+
     public static EventChangeItemId of (UUID id) {
         return new EventChangeItemId(id);
     }

@@ -20,4 +20,9 @@ public class EventRepositoryImpl implements EventRepositoryPort {
         return jpaRepository.findAll();
     }
 
+    @Override
+    public Event save(Event event) {
+        return jpaRepository.save(event);
+    }
+
 }

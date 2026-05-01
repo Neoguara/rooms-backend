@@ -10,6 +10,10 @@ public record ApprovalId(UUID id) {
         Assert.notNull(id, "id must not be null");
     }
 
+    public ApprovalId() {
+        this(UUID.randomUUID());
+    }
+
     public static ApprovalId of (UUID id) {
         return new ApprovalId(id);
     }
