@@ -37,33 +37,15 @@ public class EventChangeItem {
     private LocalDateTime oldEndAt;
     private LocalDateTime newEndAt;
 
-    private boolean oldIsAllDay;
-    private boolean newIsAllDay;
+    private Boolean oldIsAllDay;
+    private Boolean newIsAllDay;
 
     private String oldRecurrenceRule;
     private String newRecurrenceRule;
 
     EventChangeItem() {}
 
-    public EventChangeItem (
-        EventChangeRequestId eventChangeRequestId,
-        RoomId roomId,
-        String newTitle, String newDescription,
-        LocalDateTime newStartAt, LocalDateTime newEndAt,
-        Boolean newIsAllDay, String newRecurrenceRule
-    ) {
-        this.id = new EventChangeItemId();
-        this.eventChangeRequestId = eventChangeRequestId;
-        this.newRoomId = roomId;
-        this.newTitle = newTitle;
-        this.newDescription = newDescription;
-        this.newStartAt = newStartAt;
-        this.newEndAt = newEndAt;
-        this.newIsAllDay = newIsAllDay;
-        this.newRecurrenceRule = newRecurrenceRule;
-    }
-
-    public EventChangeItem(
+    private EventChangeItem(
         EventChangeRequestId eventChangeRequestId,
         RoomId oldRoomId, RoomId newRoomId,
         String oldTitle, String newTitle,
@@ -91,12 +73,70 @@ public class EventChangeItem {
         this.newRecurrenceRule = newRecurrenceRule;
     }
 
+    public static EventChangeItem create(
+        EventChangeRequestId eventChangeRequestId,
+        RoomId roomId,
+        String title, String description,
+        LocalDateTime startAt, LocalDateTime endAt,
+        Boolean isAllDay, String recurrenceRule
+    ) {
+        return new EventChangeItem(
+            eventChangeRequestId,
+            null, roomId,
+            null, title,
+            null, description,
+            null, startAt,
+            null, endAt,
+            null, isAllDay,
+            null, recurrenceRule
+        );
+    }
+
+    public static EventChangeItem update(
+        EventChangeRequestId eventChangeRequestId,
+        RoomId oldRoomId, RoomId newRoomId,
+        String oldTitle, String newTitle,
+        String oldDescription, String newDescription,
+        LocalDateTime oldStartAt, LocalDateTime newStartAt,
+        LocalDateTime oldEndAt, LocalDateTime newEndAt,
+        Boolean oldIsAllDay, Boolean newIsAllDay,
+        String oldRecurrenceRule, String newRecurrenceRule
+    ) {
+        return new EventChangeItem(
+            eventChangeRequestId,
+            oldRoomId, newRoomId,
+            oldTitle, newTitle,
+            oldDescription, newDescription,
+            oldStartAt, newStartAt,
+            oldEndAt, newEndAt,
+            oldIsAllDay, newIsAllDay,
+            oldRecurrenceRule, newRecurrenceRule
+        );
+    }
+
+    public static EventChangeItem delete(
+        EventChangeRequestId eventChangeRequestId,
+        RoomId roomId,
+        String title, String description,
+        LocalDateTime startAt, LocalDateTime endAt,
+        Boolean isAllDay, String recurrenceRule
+    ) {
+        return new EventChangeItem(
+            eventChangeRequestId,
+            roomId, null,
+            title, null,
+            description, null,
+            startAt, null,
+            endAt, null,
+            isAllDay, null,
+            recurrenceRule, null
+        );
+    }
+
     public EventChangeItemId getId() { return id; }
 
-    public RoomId getOldRoomId() {return oldRoomId;}
-    public RoomId getNewRoomId() {return newRoomId;}
-    public boolean isOldIsAllDay() {return oldIsAllDay;}
-    public boolean isNewIsAllDay() {return newIsAllDay;}
+    public RoomId getOldRoomId() { return oldRoomId; }
+    public RoomId getNewRoomId() { return newRoomId; }
     public EventChangeRequestId getEventChangeRequestId() { return eventChangeRequestId; }
     public String getOldTitle() { return oldTitle; }
     public String getNewTitle() { return newTitle; }

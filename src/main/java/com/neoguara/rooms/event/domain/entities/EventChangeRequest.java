@@ -1,6 +1,7 @@
 package com.neoguara.rooms.event.domain.entities;
 
 import com.neoguara.rooms.event.domain.enums.EventChangeRequestStatus;
+import com.neoguara.rooms.event.domain.enums.EventChangeType;
 import com.neoguara.rooms.event.domain.valueobjects.EventChangeRequestId;
 import com.neoguara.rooms.event.domain.valueobjects.EventId;
 import com.neoguara.rooms.event.domain.valueobjects.UserId;
@@ -24,6 +25,7 @@ public class EventChangeRequest {
     private UserId createdBy;
 
     private String status;
+    private String type;
     private String justification;
 
     private LocalDateTime createdAt;
@@ -32,11 +34,13 @@ public class EventChangeRequest {
 
     public EventChangeRequest(
             UserId createdBy,
-            String justification
+            String justification,
+            EventChangeType type
     ) {
         this.id = new EventChangeRequestId();
         this.createdBy = createdBy;
-        this.status = EventChangeRequestStatus.PENDING.name();;
+        this.status = EventChangeRequestStatus.PENDING.name();
+        this.type = type.name();
         this.justification = justification;
         this.createdAt = LocalDateTime.now();
     }
@@ -44,12 +48,14 @@ public class EventChangeRequest {
     public EventChangeRequest(
             EventId eventId,
             UserId createdBy,
-            String justification
+            String justification,
+            EventChangeType type
     ) {
         this.id = new EventChangeRequestId();
         this.eventId = eventId;
         this.createdBy = createdBy;
-        this.status = EventChangeRequestStatus.PENDING.name();;
+        this.status = EventChangeRequestStatus.PENDING.name();
+        this.type = type.name();
         this.justification = justification;
         this.createdAt = LocalDateTime.now();
     }
@@ -58,6 +64,7 @@ public class EventChangeRequest {
     public EventId getEventId() { return eventId; }
     public UserId getCreatedBy() { return createdBy; }
     public String getStatus() { return status; }
+    public String getType() { return type; }
     public String getJustification() { return justification; }
     public LocalDateTime getCreatedAt() { return createdAt; }
 

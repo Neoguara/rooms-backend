@@ -25,7 +25,7 @@ public class RequestEventCreationUseCase {
 
         var changeRequest = CreateEventRequestMapper.toDomain(request);
 
-        var eventChangeItem = new EventChangeItem(
+        var eventChangeItem = EventChangeItem.create(
                 changeRequest.getId(),
                 RoomId.of(request.roomId()),
                 request.title(),

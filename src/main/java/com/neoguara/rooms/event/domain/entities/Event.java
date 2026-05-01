@@ -24,7 +24,7 @@ public class Event {
 
     private LocalDateTime endAt;
 
-    private boolean isAllDay;
+    private Boolean isAllDay;
 
     private String recurrenceRule;
 
@@ -40,7 +40,7 @@ public class Event {
             String description,
             LocalDateTime startAt,
             LocalDateTime endAt,
-            boolean isAllDay,
+            Boolean isAllDay,
             String recurrenceRule
     ) {
         this.id = new EventId();
@@ -70,7 +70,7 @@ public class Event {
     public LocalDateTime getEndAt() {
         return endAt;
     }
-    public boolean isAllDay() {
+    public Boolean isAllDay() {
         return isAllDay;
     }
     public String getRecurrenceRule() {
@@ -84,6 +84,10 @@ public class Event {
     }
     public LocalDateTime getDeletedAt() {
         return deletedAt;
+    }
+
+    public void delete() {
+        this.deletedAt = LocalDateTime.now();
     }
 
     public void update(

@@ -7,6 +7,7 @@ public record CreateEventRequestResponse (
     UUID id,
     UUID createdBy,
     String status,
+    String type,
     String justification,
     LocalDateTime createdAt
 ) {}
