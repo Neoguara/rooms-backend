@@ -5,6 +5,7 @@ import com.neoguara.rooms.event.application.dtos.CreateEventRequestResponse;
 import com.neoguara.rooms.event.application.dtos.EventResponse;
 import com.neoguara.rooms.event.application.usecases.ApproveEventChangeRequestUseCase;
 import com.neoguara.rooms.event.application.usecases.GetEventUseCase;
+import com.neoguara.rooms.event.application.usecases.RejectEventChangeRequestUseCase;
 import com.neoguara.rooms.event.application.usecases.RequestEventCreationUseCase;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,15 +21,18 @@ public class EventController {
     private final GetEventUseCase getEventUseCase;
     private final RequestEventCreationUseCase requestEventCreationUseCase;
     private final ApproveEventChangeRequestUseCase approveEventChangeRequestUseCase;
+    private final RejectEventChangeRequestUseCase rejectEventChangeRequestUseCase;
 
     EventController(
             GetEventUseCase getEventUseCase,
             RequestEventCreationUseCase requestEventCreationUseCase,
-            ApproveEventChangeRequestUseCase approveEventChangeRequestUseCase
+            ApproveEventChangeRequestUseCase approveEventChangeRequestUseCase,
+            RejectEventChangeRequestUseCase rejectEventChangeRequestUseCase
     ) {
         this.getEventUseCase = getEventUseCase;
         this.requestEventCreationUseCase = requestEventCreationUseCase;
         this.approveEventChangeRequestUseCase = approveEventChangeRequestUseCase;
+        this.rejectEventChangeRequestUseCase = rejectEventChangeRequestUseCase;
     }
 
     @GetMapping
@@ -45,6 +49,12 @@ public class EventController {
     @PostMapping("/requests/{id}/approve")
     public ResponseEntity<Void> approve(@PathVariable UUID id) {
         approveEventChangeRequestUseCase.execute(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/requests/{id}/reject")
+    public ResponseEntity<Void> reject(@PathVariable UUID id) {
+        rejectEventChangeRequestUseCase.execute(id);
         return ResponseEntity.noContent().build();
     }
 }
