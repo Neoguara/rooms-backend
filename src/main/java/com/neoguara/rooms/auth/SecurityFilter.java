@@ -1,6 +1,6 @@
 package com.neoguara.rooms.auth;
 
-import com.neoguara.rooms.user.UserRepository;
+import com.neoguara.rooms.user.application.ports.UserRepositoryPort;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -19,10 +19,10 @@ import java.io.IOException;
 public class SecurityFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
-    private final UserRepository userRepository;
+    private final UserRepositoryPort userRepository;
 
     @Autowired
-    public SecurityFilter(JwtService jwtService, UserRepository userRepository) {
+    public SecurityFilter(JwtService jwtService, UserRepositoryPort userRepository) {
         this.jwtService = jwtService;
         this.userRepository = userRepository;
     }

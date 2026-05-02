@@ -1,6 +1,6 @@
-package com.neoguara.rooms.user.dto;
+package com.neoguara.rooms.user.application.dtos;
 
-import com.neoguara.rooms.user.UserRole;
+import com.neoguara.rooms.user.domain.enums.UserRole;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

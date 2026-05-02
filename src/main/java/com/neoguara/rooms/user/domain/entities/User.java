@@ -1,5 +1,7 @@
-package com.neoguara.rooms.user;
+package com.neoguara.rooms.user.domain.entities;
 
+import com.neoguara.rooms.user.domain.enums.UserRole;
+import com.neoguara.rooms.user.domain.valueobjects.UserId;
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -7,15 +9,13 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.UUID;
 
 @Entity
 @Table(name = "users")
 public class User implements UserDetails {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    @EmbeddedId
+    private UserId id;
 
     @Column(nullable = false)
     private String name;
@@ -33,6 +33,14 @@ public class User implements UserDetails {
     protected User() {}
 
     public User(String name, String email, String password, UserRole role) {
+        this.id = new UserId();
+        this.name = name;
+        this.email = email;
+        this.password = password;
+        this.role = role;
+    }
+
+    public void update(String name, String email, String password, UserRole role) {
         this.name = name;
         this.email = email;
         this.password = password;
@@ -49,14 +57,9 @@ public class User implements UserDetails {
         return email;
     }
 
-    public UUID getId() { return id; }
+    public UserId getId() { return id; }
     public String getName() { return name; }
     public String getEmail() { return email; }
     public String getPassword() { return password; }
     public UserRole getRole() { return role; }
-
-    public void setName(String name) { this.name = name; }
-    public void setEmail(String email) { this.email = email; }
-    public void setPassword(String password) { this.password = password; }
-    public void setRole(UserRole role) { this.role = role; }
 }

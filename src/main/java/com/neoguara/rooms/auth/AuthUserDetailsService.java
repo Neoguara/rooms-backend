@@ -1,6 +1,6 @@
 package com.neoguara.rooms.auth;
 
-import com.neoguara.rooms.user.UserRepository;
+import com.neoguara.rooms.user.application.ports.UserRepositoryPort;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -9,9 +9,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class AuthUserDetailsService implements UserDetailsService {
 
-    private final UserRepository userRepository;
+    private final UserRepositoryPort userRepository;
 
-    public AuthUserDetailsService(UserRepository userRepository) {
+    public AuthUserDetailsService(UserRepositoryPort userRepository) {
         this.userRepository = userRepository;
     }
 
