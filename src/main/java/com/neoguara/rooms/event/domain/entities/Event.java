@@ -32,9 +32,9 @@ public class Event {
     private LocalDateTime updatedAt;
     private LocalDateTime deletedAt;
 
-    Event () {}
+    Event() {}
 
-    public Event(
+    private Event(
             RoomId roomId,
             String title,
             String description,
@@ -52,6 +52,18 @@ public class Event {
         this.isAllDay = isAllDay;
         this.recurrenceRule = recurrenceRule;
         this.createdAt = LocalDateTime.now();
+    }
+
+    public static Event create(
+            RoomId roomId,
+            String title,
+            String description,
+            LocalDateTime startAt,
+            LocalDateTime endAt,
+            Boolean isAllDay,
+            String recurrenceRule
+    ) {
+        return new Event(roomId, title, description, startAt, endAt, isAllDay, recurrenceRule);
     }
 
     public EventId getId() {
@@ -96,7 +108,7 @@ public class Event {
             String description,
             LocalDateTime startAt,
             LocalDateTime endAt,
-            boolean isAllDay,
+            Boolean isAllDay,
             String recurrenceRule
     ) {
         this.roomId = roomId;

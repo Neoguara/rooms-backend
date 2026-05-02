@@ -46,7 +46,7 @@ public class ApproveEventChangeRequestUseCase {
         var changeType = EventChangeType.valueOf(changeRequest.getType());
 
         switch (changeType) {
-            case CREATE -> eventRepository.save(new Event(
+            case CREATE -> eventRepository.save(Event.create(
                     changeItem.getNewRoomId(),
                     changeItem.getNewTitle(),
                     changeItem.getNewDescription(),

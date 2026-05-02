@@ -134,7 +134,6 @@ public class EventChangeItem {
     }
 
     public EventChangeItemId getId() { return id; }
-
     public RoomId getOldRoomId() { return oldRoomId; }
     public RoomId getNewRoomId() { return newRoomId; }
     public EventChangeRequestId getEventChangeRequestId() { return eventChangeRequestId; }

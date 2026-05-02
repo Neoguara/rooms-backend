@@ -8,7 +8,6 @@ import com.neoguara.rooms.event.application.ports.EventChangeRequestRepositoryPo
 import com.neoguara.rooms.event.application.ports.EventRepositoryPort;
 import com.neoguara.rooms.event.domain.entities.EventChangeItem;
 import com.neoguara.rooms.event.domain.entities.EventChangeRequest;
-import com.neoguara.rooms.event.domain.enums.EventChangeType;
 import com.neoguara.rooms.event.domain.valueobjects.EventId;
 import com.neoguara.rooms.event.domain.valueobjects.RoomId;
 import com.neoguara.rooms.event.domain.valueobjects.UserId;
@@ -41,11 +40,10 @@ public class RequestEventUpdateUseCase {
         var event = eventRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Event not found: " + eventId));
 
-        var changeRequest = new EventChangeRequest(
+        var changeRequest = EventChangeRequest.update(
                 id,
                 UserId.of(request.userId()),
-                request.justification(),
-                EventChangeType.UPDATE
+                request.justification()
         );
 
         var changeItem = EventChangeItem.update(

@@ -3,7 +3,6 @@ package com.neoguara.rooms.event.application.mappers;
 import com.neoguara.rooms.event.application.dtos.CreateEventRequest;
 import com.neoguara.rooms.event.application.dtos.CreateEventRequestResponse;
 import com.neoguara.rooms.event.domain.entities.EventChangeRequest;
-import com.neoguara.rooms.event.domain.enums.EventChangeType;
 import com.neoguara.rooms.event.domain.valueobjects.UserId;
 
 public class CreateEventRequestMapper {
@@ -12,10 +11,9 @@ public class CreateEventRequestMapper {
 
     public static EventChangeRequest toDomain(CreateEventRequest eventChangeRequest) {
 
-        return new EventChangeRequest(
+        return EventChangeRequest.create(
                 UserId.of(eventChangeRequest.userId()),
-                eventChangeRequest.justification(),
-                EventChangeType.CREATE
+                eventChangeRequest.justification()
         );
     }
 

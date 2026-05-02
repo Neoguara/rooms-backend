@@ -30,9 +30,9 @@ public class EventChangeRequest {
 
     private LocalDateTime createdAt;
 
-    EventChangeRequest () {}
+    EventChangeRequest() {}
 
-    public EventChangeRequest(
+    private EventChangeRequest(
             UserId createdBy,
             String justification,
             EventChangeType type
@@ -45,7 +45,7 @@ public class EventChangeRequest {
         this.createdAt = LocalDateTime.now();
     }
 
-    public EventChangeRequest(
+    private EventChangeRequest(
             EventId eventId,
             UserId createdBy,
             String justification,
@@ -58,6 +58,18 @@ public class EventChangeRequest {
         this.type = type.name();
         this.justification = justification;
         this.createdAt = LocalDateTime.now();
+    }
+
+    public static EventChangeRequest create(UserId createdBy, String justification) {
+        return new EventChangeRequest(createdBy, justification, EventChangeType.CREATE);
+    }
+
+    public static EventChangeRequest update(EventId eventId, UserId createdBy, String justification) {
+        return new EventChangeRequest(eventId, createdBy, justification, EventChangeType.UPDATE);
+    }
+
+    public static EventChangeRequest delete(EventId eventId, UserId createdBy, String justification) {
+        return new EventChangeRequest(eventId, createdBy, justification, EventChangeType.DELETE);
     }
 
     public EventChangeRequestId getId() { return id; }
