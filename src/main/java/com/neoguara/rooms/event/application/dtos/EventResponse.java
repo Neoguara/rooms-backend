@@ -10,7 +10,7 @@ public record EventResponse(
     String description,
     LocalDateTime startAt,
     LocalDateTime endAt,
-    boolean isAllDay,
+    Boolean isAllDay,
     String recurrenceRule,
     LocalDateTime createdAt,
     LocalDateTime updatedAt,

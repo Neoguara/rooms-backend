@@ -8,7 +8,7 @@ public record UpdateEventRequest(
         String description,
         LocalDateTime startAt,
         LocalDateTime endAt,
-        boolean isAllDay,
+        Boolean isAllDay,
         String recurrenceRule,
         String justification,
         UUID userId,
