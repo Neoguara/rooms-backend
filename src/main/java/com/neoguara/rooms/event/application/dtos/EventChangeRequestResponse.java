@@ -10,5 +10,6 @@ public record EventChangeRequestResponse(
     String status,
     String type,
     String justification,
-    LocalDateTime createdAt
+    LocalDateTime createdAt,
+    EventChangeItemResponse changeItem
 ) {}
