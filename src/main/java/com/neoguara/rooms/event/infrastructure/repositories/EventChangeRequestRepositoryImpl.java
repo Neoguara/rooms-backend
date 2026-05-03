@@ -5,6 +5,7 @@ import com.neoguara.rooms.event.domain.entities.EventChangeRequest;
 import com.neoguara.rooms.event.domain.valueobjects.EventChangeRequestId;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -24,5 +25,10 @@ public class EventChangeRequestRepositoryImpl implements EventChangeRequestRepos
     @Override
     public Optional<EventChangeRequest> findById(EventChangeRequestId id) {
         return repository.findById(id);
+    }
+
+    @Override
+    public List<EventChangeRequest> findAll() {
+        return repository.findAll();
     }
 }

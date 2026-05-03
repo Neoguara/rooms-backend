@@ -3,9 +3,11 @@ package com.neoguara.rooms.event.infrastructure.web;
 import com.neoguara.rooms.event.application.dtos.CreateEventRequest;
 import com.neoguara.rooms.event.application.dtos.CreateEventRequestResponse;
 import com.neoguara.rooms.event.application.dtos.DeleteEventRequest;
+import com.neoguara.rooms.event.application.dtos.EventChangeRequestResponse;
 import com.neoguara.rooms.event.application.dtos.EventResponse;
 import com.neoguara.rooms.event.application.dtos.UpdateEventRequest;
 import com.neoguara.rooms.event.application.usecases.ApproveEventChangeRequestUseCase;
+import com.neoguara.rooms.event.application.usecases.GetEventChangeRequestUseCase;
 import com.neoguara.rooms.event.application.usecases.GetEventUseCase;
 import com.neoguara.rooms.event.application.usecases.RejectEventChangeRequestUseCase;
 import com.neoguara.rooms.event.application.usecases.RequestEventCreationUseCase;
@@ -23,6 +25,7 @@ import java.util.UUID;
 public class EventController {
 
     private final GetEventUseCase getEventUseCase;
+    private final GetEventChangeRequestUseCase getEventChangeRequestUseCase;
     private final RequestEventCreationUseCase requestEventCreationUseCase;
     private final RequestEventUpdateUseCase requestEventUpdateUseCase;
     private final RequestEventDeletionUseCase requestEventDeletionUseCase;
@@ -31,6 +34,7 @@ public class EventController {
 
     EventController(
             GetEventUseCase getEventUseCase,
+            GetEventChangeRequestUseCase getEventChangeRequestUseCase,
             RequestEventCreationUseCase requestEventCreationUseCase,
             RequestEventUpdateUseCase requestEventUpdateUseCase,
             RequestEventDeletionUseCase requestEventDeletionUseCase,
@@ -38,6 +42,7 @@ public class EventController {
             RejectEventChangeRequestUseCase rejectEventChangeRequestUseCase
     ) {
         this.getEventUseCase = getEventUseCase;
+        this.getEventChangeRequestUseCase = getEventChangeRequestUseCase;
         this.requestEventCreationUseCase = requestEventCreationUseCase;
         this.requestEventUpdateUseCase = requestEventUpdateUseCase;
         this.requestEventDeletionUseCase = requestEventDeletionUseCase;
@@ -72,6 +77,11 @@ public class EventController {
     ) {
         var response = requestEventDeletionUseCase.execute(id, request);
         return ResponseEntity.accepted().body(response);
+    }
+
+    @GetMapping("/requests")
+    public ResponseEntity<List<EventChangeRequestResponse>> findAllRequests() {
+        return ResponseEntity.ok(getEventChangeRequestUseCase.findAll());
     }
 
     @PostMapping("/requests/{id}/approve")
