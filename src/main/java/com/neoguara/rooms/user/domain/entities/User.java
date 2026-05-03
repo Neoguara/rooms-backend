@@ -7,6 +7,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
@@ -30,6 +31,12 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private UserRole role;
 
+    private Boolean isActive;
+
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+    private LocalDateTime deletedAt;
+
     protected User() {}
 
     public User(String name, String email, String password, UserRole role) {
@@ -38,13 +45,22 @@ public class User implements UserDetails {
         this.email = email;
         this.password = password;
         this.role = role;
+        this.createdAt = LocalDateTime.now();
+        this.isActive = true;
     }
 
-    public void update(String name, String email, String password, UserRole role) {
+    public void update(String name, String email, String password, UserRole role, Boolean isActive) {
         this.name = name;
         this.email = email;
         this.password = password;
         this.role = role;
+        this.isActive = isActive;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public void softDelete() {
+        this.isActive = false;
+        this.deletedAt = LocalDateTime.now();
     }
 
     @Override
@@ -62,4 +78,9 @@ public class User implements UserDetails {
     public String getEmail() { return email; }
     public String getPassword() { return password; }
     public UserRole getRole() { return role; }
+    public Boolean getActive() {return isActive;}
+
+    public LocalDateTime getCreatedAt() {return createdAt;}
+    public LocalDateTime getUpdatedAt() {return updatedAt;}
+    public LocalDateTime getDeletedAt() {return deletedAt;}
 }

@@ -2,6 +2,7 @@ package com.neoguara.rooms.auth;
 
 import com.neoguara.rooms.auth.dto.LoginRequest;
 import com.neoguara.rooms.auth.dto.TokenResponse;
+import com.neoguara.rooms.user.application.mappers.UserMapper;
 import com.neoguara.rooms.user.domain.entities.User;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -22,6 +23,17 @@ public class AuthService {
         var authToken = new UsernamePasswordAuthenticationToken(request.email(), request.password());
         var authentication = authenticationManager.authenticate(authToken);
         var user = (User) authentication.getPrincipal();
-        return new TokenResponse(jwtService.generateToken(user.getUsername()));
+        var userResponse = UserMapper.toResponse(user);
+        return new TokenResponse(
+                jwtService.generateToken(user.getUsername()),
+                userResponse.id(),
+                userResponse.name(),
+                userResponse.email(),
+                userResponse.role(),
+                userResponse.isActive(),
+                userResponse.createdAt(),
+                userResponse.updatedAt(),
+                userResponse.deletedAt()
+        );
     }
 }

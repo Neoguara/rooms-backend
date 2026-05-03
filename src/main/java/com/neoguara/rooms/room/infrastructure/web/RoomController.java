@@ -54,7 +54,7 @@ public class RoomController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable UUID id) {
+    public ResponseEntity<Void> deleteById(@PathVariable UUID id) {
         deleteRoomUseCase.execute(id);
         return ResponseEntity.noContent().build();
     }
