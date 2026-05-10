@@ -9,7 +9,7 @@ public class UserMapper {
     private UserMapper() {}
 
     public static User toDomain(CreateUserRequest request, String encodedPassword) {
-        return new User(request.name(), request.email(), encodedPassword, request.role());
+        return User.create(request.name(), request.email(), encodedPassword, request.role());
     }
 
     public static UserResponse toResponse(User user) {

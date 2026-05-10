@@ -9,7 +9,7 @@ public class RoomMapper {
     private RoomMapper() {}
 
     public static Room toDomain(CreateRoomRequest request) {
-        return new Room(
+        return Room.create(
                 request.name(),
                 request.code(),
                 request.type(),

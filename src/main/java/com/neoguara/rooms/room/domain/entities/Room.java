@@ -1,6 +1,7 @@
 package com.neoguara.rooms.room.domain.entities;
 
 import com.neoguara.rooms.room.domain.valueobjects.RoomId;
+import com.neoguara.rooms.shared.domain.validation.Notification;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -29,7 +30,7 @@ public class Room {
 
     protected Room() {}
 
-    public Room(String name, String code, String type, String building, String resources, int floor, int capacity) {
+    private Room(String name, String code, String type, String building, String resources, int floor, int capacity) {
         this.id = new RoomId();
         this.name = name;
         this.code = code;
@@ -40,6 +41,16 @@ public class Room {
         this.capacity = capacity;
         this.isActive = true;
         this.createdAt = LocalDateTime.now();
+    }
+
+    public static Room create(String name, String code, String type, String building, String resources, int floor, int capacity) {
+        Notification notification = Notification.create()
+                .addErrorIf(name == null || name.isBlank(), "name is required")
+                .addErrorIf(code == null || code.isBlank(), "code is required")
+                .addErrorIf(capacity <= 0, "capacity must be greater than 0")
+                .addErrorIf(floor < 0, "floor must be 0 or greater");
+        notification.raiseIfHasErrors();
+        return new Room(name, code, type, building, resources, floor, capacity);
     }
 
     public void update(String name, String code, String type, String building, String resources, int floor, int capacity) {

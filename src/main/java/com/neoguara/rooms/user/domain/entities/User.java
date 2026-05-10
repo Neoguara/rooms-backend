@@ -1,5 +1,6 @@
 package com.neoguara.rooms.user.domain.entities;
 
+import com.neoguara.rooms.shared.domain.validation.Notification;
 import com.neoguara.rooms.user.domain.enums.UserRole;
 import com.neoguara.rooms.user.domain.valueobjects.UserId;
 import jakarta.persistence.*;
@@ -39,7 +40,7 @@ public class User implements UserDetails {
 
     protected User() {}
 
-    public User(String name, String email, String password, UserRole role) {
+    private User(String name, String email, String password, UserRole role) {
         this.id = new UserId();
         this.name = name;
         this.email = email;
@@ -47,6 +48,16 @@ public class User implements UserDetails {
         this.role = role;
         this.createdAt = LocalDateTime.now();
         this.isActive = true;
+    }
+
+    public static User create(String name, String email, String password, UserRole role) {
+        Notification notification = Notification.create()
+                .addErrorIf(name == null || name.isBlank(), "name is required")
+                .addErrorIf(email == null || email.isBlank(), "email is required")
+                .addErrorIf(password == null || password.isBlank(), "password is required")
+                .addErrorIf(role == null, "role is required");
+        notification.raiseIfHasErrors();
+        return new User(name, email, password, role);
     }
 
     public void update(String name, String email, String password, UserRole role, Boolean isActive) {

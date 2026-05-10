@@ -2,16 +2,29 @@ package com.neoguara.rooms.shared.infrastructure.web;
 
 import com.neoguara.rooms.shared.domain.exceptions.BusinessException;
 import com.neoguara.rooms.shared.domain.exceptions.ConflictException;
+import com.neoguara.rooms.shared.domain.exceptions.DomainValidationException;
 import com.neoguara.rooms.shared.domain.exceptions.InvalidStateException;
 import com.neoguara.rooms.shared.domain.exceptions.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+
+import java.util.List;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(DomainValidationException.class)
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    public ErrorResponse handleDomainValidation(DomainValidationException ex) {
+        return new ErrorResponse(
+                HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                "DOMAIN_VALIDATION_ERROR",
+                ex.getNotification().getErrors()
+        );
+    }
 
     @ExceptionHandler(ResourceNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
@@ -40,10 +53,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleValidation(MethodArgumentNotValidException ex) {
-        String message = ex.getBindingResult().getFieldErrors().stream()
+        List<String> errors = ex.getBindingResult().getFieldErrors().stream()
                 .map(e -> e.getField() + ": " + e.getDefaultMessage())
-                .reduce((a, b) -> a + "; " + b)
-                .orElse("Validation failed");
-        return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), "VALIDATION_ERROR", message);
+                .toList();
+        return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), "VALIDATION_ERROR", errors);
     }
 }

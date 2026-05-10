@@ -2,6 +2,7 @@ package com.neoguara.rooms.event.domain.entities;
 
 import com.neoguara.rooms.event.domain.valueobjects.EventId;
 import com.neoguara.rooms.event.domain.valueobjects.RoomId;
+import com.neoguara.rooms.shared.domain.validation.Notification;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -63,6 +64,14 @@ public class Event {
             Boolean isAllDay,
             String recurrenceRule
     ) {
+        Notification notification = Notification.create()
+                .addErrorIf(roomId == null, "roomId is required")
+                .addErrorIf(title == null || title.isBlank(), "title is required")
+                .addErrorIf(startAt == null, "startAt is required")
+                .addErrorIf(endAt == null, "endAt is required")
+                .addErrorIf(startAt != null && endAt != null && !startAt.isBefore(endAt),
+                        "startAt must be before endAt");
+        notification.raiseIfHasErrors();
         return new Event(roomId, title, description, startAt, endAt, isAllDay, recurrenceRule);
     }
 
