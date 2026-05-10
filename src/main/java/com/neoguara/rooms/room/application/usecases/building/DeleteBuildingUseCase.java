@@ -20,6 +20,7 @@ public class DeleteBuildingUseCase {
     public void execute(UUID id) {
         Building building = repository.findById(BuildingId.of(id))
                 .orElseThrow(() -> new ResourceNotFoundException("Building", id));
-        repository.delete(building);
+        building.deactivate();
+        repository.save(building);
     }
 }
