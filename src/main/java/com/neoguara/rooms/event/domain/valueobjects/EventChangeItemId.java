@@ -1,12 +1,13 @@
 package com.neoguara.rooms.event.domain.valueobjects;
 
-import org.springframework.util.Assert;
+import com.neoguara.rooms.shared.domain.exceptions.DomainValidationException;
+import com.neoguara.rooms.shared.domain.validation.Notification;
 
 import java.util.UUID;
 
 public record EventChangeItemId(UUID id) {
     public EventChangeItemId {
-        Assert.notNull(id, "id must not be null");
+        if (id == null) throw new DomainValidationException(Notification.create().addError("EventChangeItemId must not be null"));
     }
 
     public EventChangeItemId() {

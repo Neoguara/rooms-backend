@@ -1,13 +1,14 @@
 package com.neoguara.rooms.event.domain.valueobjects;
 
-import org.springframework.util.Assert;
+import com.neoguara.rooms.shared.domain.exceptions.DomainValidationException;
+import com.neoguara.rooms.shared.domain.validation.Notification;
 
 import java.util.UUID;
 
 public record ApprovalId(UUID id) {
 
     public ApprovalId {
-        Assert.notNull(id, "id must not be null");
+        if (id == null) throw new DomainValidationException(Notification.create().addError("ApprovalId must not be null"));
     }
 
     public ApprovalId() {

@@ -1,14 +1,15 @@
 package com.neoguara.rooms.room.domain.valueobjects;
 
+import com.neoguara.rooms.shared.domain.exceptions.DomainValidationException;
+import com.neoguara.rooms.shared.domain.validation.Notification;
 import jakarta.persistence.Embeddable;
-import org.springframework.util.Assert;
 
 import java.util.UUID;
 
 @Embeddable
 public record BuildingId(UUID id) {
     public BuildingId {
-        Assert.notNull(id, "id must not be null");
+        if (id == null) throw new DomainValidationException(Notification.create().addError("BuildingId must not be null"));
     }
 
     public BuildingId() {
