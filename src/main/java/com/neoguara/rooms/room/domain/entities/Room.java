@@ -1,10 +1,13 @@
 package com.neoguara.rooms.room.domain.entities;
 
+import com.neoguara.rooms.room.domain.enums.BuildingStatus;
+import com.neoguara.rooms.room.domain.enums.RoomStatus;
+import com.neoguara.rooms.room.domain.valueobjects.BuildingId;
 import com.neoguara.rooms.room.domain.valueobjects.RoomId;
+import com.neoguara.rooms.room.domain.valueobjects.RoomTypeId;
+import com.neoguara.rooms.shared.domain.exceptions.InvalidStateException;
 import com.neoguara.rooms.shared.domain.validation.Notification;
-import jakarta.persistence.EmbeddedId;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 
@@ -18,67 +21,56 @@ public class Room {
     private String name;
     private String code;
     private String type;
-    private String building;
-    private String resources;
-    private int floor;
-    private int capacity;
-    private boolean isActive;
+
+    @AttributeOverride(name = "id", column = @Column(name = "room_type_id"))
+    private RoomTypeId roomTypeId;
+
+    @AttributeOverride(name = "id", column = @Column(name = "building_id"))
+    private BuildingId buildingId;
+
+    private Integer floor;
+    private Integer capacity;
+
+    private RoomStatus status;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private LocalDateTime deletedAt;
 
-    protected Room() {}
+    Room() {}
 
-    private Room(String name, String code, String type, String building, String resources, int floor, int capacity) {
-        this.id = new RoomId();
-        this.name = name;
-        this.code = code;
-        this.type = type;
-        this.building = building;
-        this.resources = resources;
-        this.floor = floor;
-        this.capacity = capacity;
-        this.isActive = true;
-        this.createdAt = LocalDateTime.now();
+    public static Room create () {}
+
+    public void update () {}
+
+    public void activate () {
+        if (status == RoomStatus.ARCHIVED) {
+            throw new InvalidStateException("Archived room cannot be activated");
+        }
+        this.status = RoomStatus.AVAILABLE;
     }
 
-    public static Room create(String name, String code, String type, String building, String resources, int floor, int capacity) {
-        Notification notification = Notification.create()
-                .addErrorIf(name == null || name.isBlank(), "name is required")
-                .addErrorIf(code == null || code.isBlank(), "code is required")
-                .addErrorIf(capacity <= 0, "capacity must be greater than 0")
-                .addErrorIf(floor < 0, "floor must be 0 or greater");
-        notification.raiseIfHasErrors();
-        return new Room(name, code, type, building, resources, floor, capacity);
+    public void deactivate () {
+        if (status == RoomStatus.ARCHIVED) {
+            throw new InvalidStateException("Archived room cannot be deactivated");
+        }
+        this.status = RoomStatus.INACTIVE;
     }
 
-    public void update(String name, String code, String type, String building, String resources, int floor, int capacity) {
-        this.name = name;
-        this.code = code;
-        this.type = type;
-        this.building = building;
-        this.resources = resources;
-        this.floor = floor;
-        this.capacity = capacity;
-        this.updatedAt = LocalDateTime.now();
+    public void archive() {
+        this.status = RoomStatus.ARCHIVED;
     }
 
-    public void softDelete() {
-        this.isActive = false;
-        this.deletedAt = LocalDateTime.now();
+    public void restore() {
+        this.status = RoomStatus.AVAILABLE;
     }
 
-    public RoomId getId() { return id; }
-    public String getName() { return name; }
-    public String getCode() { return code; }
-    public String getType() { return type; }
-    public String getBuilding() { return building; }
-    public String getResources() { return resources; }
-    public int getFloor() { return floor; }
-    public int getCapacity() { return capacity; }
-    public boolean isActive() { return isActive; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public LocalDateTime getUpdatedAt() { return updatedAt; }
-    public LocalDateTime getDeletedAt() { return deletedAt; }
+    public void putUnderMaintenance() {
+        if (status == RoomStatus.ARCHIVED) {
+            throw new InvalidStateException("Archived room cannot enter maintenance");
+        }
+
+        this.status = RoomStatus.MAINTENANCE;
+    }
+
+
 }
