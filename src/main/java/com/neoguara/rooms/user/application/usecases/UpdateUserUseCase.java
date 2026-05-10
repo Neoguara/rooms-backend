@@ -4,11 +4,10 @@ import com.neoguara.rooms.user.application.dtos.UpdateUserRequest;
 import com.neoguara.rooms.user.application.dtos.UserResponse;
 import com.neoguara.rooms.user.application.mappers.UserMapper;
 import com.neoguara.rooms.user.application.ports.UserRepositoryPort;
+import com.neoguara.rooms.shared.domain.exceptions.ResourceNotFoundException;
 import com.neoguara.rooms.user.domain.valueobjects.UserId;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.UUID;
 
@@ -25,7 +24,7 @@ public class UpdateUserUseCase {
 
     public UserResponse execute(UUID id, UpdateUserRequest request) {
         var user = repository.findById(UserId.of(id))
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User", id));
 
         var newPassword = (request.password() != null && !request.password().isBlank())
                 ? passwordEncoder.encode(request.password())

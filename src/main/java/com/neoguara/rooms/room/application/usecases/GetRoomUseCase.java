@@ -4,6 +4,7 @@ import com.neoguara.rooms.room.application.dtos.RoomResponse;
 import com.neoguara.rooms.room.application.mappers.RoomMapper;
 import com.neoguara.rooms.room.application.ports.RoomRepositoryPort;
 import com.neoguara.rooms.room.domain.valueobjects.RoomId;
+import com.neoguara.rooms.shared.domain.exceptions.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,7 +22,7 @@ public class GetRoomUseCase {
     public RoomResponse findById(UUID id) {
         return repository.findById(RoomId.of(id))
                 .map(RoomMapper::toResponse)
-                .orElseThrow(() -> new RuntimeException("Room not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Room", id));
     }
 
     public List<RoomResponse> findAll() {

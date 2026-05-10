@@ -2,6 +2,7 @@ package com.neoguara.rooms.room.domain.entities;
 
 import com.neoguara.rooms.room.domain.enums.BuildingStatus;
 import com.neoguara.rooms.room.domain.valueobjects.BuildingId;
+import com.neoguara.rooms.shared.domain.exceptions.InvalidStateException;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -25,16 +26,16 @@ public class Building {
 
     Building() {}
 
-    public void activate () {
+    public void activate() {
         if (this.status == BuildingStatus.ARCHIVED) {
-            throw new Exception("Archived building cannot be activated");
+            throw new InvalidStateException("Archived building cannot be activated");
         }
         this.status = BuildingStatus.ACTIVE;
     }
 
-    public void deactivate () {
+    public void deactivate() {
         if (status == BuildingStatus.ARCHIVED) {
-//            throw new BusinessException("Archived building cannot be deactivated");
+            throw new InvalidStateException("Archived building cannot be deactivated");
         }
         this.status = BuildingStatus.INACTIVE;
     }
@@ -45,7 +46,7 @@ public class Building {
 
     public void restore () {
         if (status != BuildingStatus.ARCHIVED) {
-
+            throw new InvalidStateException("Only archived building can be restored");
         }
         this.status = BuildingStatus.ACTIVE;
     }

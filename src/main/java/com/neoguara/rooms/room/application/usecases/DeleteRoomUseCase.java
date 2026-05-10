@@ -3,6 +3,7 @@ package com.neoguara.rooms.room.application.usecases;
 import com.neoguara.rooms.room.application.ports.RoomRepositoryPort;
 import com.neoguara.rooms.room.domain.entities.Room;
 import com.neoguara.rooms.room.domain.valueobjects.RoomId;
+import com.neoguara.rooms.shared.domain.exceptions.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -18,7 +19,7 @@ public class DeleteRoomUseCase {
 
     public void execute(UUID id) {
         Room room = repository.findById(RoomId.of(id))
-                .orElseThrow(() -> new RuntimeException("Room not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Room", id));
         room.softDelete();
         repository.save(room);
     }

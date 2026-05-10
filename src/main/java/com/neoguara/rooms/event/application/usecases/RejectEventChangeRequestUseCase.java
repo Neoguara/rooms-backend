@@ -2,6 +2,7 @@ package com.neoguara.rooms.event.application.usecases;
 
 import com.neoguara.rooms.event.application.ports.EventChangeRequestRepositoryPort;
 import com.neoguara.rooms.event.domain.valueobjects.EventChangeRequestId;
+import com.neoguara.rooms.shared.domain.exceptions.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,7 +22,7 @@ public class RejectEventChangeRequestUseCase {
         var requestId = EventChangeRequestId.of(changeRequestId);
 
         var changeRequest = changeRequestRepository.findById(requestId)
-                .orElseThrow(() -> new IllegalArgumentException("Change request not found: " + changeRequestId));
+                .orElseThrow(() -> new ResourceNotFoundException("Change request", changeRequestId));
 
         changeRequest.reject();
 

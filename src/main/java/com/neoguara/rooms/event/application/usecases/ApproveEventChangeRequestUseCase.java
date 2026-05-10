@@ -6,6 +6,8 @@ import com.neoguara.rooms.event.application.ports.EventRepositoryPort;
 import com.neoguara.rooms.event.domain.entities.Event;
 import com.neoguara.rooms.event.domain.enums.EventChangeType;
 import com.neoguara.rooms.event.domain.valueobjects.EventChangeRequestId;
+import com.neoguara.rooms.shared.domain.exceptions.InvalidStateException;
+import com.neoguara.rooms.shared.domain.exceptions.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,14 +33,14 @@ public class ApproveEventChangeRequestUseCase {
         var requestId = EventChangeRequestId.of(changeRequestId);
 
         var changeRequest = changeRequestRepository.findById(requestId)
-                .orElseThrow(() -> new IllegalArgumentException("Change request not found: " + changeRequestId));
+                .orElseThrow(() -> new ResourceNotFoundException("Change request", changeRequestId));
 
         if (changeRequest.isApproved()) {
-            throw new IllegalStateException("Change request already approved: " + changeRequestId);
+            throw new InvalidStateException("Change request already approved: " + changeRequestId);
         }
 
         var changeItem = changeItemRepository.findByEventChangeRequestId(requestId)
-                .orElseThrow(() -> new IllegalArgumentException("Change item not found for request: " + changeRequestId));
+                .orElseThrow(() -> new ResourceNotFoundException("Change item for request", changeRequestId));
 
         changeRequest.approve();
         changeRequestRepository.save(changeRequest);
@@ -57,7 +59,7 @@ public class ApproveEventChangeRequestUseCase {
             ));
             case UPDATE -> {
                 var event = eventRepository.findById(changeRequest.getEventId())
-                        .orElseThrow(() -> new IllegalArgumentException("Event not found: " + changeRequest.getEventId()));
+                        .orElseThrow(() -> new ResourceNotFoundException("Event", changeRequest.getEventId()));
                 event.update(
                         changeItem.getNewRoomId(),
                         changeItem.getNewTitle(),
@@ -71,7 +73,7 @@ public class ApproveEventChangeRequestUseCase {
             }
             case DELETE -> {
                 var event = eventRepository.findById(changeRequest.getEventId())
-                        .orElseThrow(() -> new IllegalArgumentException("Event not found: " + changeRequest.getEventId()));
+                        .orElseThrow(() -> new ResourceNotFoundException("Event", changeRequest.getEventId()));
                 event.delete();
                 eventRepository.save(event);
             }
