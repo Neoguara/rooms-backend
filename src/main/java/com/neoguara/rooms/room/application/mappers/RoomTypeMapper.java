@@ -1,4 +1,4 @@
-package com.neoguara.rooms.room.application.mappers.roomtype;
+package com.neoguara.rooms.room.application.mappers;
 
 import com.neoguara.rooms.room.application.dtos.roomtype.CreateRoomTypeRequest;
 import com.neoguara.rooms.room.application.dtos.roomtype.RoomTypeResponse;

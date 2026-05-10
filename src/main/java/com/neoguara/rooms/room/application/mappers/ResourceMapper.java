@@ -1,4 +1,4 @@
-package com.neoguara.rooms.room.application.mappers.resource;
+package com.neoguara.rooms.room.application.mappers;
 
 import com.neoguara.rooms.room.application.dtos.resource.CreateResourceRequest;
 import com.neoguara.rooms.room.application.dtos.resource.ResourceResponse;

@@ -2,7 +2,7 @@ package com.neoguara.rooms.room.application.usecases.resource;
 
 import com.neoguara.rooms.room.application.dtos.resource.ResourceResponse;
 import com.neoguara.rooms.room.application.dtos.resource.UpdateResourceRequest;
-import com.neoguara.rooms.room.application.mappers.resource.ResourceMapper;
+import com.neoguara.rooms.room.application.mappers.ResourceMapper;
 import com.neoguara.rooms.room.application.ports.ResourceRepositoryPort;
 import com.neoguara.rooms.room.domain.entities.Resource;
 import com.neoguara.rooms.room.domain.valueobjects.ResourceId;
