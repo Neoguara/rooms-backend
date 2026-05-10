@@ -1,7 +1,7 @@
 package com.neoguara.rooms.room.application.usecases.room;
 
 import com.neoguara.rooms.room.application.dtos.room.RoomResponse;
-import com.neoguara.rooms.room.application.mappers.room.RoomMapper;
+import com.neoguara.rooms.room.application.mappers.RoomMapper;
 import com.neoguara.rooms.room.application.ports.RoomRepositoryPort;
 import com.neoguara.rooms.room.domain.valueobjects.RoomId;
 import com.neoguara.rooms.shared.domain.exceptions.ResourceNotFoundException;

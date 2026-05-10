@@ -1,5 +1,7 @@
 package com.neoguara.rooms.room.application.dtos.room;
 
+import com.neoguara.rooms.room.domain.enums.RoomStatus;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -8,10 +10,11 @@ public record RoomResponse(
         String name,
         String code,
         String type,
-        String building,
-        String resources,
+        UUID roomTypeId,
+        UUID buildingId,
         int floor,
         int capacity,
-        boolean isActive,
-        LocalDateTime createdAt
+        RoomStatus status,
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt
 ) {}

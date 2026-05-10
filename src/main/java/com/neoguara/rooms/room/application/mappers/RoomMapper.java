@@ -1,8 +1,10 @@
-package com.neoguara.rooms.room.application.mappers.room;
+package com.neoguara.rooms.room.application.mappers;
 
 import com.neoguara.rooms.room.application.dtos.room.CreateRoomRequest;
 import com.neoguara.rooms.room.application.dtos.room.RoomResponse;
 import com.neoguara.rooms.room.domain.entities.Room;
+import com.neoguara.rooms.room.domain.valueobjects.BuildingId;
+import com.neoguara.rooms.room.domain.valueobjects.RoomTypeId;
 
 public class RoomMapper {
 
@@ -13,8 +15,8 @@ public class RoomMapper {
                 request.name(),
                 request.code(),
                 request.type(),
-                request.building(),
-                request.resources(),
+                RoomTypeId.of(request.roomTypeId()),
+                BuildingId.of(request.buildingId()),
                 request.floor(),
                 request.capacity()
         );
@@ -26,12 +28,13 @@ public class RoomMapper {
                 room.getName(),
                 room.getCode(),
                 room.getType(),
-                room.getBuilding(),
-                room.getResources(),
+                room.getRoomTypeId().id(),
+                room.getBuildingId().id(),
                 room.getFloor(),
                 room.getCapacity(),
-                room.isActive(),
-                room.getCreatedAt()
+                room.getStatus(),
+                room.getCreatedAt(),
+                room.getUpdatedAt()
         );
     }
 }

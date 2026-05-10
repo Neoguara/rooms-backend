@@ -3,9 +3,11 @@ package com.neoguara.rooms.room.infrastructure.web;
 import com.neoguara.rooms.room.application.dtos.room.CreateRoomRequest;
 import com.neoguara.rooms.room.application.dtos.room.RoomResponse;
 import com.neoguara.rooms.room.application.dtos.room.UpdateRoomRequest;
+import com.neoguara.rooms.room.application.dtos.room.UpdateRoomStatusRequest;
 import com.neoguara.rooms.room.application.usecases.room.CreateRoomUseCase;
 import com.neoguara.rooms.room.application.usecases.room.DeleteRoomUseCase;
 import com.neoguara.rooms.room.application.usecases.room.GetRoomUseCase;
+import com.neoguara.rooms.room.application.usecases.room.UpdateRoomStatusUseCase;
 import com.neoguara.rooms.room.application.usecases.room.UpdateRoomUseCase;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,15 +23,18 @@ public class RoomController {
     private final CreateRoomUseCase createRoomUseCase;
     private final GetRoomUseCase getRoomUseCase;
     private final UpdateRoomUseCase updateRoomUseCase;
+    private final UpdateRoomStatusUseCase updateRoomStatusUseCase;
     private final DeleteRoomUseCase deleteRoomUseCase;
 
     public RoomController(CreateRoomUseCase createRoomUseCase,
                           GetRoomUseCase getRoomUseCase,
                           UpdateRoomUseCase updateRoomUseCase,
+                          UpdateRoomStatusUseCase updateRoomStatusUseCase,
                           DeleteRoomUseCase deleteRoomUseCase) {
         this.createRoomUseCase = createRoomUseCase;
         this.getRoomUseCase = getRoomUseCase;
         this.updateRoomUseCase = updateRoomUseCase;
+        this.updateRoomStatusUseCase = updateRoomStatusUseCase;
         this.deleteRoomUseCase = deleteRoomUseCase;
     }
 
@@ -51,6 +56,11 @@ public class RoomController {
     @PutMapping("/{id}")
     public ResponseEntity<RoomResponse> update(@PathVariable UUID id, @RequestBody UpdateRoomRequest request) {
         return ResponseEntity.ok(updateRoomUseCase.execute(id, request));
+    }
+
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<RoomResponse> updateStatus(@PathVariable UUID id, @RequestBody UpdateRoomStatusRequest request) {
+        return ResponseEntity.ok(updateRoomStatusUseCase.execute(id, request.status()));
     }
 
     @DeleteMapping("/{id}")
