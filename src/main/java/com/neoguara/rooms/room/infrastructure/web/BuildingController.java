@@ -104,13 +104,13 @@ public class BuildingController {
                     - **INACTIVE**: desativa um edifício ACTIVE.
                     - **ARCHIVED**: arquiva o edifício independente do status atual.
 
-                    Transições inválidas retornam 409 (ex: ativar um edifício já ARCHIVED diretamente).
+                    Transições inválidas retornam 422 (ex: ativar um edifício já ARCHIVED diretamente).
                     """
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Status atualizado com sucesso"),
             @ApiResponse(responseCode = "404", description = "Edifício não encontrado"),
-            @ApiResponse(responseCode = "409", description = "Transição de status inválida")
+            @ApiResponse(responseCode = "422", description = "Transição de status inválida")
     })
     @PatchMapping("/{id}")
     public ResponseEntity<BuildingResponse> updateStatus(

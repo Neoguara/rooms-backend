@@ -9,6 +9,11 @@ import com.neoguara.rooms.room.application.usecases.room.DeleteRoomUseCase;
 import com.neoguara.rooms.room.application.usecases.room.GetRoomUseCase;
 import com.neoguara.rooms.room.application.usecases.room.UpdateRoomStatusUseCase;
 import com.neoguara.rooms.room.application.usecases.room.UpdateRoomUseCase;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+@Tag(name = "Rooms", description = "Gerenciamento de salas")
 @RestController
 @RequestMapping("/rooms")
 public class RoomController {
@@ -38,34 +44,79 @@ public class RoomController {
         this.deleteRoomUseCase = deleteRoomUseCase;
     }
 
+    @Operation(description = "Cadastra uma nova sala com status inicial ACTIVE.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Sala criada com sucesso"),
+            @ApiResponse(responseCode = "422", description = "Dados inválidos")
+    })
     @PostMapping
     public ResponseEntity<RoomResponse> create(@RequestBody CreateRoomRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(createRoomUseCase.execute(request));
     }
 
+    @Operation(description = "Retorna todas as salas cadastradas.")
+    @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso")
     @GetMapping
     public ResponseEntity<List<RoomResponse>> findAll() {
         return ResponseEntity.ok(getRoomUseCase.findAll());
     }
 
+    @Operation(description = "Retorna os dados de uma sala pelo seu ID.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Sala encontrada"),
+            @ApiResponse(responseCode = "404", description = "Sala não encontrada")
+    })
     @GetMapping("/{id}")
-    public ResponseEntity<RoomResponse> findById(@PathVariable UUID id) {
+    public ResponseEntity<RoomResponse> findById(
+            @Parameter(description = "ID da sala") @PathVariable UUID id) {
         return ResponseEntity.ok(getRoomUseCase.findById(id));
     }
 
+    @Operation(description = "Atualiza os dados da sala.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Sala atualizada com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Sala não encontrada"),
+            @ApiResponse(responseCode = "422", description = "Dados inválidos")
+    })
     @PutMapping("/{id}")
-    public ResponseEntity<RoomResponse> update(@PathVariable UUID id, @RequestBody UpdateRoomRequest request) {
+    public ResponseEntity<RoomResponse> updateById(
+            @Parameter(description = "ID da sala") @PathVariable UUID id,
+            @RequestBody UpdateRoomRequest request) {
         return ResponseEntity.ok(updateRoomUseCase.execute(id, request));
     }
 
-    @PatchMapping("/{id}/status")
-    public ResponseEntity<RoomResponse> updateStatus(@PathVariable UUID id, @RequestBody UpdateRoomStatusRequest request) {
-        return ResponseEntity.ok(updateRoomStatusUseCase.execute(id, request.status()));
-    }
-
+    @Operation(description = "Arquiva uma sala pelo seu ID, alterando seu status para ARCHIVED.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Sala arquivada com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Sala não encontrada")
+    })
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteById(@PathVariable UUID id) {
+    public ResponseEntity<Void> deleteById(
+            @Parameter(description = "ID da sala") @PathVariable UUID id) {
         deleteRoomUseCase.execute(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(
+            description = """
+                    Altera o status da sala. Transições permitidas:
+                    - **AVAILABLE**: ativa uma sala INACTIVE ou MAINTENANCE. Se a sala estiver ARCHIVED, restaura para AVAILABLE.
+                    - **INACTIVE**: desativa uma sala AVAILABLE ou MAINTENANCE. Inválido se ARCHIVED.
+                    - **MAINTENANCE**: coloca a sala em manutenção. Inválido se ARCHIVED.
+                    - **ARCHIVED**: arquiva a sala independente do status atual.
+
+                    Transições inválidas retornam 422 (ex: tentar desativar ou colocar em manutenção uma sala ARCHIVED).
+                    """
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Status atualizado com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Sala não encontrada"),
+            @ApiResponse(responseCode = "422", description = "Transição de status inválida")
+    })
+    @PatchMapping("/{id}")
+    public ResponseEntity<RoomResponse> updateStatus(
+            @Parameter(description = "ID da sala") @PathVariable UUID id,
+            @RequestBody UpdateRoomStatusRequest request) {
+        return ResponseEntity.ok(updateRoomStatusUseCase.execute(id, request.status()));
     }
 }
