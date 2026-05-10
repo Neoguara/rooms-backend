@@ -7,8 +7,13 @@ import com.neoguara.rooms.room.application.dtos.building.UpdateBuildingStatusReq
 import com.neoguara.rooms.room.application.usecases.building.CreateBuildingUseCase;
 import com.neoguara.rooms.room.application.usecases.building.DeleteBuildingUseCase;
 import com.neoguara.rooms.room.application.usecases.building.GetBuildingUseCase;
-import com.neoguara.rooms.room.application.usecases.building.UpdateBuildingUseCase;
 import com.neoguara.rooms.room.application.usecases.building.UpdateBuildingStatusUseCase;
+import com.neoguara.rooms.room.application.usecases.building.UpdateBuildingUseCase;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+@Tag(name = "Buildings", description = "Gerenciamento de edifícios")
 @RestController
 @RequestMapping("/buildings")
 public class BuildingController {
@@ -38,34 +44,78 @@ public class BuildingController {
         this.deleteBuildingUseCase = deleteBuildingUseCase;
     }
 
+    @Operation(description = "Cadastra um novo edifício com status inicial ACTIVE.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Edifício criado com sucesso"),
+            @ApiResponse(responseCode = "422", description = "Dados inválidos (nome, endereço ou andares ausentes/inválidos)")
+    })
     @PostMapping
     public ResponseEntity<BuildingResponse> create(@RequestBody CreateBuildingRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(createBuildingUseCase.execute(request));
     }
 
+    @Operation(description = "Retorna todos os edifícios cadastrados.")
+    @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso")
     @GetMapping
     public ResponseEntity<List<BuildingResponse>> findAll() {
         return ResponseEntity.ok(getBuildingUseCase.findAll());
     }
 
+    @Operation(description = "Retorna os dados de um edifício pelo seu ID.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Edifício encontrado"),
+            @ApiResponse(responseCode = "404", description = "Edifício não encontrado")
+    })
     @GetMapping("/{id}")
-    public ResponseEntity<BuildingResponse> findById(@PathVariable UUID id) {
+    public ResponseEntity<BuildingResponse> findById(
+            @Parameter(description = "ID do edifício") @PathVariable UUID id) {
         return ResponseEntity.ok(getBuildingUseCase.findById(id));
     }
 
+    @Operation(description = "Atualiza nome, endereço e total de andares do edifício.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Edifício atualizado com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Edifício não encontrado"),
+            @ApiResponse(responseCode = "422", description = "Dados inválidos")
+    })
     @PutMapping("/{id}")
-    public ResponseEntity<BuildingResponse> updateById(@PathVariable UUID id, @RequestBody UpdateBuildingRequest request) {
+    public ResponseEntity<BuildingResponse> updateById(
+            @Parameter(description = "ID do edifício") @PathVariable UUID id,
+            @RequestBody UpdateBuildingRequest request) {
         return ResponseEntity.ok(updateBuildingUseCase.execute(id, request));
     }
 
+    @Operation(description = "Arquiva um edifício pelo seu ID, alterando seu status para ARCHIVED.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Edifício arquivado com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Edifício não encontrado")
+    })
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteById(@PathVariable UUID id) {
+    public ResponseEntity<Void> deleteById(
+            @Parameter(description = "ID do edifício") @PathVariable UUID id) {
         deleteBuildingUseCase.execute(id);
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(
+            description = """
+                    Altera o status do edifício. Transições permitidas:
+                    - **ACTIVE**: ativa um edifício INACTIVE, ou restaura um ARCHIVED.
+                    - **INACTIVE**: desativa um edifício ACTIVE.
+                    - **ARCHIVED**: arquiva o edifício independente do status atual.
+
+                    Transições inválidas retornam 409 (ex: ativar um edifício já ARCHIVED diretamente).
+                    """
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Status atualizado com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Edifício não encontrado"),
+            @ApiResponse(responseCode = "409", description = "Transição de status inválida")
+    })
     @PatchMapping("/{id}")
-    public ResponseEntity<BuildingResponse> updateStatus(@PathVariable UUID id, @RequestBody UpdateBuildingStatusRequest request) {
+    public ResponseEntity<BuildingResponse> updateStatus(
+            @Parameter(description = "ID do edifício") @PathVariable UUID id,
+            @RequestBody UpdateBuildingStatusRequest request) {
         return ResponseEntity.ok(updateBuildingStatusUseCase.execute(id, request.status()));
     }
 }
