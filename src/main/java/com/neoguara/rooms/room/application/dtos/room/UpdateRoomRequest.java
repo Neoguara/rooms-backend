@@ -1,4 +1,4 @@
-package com.neoguara.rooms.room.application.dtos;
+package com.neoguara.rooms.room.application.dtos.room;
 
 public record UpdateRoomRequest(
         String name,

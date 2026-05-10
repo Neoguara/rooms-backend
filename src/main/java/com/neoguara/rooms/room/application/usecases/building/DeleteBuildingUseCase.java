@@ -1,4 +1,4 @@
-package com.neoguara.rooms.room.application.usecases;
+package com.neoguara.rooms.room.application.usecases.building;
 
 import com.neoguara.rooms.room.application.ports.BuildingRepositoryPort;
 import com.neoguara.rooms.room.domain.entities.Building;

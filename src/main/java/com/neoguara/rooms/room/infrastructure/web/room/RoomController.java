@@ -1,12 +1,12 @@
-package com.neoguara.rooms.room.infrastructure.web;
+package com.neoguara.rooms.room.infrastructure.web.room;
 
-import com.neoguara.rooms.room.application.dtos.CreateRoomRequest;
-import com.neoguara.rooms.room.application.dtos.RoomResponse;
-import com.neoguara.rooms.room.application.dtos.UpdateRoomRequest;
-import com.neoguara.rooms.room.application.usecases.CreateRoomUseCase;
-import com.neoguara.rooms.room.application.usecases.DeleteRoomUseCase;
-import com.neoguara.rooms.room.application.usecases.GetRoomUseCase;
-import com.neoguara.rooms.room.application.usecases.UpdateRoomUseCase;
+import com.neoguara.rooms.room.application.dtos.room.CreateRoomRequest;
+import com.neoguara.rooms.room.application.dtos.room.RoomResponse;
+import com.neoguara.rooms.room.application.dtos.room.UpdateRoomRequest;
+import com.neoguara.rooms.room.application.usecases.room.CreateRoomUseCase;
+import com.neoguara.rooms.room.application.usecases.room.DeleteRoomUseCase;
+import com.neoguara.rooms.room.application.usecases.room.GetRoomUseCase;
+import com.neoguara.rooms.room.application.usecases.room.UpdateRoomUseCase;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

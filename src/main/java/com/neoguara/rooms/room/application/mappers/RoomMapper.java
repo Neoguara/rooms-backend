@@ -1,7 +1,7 @@
-package com.neoguara.rooms.room.application.mappers;
+package com.neoguara.rooms.room.application.mappers.room;
 
-import com.neoguara.rooms.room.application.dtos.CreateRoomRequest;
-import com.neoguara.rooms.room.application.dtos.RoomResponse;
+import com.neoguara.rooms.room.application.dtos.room.CreateRoomRequest;
+import com.neoguara.rooms.room.application.dtos.room.RoomResponse;
 import com.neoguara.rooms.room.domain.entities.Room;
 
 public class RoomMapper {

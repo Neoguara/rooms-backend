@@ -1,4 +1,4 @@
-package com.neoguara.rooms.room.application.dtos;
+package com.neoguara.rooms.room.application.dtos.building;
 
 import com.neoguara.rooms.room.domain.enums.BuildingStatus;
 

@@ -1,8 +1,8 @@
-package com.neoguara.rooms.room.application.usecases;
+package com.neoguara.rooms.room.application.usecases.room;
 
-import com.neoguara.rooms.room.application.dtos.RoomResponse;
-import com.neoguara.rooms.room.application.dtos.UpdateRoomRequest;
-import com.neoguara.rooms.room.application.mappers.RoomMapper;
+import com.neoguara.rooms.room.application.dtos.room.RoomResponse;
+import com.neoguara.rooms.room.application.dtos.room.UpdateRoomRequest;
+import com.neoguara.rooms.room.application.mappers.room.RoomMapper;
 import com.neoguara.rooms.room.application.ports.RoomRepositoryPort;
 import com.neoguara.rooms.room.domain.entities.Room;
 import com.neoguara.rooms.room.domain.valueobjects.RoomId;

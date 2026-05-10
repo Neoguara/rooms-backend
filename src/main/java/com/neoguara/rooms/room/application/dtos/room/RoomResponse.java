@@ -1,4 +1,4 @@
-package com.neoguara.rooms.room.application.dtos;
+package com.neoguara.rooms.room.application.dtos.room;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
