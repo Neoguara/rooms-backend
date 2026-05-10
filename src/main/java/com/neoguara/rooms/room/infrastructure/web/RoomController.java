@@ -1,4 +1,4 @@
-package com.neoguara.rooms.room.infrastructure.web.room;
+package com.neoguara.rooms.room.infrastructure.web;
 
 import com.neoguara.rooms.room.application.dtos.room.CreateRoomRequest;
 import com.neoguara.rooms.room.application.dtos.room.RoomResponse;
