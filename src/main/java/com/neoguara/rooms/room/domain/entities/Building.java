@@ -21,7 +21,6 @@ public class Building {
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private LocalDateTime deletedAt;
 
     protected Building() {}
 }
