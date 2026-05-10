@@ -3,9 +3,11 @@ package com.neoguara.rooms.room.infrastructure.web;
 import com.neoguara.rooms.room.application.dtos.resource.CreateResourceRequest;
 import com.neoguara.rooms.room.application.dtos.resource.ResourceResponse;
 import com.neoguara.rooms.room.application.dtos.resource.UpdateResourceRequest;
+import com.neoguara.rooms.room.application.dtos.resource.UpdateResourceStatusRequest;
 import com.neoguara.rooms.room.application.usecases.resource.CreateResourceUseCase;
 import com.neoguara.rooms.room.application.usecases.resource.DeleteResourceUseCase;
 import com.neoguara.rooms.room.application.usecases.resource.GetResourceUseCase;
+import com.neoguara.rooms.room.application.usecases.resource.UpdateResourceStatusUseCase;
 import com.neoguara.rooms.room.application.usecases.resource.UpdateResourceUseCase;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -27,15 +29,18 @@ public class ResourceController {
     private final CreateResourceUseCase createResourceUseCase;
     private final GetResourceUseCase getResourceUseCase;
     private final UpdateResourceUseCase updateResourceUseCase;
+    private final UpdateResourceStatusUseCase updateResourceStatusUseCase;
     private final DeleteResourceUseCase deleteResourceUseCase;
 
     public ResourceController(CreateResourceUseCase createResourceUseCase,
                               GetResourceUseCase getResourceUseCase,
                               UpdateResourceUseCase updateResourceUseCase,
+                              UpdateResourceStatusUseCase updateResourceStatusUseCase,
                               DeleteResourceUseCase deleteResourceUseCase) {
         this.createResourceUseCase = createResourceUseCase;
         this.getResourceUseCase = getResourceUseCase;
         this.updateResourceUseCase = updateResourceUseCase;
+        this.updateResourceStatusUseCase = updateResourceStatusUseCase;
         this.deleteResourceUseCase = deleteResourceUseCase;
     }
 
@@ -78,6 +83,18 @@ public class ResourceController {
             @Parameter(description = "ID do recurso") @PathVariable UUID id,
             @RequestBody UpdateResourceRequest request) {
         return ResponseEntity.ok(updateResourceUseCase.execute(id, request));
+    }
+
+    @Operation(description = "Ativa ou desativa um recurso pelo seu ID.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Status atualizado com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Recurso não encontrado")
+    })
+    @PatchMapping("/{id}")
+    public ResponseEntity<ResourceResponse> updateStatus(
+            @Parameter(description = "ID do recurso") @PathVariable UUID id,
+            @RequestBody UpdateResourceStatusRequest request) {
+        return ResponseEntity.ok(updateResourceStatusUseCase.execute(id, request.active()));
     }
 
     @Operation(description = "Desativa um recurso pelo seu ID (soft delete).")

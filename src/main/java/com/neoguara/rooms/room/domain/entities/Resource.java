@@ -30,6 +30,7 @@ public class Resource {
         this.name = name;
         this.description = description;
         this.icon = icon;
+        this.active = true;
         this.createdAt = LocalDateTime.now();
     }
 
