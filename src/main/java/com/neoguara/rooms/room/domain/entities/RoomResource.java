@@ -3,10 +3,7 @@ package com.neoguara.rooms.room.domain.entities;
 import com.neoguara.rooms.room.domain.valueobjects.ResourceId;
 import com.neoguara.rooms.room.domain.valueobjects.RoomId;
 import com.neoguara.rooms.room.domain.valueobjects.RoomResourceId;
-import jakarta.persistence.AttributeOverride;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 
@@ -14,6 +11,7 @@ import java.time.LocalDateTime;
 @Table(name = "room_resources")
 public class RoomResource {
 
+    @EmbeddedId
     private RoomResourceId id;
 
     @AttributeOverride(name = "id", column = @Column(name = "room_id"))
@@ -24,4 +22,20 @@ public class RoomResource {
 
     private LocalDateTime createdAt;
 
+    RoomResource() {}
+
+    public RoomResource(RoomId roomId, ResourceId resourceId) {
+        this.roomId = roomId;
+        this.resourceId = resourceId;
+        this.createdAt = LocalDateTime.now();
+    }
+
+    public static RoomResource create (RoomId roomId, ResourceId resourceId) {
+        return new RoomResource(roomId, resourceId);
+    }
+
+    public RoomResourceId getId() {return id;}
+    public RoomId getRoomId() {return roomId;}
+    public ResourceId getResourceId() {return resourceId;}
+    public LocalDateTime getCreatedAt() {return createdAt;}
 }
