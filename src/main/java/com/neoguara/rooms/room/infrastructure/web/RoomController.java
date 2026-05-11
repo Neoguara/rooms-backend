@@ -1,12 +1,15 @@
 package com.neoguara.rooms.room.infrastructure.web;
 
 import com.neoguara.rooms.room.application.dtos.room.CreateRoomRequest;
+import com.neoguara.rooms.room.application.dtos.room.ReplaceRoomResourcesRequest;
+import com.neoguara.rooms.room.application.dtos.room.RoomResourcesResponse;
 import com.neoguara.rooms.room.application.dtos.room.RoomResponse;
 import com.neoguara.rooms.room.application.dtos.room.UpdateRoomRequest;
 import com.neoguara.rooms.room.application.dtos.room.UpdateRoomStatusRequest;
 import com.neoguara.rooms.room.application.usecases.room.CreateRoomUseCase;
 import com.neoguara.rooms.room.application.usecases.room.DeleteRoomUseCase;
 import com.neoguara.rooms.room.application.usecases.room.GetRoomUseCase;
+import com.neoguara.rooms.room.application.usecases.room.ReplaceRoomResourcesUseCase;
 import com.neoguara.rooms.room.application.usecases.room.UpdateRoomStatusUseCase;
 import com.neoguara.rooms.room.application.usecases.room.UpdateRoomUseCase;
 import io.swagger.v3.oas.annotations.Operation;
@@ -31,17 +34,20 @@ public class RoomController {
     private final UpdateRoomUseCase updateRoomUseCase;
     private final UpdateRoomStatusUseCase updateRoomStatusUseCase;
     private final DeleteRoomUseCase deleteRoomUseCase;
+    private final ReplaceRoomResourcesUseCase replaceRoomResourcesUseCase;
 
     public RoomController(CreateRoomUseCase createRoomUseCase,
                           GetRoomUseCase getRoomUseCase,
                           UpdateRoomUseCase updateRoomUseCase,
                           UpdateRoomStatusUseCase updateRoomStatusUseCase,
-                          DeleteRoomUseCase deleteRoomUseCase) {
+                          DeleteRoomUseCase deleteRoomUseCase,
+                          ReplaceRoomResourcesUseCase replaceRoomResourcesUseCase) {
         this.createRoomUseCase = createRoomUseCase;
         this.getRoomUseCase = getRoomUseCase;
         this.updateRoomUseCase = updateRoomUseCase;
         this.updateRoomStatusUseCase = updateRoomStatusUseCase;
         this.deleteRoomUseCase = deleteRoomUseCase;
+        this.replaceRoomResourcesUseCase = replaceRoomResourcesUseCase;
     }
 
     @Operation(description = "Cadastra uma nova sala com status inicial ACTIVE.")
@@ -95,6 +101,18 @@ public class RoomController {
             @Parameter(description = "ID da sala") @PathVariable UUID id) {
         deleteRoomUseCase.execute(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(description = "Substitui todos os recursos da sala pela lista informada.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Recursos atualizados com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Sala ou recurso não encontrado")
+    })
+    @PutMapping("/{id}/resources")
+    public ResponseEntity<RoomResourcesResponse> replaceResources(
+            @Parameter(description = "ID da sala") @PathVariable UUID id,
+            @RequestBody ReplaceRoomResourcesRequest request) {
+        return ResponseEntity.ok(replaceRoomResourcesUseCase.execute(id, request));
     }
 
     @Operation(

@@ -25,6 +25,7 @@ public class RoomResource {
     RoomResource() {}
 
     public RoomResource(RoomId roomId, ResourceId resourceId) {
+        this.id = new RoomResourceId();
         this.roomId = roomId;
         this.resourceId = resourceId;
         this.createdAt = LocalDateTime.now();

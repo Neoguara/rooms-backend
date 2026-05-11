@@ -22,9 +22,11 @@ public class Room {
     private String code;
     private String type;
 
+    @Embedded
     @AttributeOverride(name = "id", column = @Column(name = "room_type_id"))
     private RoomTypeId roomTypeId;
 
+    @Embedded
     @AttributeOverride(name = "id", column = @Column(name = "building_id"))
     private BuildingId buildingId;
 
