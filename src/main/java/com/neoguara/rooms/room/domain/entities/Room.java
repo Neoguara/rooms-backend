@@ -20,7 +20,6 @@ public class Room {
 
     private String name;
     private String code;
-    private String type;
 
     @Embedded
     @AttributeOverride(name = "id", column = @Column(name = "room_type_id"))
@@ -43,7 +42,6 @@ public class Room {
     private Room(
             String name,
             String code,
-            String type,
             RoomTypeId roomTypeId,
             BuildingId buildingId,
             int floor,
@@ -52,7 +50,6 @@ public class Room {
         this.id = new RoomId();
         this.name = name;
         this.code = code;
-        this.type = type;
         this.roomTypeId = roomTypeId;
         this.buildingId = buildingId;
         this.floor = floor;
@@ -64,13 +61,12 @@ public class Room {
     public static Room create (
             String name,
             String code,
-            String type,
             RoomTypeId roomTypeId,
             BuildingId buildingId,
             int floor,
             int capacity
     ) {
-        Room room = new Room(name,code,type,roomTypeId,buildingId,floor,capacity);
+        Room room = new Room(name,code,roomTypeId,buildingId,floor,capacity);
         Notification notification = Notification.create();
         new RoomValidator().validate(room, notification);
         notification.raiseIfHasErrors();
@@ -80,7 +76,6 @@ public class Room {
     public void update (
             String name,
             String code,
-            String type,
             RoomTypeId roomTypeId,
             BuildingId buildingId,
             int floor,
@@ -88,7 +83,6 @@ public class Room {
     ) {
         this.name = name;
         this.code = code;
-        this.type = type;
         this.roomTypeId = roomTypeId;
         this.buildingId = buildingId;
         this.floor = floor;
@@ -132,7 +126,6 @@ public class Room {
     public RoomId getId() {return id;}
     public String getName() {return name;}
     public String getCode() {return code;}
-    public String getType() {return type;}
     public RoomTypeId getRoomTypeId() {return roomTypeId;}
     public BuildingId getBuildingId() {return buildingId;}
     public Integer getFloor() {return floor;}

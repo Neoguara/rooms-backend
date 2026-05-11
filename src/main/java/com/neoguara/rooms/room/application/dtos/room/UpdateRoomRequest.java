@@ -5,7 +5,6 @@ import java.util.UUID;
 public record UpdateRoomRequest(
         String name,
         String code,
-        String type,
         UUID roomTypeId,
         UUID buildingId,
         int floor,

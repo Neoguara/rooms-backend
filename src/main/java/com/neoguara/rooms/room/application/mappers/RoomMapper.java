@@ -20,7 +20,6 @@ public class RoomMapper {
         return Room.create(
                 request.name(),
                 request.code(),
-                request.type(),
                 RoomTypeId.of(request.roomTypeId()),
                 BuildingId.of(request.buildingId()),
                 request.floor(),
@@ -33,7 +32,6 @@ public class RoomMapper {
                 room.getId().id(),
                 room.getName(),
                 room.getCode(),
-                room.getType(),
                 room.getRoomTypeId().id(),
                 room.getBuildingId().id(),
                 room.getFloor(),
@@ -54,7 +52,6 @@ public class RoomMapper {
                 room.getId().id(),
                 room.getName(),
                 room.getCode(),
-                room.getType(),
                 room.getRoomTypeId().id(),
                 room.getBuildingId().id(),
                 room.getFloor(),

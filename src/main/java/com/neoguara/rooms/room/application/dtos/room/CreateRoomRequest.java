@@ -6,7 +6,6 @@ import java.util.UUID;
 public record CreateRoomRequest(
         String name,
         String code,
-        String type,
         UUID roomTypeId,
         UUID buildingId,
         int floor,

@@ -10,7 +10,6 @@ public class RoomValidator implements Validator<Room> {
         notification
                 .addErrorIf(target.getName() == null || target.getName().isBlank(), "name is required")
                 .addErrorIf(target.getCode() == null || target.getCode().isBlank(), "code is required")
-                .addErrorIf(target.getType() == null || target.getType().isBlank(), "type is required")
                 .addErrorIf(target.getRoomTypeId() == null, "roomTypeId is required")
                 .addErrorIf(target.getBuildingId() == null, "buildingId is required")
                 .addErrorIf(target.getFloor() == null || target.getFloor() < 0, "floor must be zero or greater")

@@ -377,3 +377,6 @@ org.h2.jdbc.JdbcSQLNonTransientConnectionException: Database is already closed (
 	at java.base/java.lang.Iterable.forEach(Iterable.java:75)
 	at org.springframework.boot.SpringApplicationShutdownHook.run(SpringApplicationShutdownHook.java:116)
 	at java.base/java.lang.Thread.run(Thread.java:1474)
+2026-05-11 00:54:51.497231-03:00 jdbc[14]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "[*]EVENT_CHANGE_ITEMS"; expected "EXPLAIN, EXECUTE"; SQL statement:
+EVENT_CHANGE_ITEMS [42001-240]

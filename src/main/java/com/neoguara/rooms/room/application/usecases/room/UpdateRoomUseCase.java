@@ -29,7 +29,6 @@ public class UpdateRoomUseCase {
         room.update(
                 request.name(),
                 request.code(),
-                request.type(),
                 RoomTypeId.of(request.roomTypeId()),
                 BuildingId.of(request.buildingId()),
                 request.floor(),

@@ -9,7 +9,6 @@ public record RoomResponse(
         UUID id,
         String name,
         String code,
-        String type,
         UUID roomTypeId,
         UUID buildingId,
         int floor,
