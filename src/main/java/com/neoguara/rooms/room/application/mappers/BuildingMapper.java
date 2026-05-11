@@ -1,4 +1,4 @@
-package com.neoguara.rooms.room.application.mappers.building;
+package com.neoguara.rooms.room.application.mappers;
 
 import com.neoguara.rooms.room.application.dtos.building.BuildingResponse;
 import com.neoguara.rooms.room.application.dtos.building.CreateBuildingRequest;

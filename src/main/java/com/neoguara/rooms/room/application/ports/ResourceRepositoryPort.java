@@ -9,6 +9,7 @@ import java.util.Optional;
 public interface ResourceRepositoryPort {
     Resource save(Resource resource);
     Optional<Resource> findById(ResourceId id);
+    List<Resource> findAllById(List<ResourceId> ids);
     List<Resource> findAll();
     void delete(Resource resource);
 }

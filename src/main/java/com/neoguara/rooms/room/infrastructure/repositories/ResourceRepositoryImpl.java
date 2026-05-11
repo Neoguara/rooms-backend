@@ -28,6 +28,11 @@ public class ResourceRepositoryImpl implements ResourceRepositoryPort {
     }
 
     @Override
+    public List<Resource> findAllById(List<ResourceId> ids) {
+        return jpaRepository.findAllById(ids);
+    }
+
+    @Override
     public List<Resource> findAll() {
         return jpaRepository.findAll();
     }

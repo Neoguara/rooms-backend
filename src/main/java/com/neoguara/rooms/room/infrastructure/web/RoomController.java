@@ -2,6 +2,8 @@ package com.neoguara.rooms.room.infrastructure.web;
 
 import com.neoguara.rooms.room.application.dtos.room.CreateRoomRequest;
 import com.neoguara.rooms.room.application.dtos.room.ReplaceRoomResourcesRequest;
+import com.neoguara.rooms.room.application.dtos.room.RoomDetailResponse;
+import com.neoguara.rooms.room.application.dtos.room.RoomExpandField;
 import com.neoguara.rooms.room.application.dtos.room.RoomResourcesResponse;
 import com.neoguara.rooms.room.application.dtos.room.RoomResponse;
 import com.neoguara.rooms.room.application.dtos.room.UpdateRoomRequest;
@@ -22,7 +24,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Tag(name = "Rooms", description = "Gerenciamento de salas")
 @RestController
@@ -63,8 +67,10 @@ public class RoomController {
     @Operation(description = "Retorna todas as salas cadastradas.")
     @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso")
     @GetMapping
-    public ResponseEntity<List<RoomResponse>> findAll() {
-        return ResponseEntity.ok(getRoomUseCase.findAll());
+    public ResponseEntity<List<RoomDetailResponse>> findAll(
+            @Parameter(description = "Expandable fields: building, roomType, resources")
+            @RequestParam(required = false) List<String> expand) {
+        return ResponseEntity.ok(getRoomUseCase.findAll(parseExpand(expand)));
     }
 
     @Operation(description = "Retorna os dados de uma sala pelo seu ID.")
@@ -73,9 +79,11 @@ public class RoomController {
             @ApiResponse(responseCode = "404", description = "Sala não encontrada")
     })
     @GetMapping("/{id}")
-    public ResponseEntity<RoomResponse> findById(
-            @Parameter(description = "ID da sala") @PathVariable UUID id) {
-        return ResponseEntity.ok(getRoomUseCase.findById(id));
+    public ResponseEntity<RoomDetailResponse> findById(
+            @Parameter(description = "ID da sala") @PathVariable UUID id,
+            @Parameter(description = "Expandable fields: building, roomType, resources")
+            @RequestParam(required = false) List<String> expand) {
+        return ResponseEntity.ok(getRoomUseCase.findById(id, parseExpand(expand)));
     }
 
     @Operation(description = "Atualiza os dados da sala.")
@@ -136,5 +144,12 @@ public class RoomController {
             @Parameter(description = "ID da sala") @PathVariable UUID id,
             @RequestBody UpdateRoomStatusRequest request) {
         return ResponseEntity.ok(updateRoomStatusUseCase.execute(id, request.status()));
+    }
+
+    private Set<RoomExpandField> parseExpand(List<String> expand) {
+        if (expand == null || expand.isEmpty()) return Set.of();
+        return expand.stream()
+                .map(RoomExpandField::fromString)
+                .collect(Collectors.toSet());
     }
 }
