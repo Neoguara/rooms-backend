@@ -4,6 +4,7 @@ import com.neoguara.rooms.event.domain.enums.EventStatus;
 import com.neoguara.rooms.event.domain.validation.EventValidation;
 import com.neoguara.rooms.event.domain.valueobjects.EventId;
 import com.neoguara.rooms.event.domain.valueobjects.RoomId;
+import com.neoguara.rooms.shared.domain.exceptions.InvalidStateException;
 import com.neoguara.rooms.shared.domain.validation.Notification;
 import jakarta.persistence.*;
 
@@ -48,6 +49,7 @@ public class Event {
         this.endAt = endAt;
         this.isAllDay = isAllDay;
         this.recurrenceRule = recurrenceRule;
+        this.status = EventStatus.ACTIVE;
         this.createdAt = LocalDateTime.now();
     }
 
@@ -97,34 +99,37 @@ public class Event {
         notification.raiseIfHasErrors();
     }
 
-    public EventId getId() {
-        return id;
+    public void cancel() {
+        if (this.status != EventStatus.ACTIVE)
+            throw new InvalidStateException("Only active events can be cancelled");
+        this.status = EventStatus.CANCELLED;
+        this.updatedAt = LocalDateTime.now();
     }
+
+    public void complete() {
+        if (this.status != EventStatus.ACTIVE)
+            throw new InvalidStateException("Only active events can be completed");
+        this.status = EventStatus.COMPLETED;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public void archive() {
+        if (this.status == EventStatus.ACTIVE || this.status == EventStatus.ARCHIVED)
+            throw new InvalidStateException("Only cancelled or completed events can be archived");
+        this.status = EventStatus.ARCHIVED;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public EventId getId() {return id;}
     public RoomId getRoomId() {return roomId;}
-    public String getTitle() {
-        return title;
-    }
-    public String getDescription() {
-        return description;
-    }
-    public LocalDateTime getStartAt() {
-        return startAt;
-    }
-    public LocalDateTime getEndAt() {
-        return endAt;
-    }
-    public Boolean isAllDay() {
-        return isAllDay;
-    }
-    public String getRecurrenceRule() {
-        return recurrenceRule;
-    }
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
+    public String getTitle() {return title;}
+    public String getDescription() {return description;}
+    public LocalDateTime getStartAt() {return startAt;}
+    public LocalDateTime getEndAt() {return endAt;}
+    public Boolean isAllDay() {return isAllDay;}
+    public String getRecurrenceRule() {return recurrenceRule;}
+    public LocalDateTime getCreatedAt() {return createdAt;}
+    public LocalDateTime getUpdatedAt() {return updatedAt;}
     public Boolean getAllDay() {return isAllDay;}
     public EventStatus getStatus() {return status;}
 }

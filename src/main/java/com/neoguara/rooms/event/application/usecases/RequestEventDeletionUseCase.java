@@ -7,7 +7,7 @@ import com.neoguara.rooms.event.application.ports.EventChangeItemRepositoryPort;
 import com.neoguara.rooms.event.application.ports.EventChangeRequestRepositoryPort;
 import com.neoguara.rooms.event.application.ports.EventRepositoryPort;
 import com.neoguara.rooms.event.domain.entities.EventChangeItem;
-import com.neoguara.rooms.event.domain.entities.EventChangeRequest;
+import com.neoguara.rooms.event.domain.entities.EventRequest;
 import com.neoguara.rooms.event.domain.valueobjects.EventId;
 import com.neoguara.rooms.event.domain.valueobjects.UserId;
 import org.springframework.stereotype.Service;
@@ -39,7 +39,7 @@ public class RequestEventDeletionUseCase {
         var event = eventRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Event not found: " + eventId));
 
-        var changeRequest = EventChangeRequest.delete(
+        var changeRequest = EventRequest.delete(
                 id,
                 UserId.of(request.userId()),
                 request.justification()

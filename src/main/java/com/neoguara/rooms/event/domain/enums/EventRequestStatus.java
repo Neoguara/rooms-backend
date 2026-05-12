@@ -1,6 +1,6 @@
 package com.neoguara.rooms.event.domain.enums;
 
-public enum EventChangeRequestStatus {
+public enum EventRequestStatus {
     PENDING,
     APPROVED,
     REJECTED

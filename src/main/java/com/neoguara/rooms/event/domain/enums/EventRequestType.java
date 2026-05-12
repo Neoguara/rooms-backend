@@ -1,7 +1,7 @@
 package com.neoguara.rooms.event.domain.enums;
 
-public enum EventChangeType {
+public enum EventRequestType {
     CREATE,
     UPDATE,
-    DELETE
+    CANCEL
 }

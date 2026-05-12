@@ -4,7 +4,7 @@ import com.neoguara.rooms.event.application.ports.EventChangeItemRepositoryPort;
 import com.neoguara.rooms.event.application.ports.EventChangeRequestRepositoryPort;
 import com.neoguara.rooms.event.application.ports.EventRepositoryPort;
 import com.neoguara.rooms.event.domain.entities.Event;
-import com.neoguara.rooms.event.domain.enums.EventChangeType;
+import com.neoguara.rooms.event.domain.enums.EventRequestType;
 import com.neoguara.rooms.event.domain.valueobjects.EventChangeRequestId;
 import com.neoguara.rooms.shared.domain.exceptions.InvalidStateException;
 import com.neoguara.rooms.shared.domain.exceptions.ResourceNotFoundException;
@@ -45,7 +45,7 @@ public class ApproveEventChangeRequestUseCase {
         changeRequest.approve();
         changeRequestRepository.save(changeRequest);
 
-        var changeType = EventChangeType.valueOf(changeRequest.getType());
+        var changeType = EventRequestType.valueOf(changeRequest.getType());
 
         switch (changeType) {
             case CREATE -> eventRepository.save(Event.create(
