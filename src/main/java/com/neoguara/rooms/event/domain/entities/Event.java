@@ -1,5 +1,7 @@
 package com.neoguara.rooms.event.domain.entities;
 
+import com.neoguara.rooms.event.domain.enums.EventStatus;
+import com.neoguara.rooms.event.domain.validation.EventValidation;
 import com.neoguara.rooms.event.domain.valueobjects.EventId;
 import com.neoguara.rooms.event.domain.valueobjects.RoomId;
 import com.neoguara.rooms.shared.domain.validation.Notification;
@@ -16,22 +18,16 @@ public class Event {
     @Embedded
     @AttributeOverride(name = "id", column = @Column(name = "room_id"))
     private RoomId roomId;
-
     private String title;
-
     private String description;
-
     private LocalDateTime startAt;
-
     private LocalDateTime endAt;
-
     private Boolean isAllDay;
-
     private String recurrenceRule;
+    private EventStatus status;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private LocalDateTime deletedAt;
 
     Event() {}
 
@@ -64,15 +60,41 @@ public class Event {
             Boolean isAllDay,
             String recurrenceRule
     ) {
-        Notification notification = Notification.create()
-                .addErrorIf(roomId == null, "roomId is required")
-                .addErrorIf(title == null || title.isBlank(), "title is required")
-                .addErrorIf(startAt == null, "startAt is required")
-                .addErrorIf(endAt == null, "endAt is required")
-                .addErrorIf(startAt != null && endAt != null && !startAt.isBefore(endAt),
-                        "startAt must be before endAt");
+        Event event = new Event(
+                roomId,
+                title,
+                description,
+                startAt,
+                endAt,
+                isAllDay,
+                recurrenceRule
+        );
+        Notification notification = Notification.create();
+        new EventValidation().validate(event, notification);
         notification.raiseIfHasErrors();
-        return new Event(roomId, title, description, startAt, endAt, isAllDay, recurrenceRule);
+        return event;
+    }
+
+    public void update(
+            RoomId roomId,
+            String title,
+            String description,
+            LocalDateTime startAt,
+            LocalDateTime endAt,
+            Boolean isAllDay,
+            String recurrenceRule
+    ) {
+        this.roomId = roomId;
+        this.title = title;
+        this.description = description;
+        this.startAt = startAt;
+        this.endAt = endAt;
+        this.isAllDay = isAllDay;
+        this.recurrenceRule = recurrenceRule;
+        this.updatedAt = LocalDateTime.now();
+        Notification notification = Notification.create();
+        new EventValidation().validate(this, notification);
+        notification.raiseIfHasErrors();
     }
 
     public EventId getId() {
@@ -103,31 +125,6 @@ public class Event {
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
     }
-    public LocalDateTime getDeletedAt() {
-        return deletedAt;
-    }
-
-    public void delete() {
-        this.deletedAt = LocalDateTime.now();
-    }
-
-    public void update(
-            RoomId roomId,
-            String title,
-            String description,
-            LocalDateTime startAt,
-            LocalDateTime endAt,
-            Boolean isAllDay,
-            String recurrenceRule
-    ) {
-        this.roomId = roomId;
-        this.title = title;
-        this.description = description;
-        this.startAt = startAt;
-        this.endAt = endAt;
-        this.isAllDay = isAllDay;
-        this.recurrenceRule = recurrenceRule;
-        this.updatedAt = LocalDateTime.now();
-    }
-
+    public Boolean getAllDay() {return isAllDay;}
+    public EventStatus getStatus() {return status;}
 }
