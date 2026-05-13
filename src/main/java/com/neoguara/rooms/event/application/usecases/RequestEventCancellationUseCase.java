@@ -10,6 +10,7 @@ import com.neoguara.rooms.event.domain.entities.EventChangeItem;
 import com.neoguara.rooms.event.domain.entities.EventRequest;
 import com.neoguara.rooms.event.domain.valueobjects.EventId;
 import com.neoguara.rooms.event.domain.valueobjects.UserId;
+import com.neoguara.rooms.shared.domain.exceptions.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,7 +38,7 @@ public class RequestEventCancellationUseCase {
         var id = EventId.of(eventId);
 
         var event = eventRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Event not found: " + eventId));
+                .orElseThrow(() -> new ResourceNotFoundException("Event", eventId));
 
         var changeRequest = EventRequest.cancelEvent(
                 id,

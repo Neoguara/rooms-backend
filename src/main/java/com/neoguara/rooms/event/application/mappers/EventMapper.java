@@ -17,6 +17,7 @@ public class EventMapper {
                 event.getEndAt(),
                 event.isAllDay(),
                 event.getRecurrenceRule(),
+                event.getStatus().name(),
                 event.getCreatedAt(),
                 event.getUpdatedAt()
         );

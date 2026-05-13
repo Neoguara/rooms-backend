@@ -12,6 +12,7 @@ public record EventResponse(
     LocalDateTime endAt,
     Boolean isAllDay,
     String recurrenceRule,
+    String status,
     LocalDateTime createdAt,
     LocalDateTime updatedAt
     ) {
