@@ -15,7 +15,8 @@ import com.neoguara.rooms.event.application.usecases.RejectEventRequestUseCase;
 import com.neoguara.rooms.event.application.usecases.RequestEventCancellationUseCase;
 import com.neoguara.rooms.event.application.usecases.RequestEventCreationUseCase;
 import com.neoguara.rooms.event.application.usecases.RequestEventUpdateUseCase;
-import com.neoguara.rooms.event.domain.enums.EventRequestStatus;
+import com.neoguara.rooms.event.application.dtos.EventChangeType;
+import com.neoguara.rooms.event.application.dtos.EventRequestStatusAction;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -109,7 +110,6 @@ public class EventController {
             case CANCEL -> requestEventCancellationUseCase.execute(id, new CancelEventRequest(
                     request.userId(), request.justification()
             ));
-            default -> throw new IllegalArgumentException("Tipo inválido para alteração de evento: " + request.type());
         };
         return ResponseEntity.created(URI.create("/events/requests/" + response.id())).body(response);
     }
@@ -128,12 +128,9 @@ public class EventController {
     public ResponseEntity<Void> updateRequestStatus(
             @Parameter(description = "ID da solicitação") @PathVariable UUID id,
             @RequestBody UpdateEventRequestStatusRequest request) {
-        if (request.status() == EventRequestStatus.APPROVED) {
-            approveEventRequestUseCase.execute(id);
-        } else if (request.status() == EventRequestStatus.REJECTED) {
-            rejectEventRequestUseCase.execute(id);
-        } else {
-            throw new IllegalArgumentException("Status inválido para atualização: " + request.status());
+        switch (request.status()) {
+            case APPROVED -> approveEventRequestUseCase.execute(id);
+            case REJECTED -> rejectEventRequestUseCase.execute(id);
         }
         return ResponseEntity.noContent().build();
     }
