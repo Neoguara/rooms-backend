@@ -45,16 +45,7 @@ public class RequestEventDeletionUseCase {
                 request.justification()
         );
 
-        var changeItem = EventChangeItem.delete(
-                changeRequest.getId(),
-                event.getRoomId(),
-                event.getTitle(),
-                event.getDescription(),
-                event.getStartAt(),
-                event.getEndAt(),
-                event.isAllDay(),
-                event.getRecurrenceRule()
-        );
+        var changeItem = EventChangeItem.delete(changeRequest.getId(), event);
 
         changeRequestRepository.save(changeRequest);
         changeItemRepository.save(changeItem);

@@ -47,27 +47,29 @@ public class ApproveEventChangeRequestUseCase {
 
         var changeType = EventRequestType.valueOf(changeRequest.getType());
 
+        var after = changeItem.getAfter();
+
         switch (changeType) {
             case CREATE -> eventRepository.save(Event.create(
-                    changeItem.getNewRoomId(),
-                    changeItem.getNewTitle(),
-                    changeItem.getNewDescription(),
-                    changeItem.getNewStartAt(),
-                    changeItem.getNewEndAt(),
-                    changeItem.getNewIsAllDay(),
-                    changeItem.getNewRecurrenceRule()
+                    after.getRoomId(),
+                    after.getTitle(),
+                    after.getDescription(),
+                    after.getStartAt(),
+                    after.getEndAt(),
+                    after.isAllDay(),
+                    after.getRecurrenceRule()
             ));
             case UPDATE -> {
                 var event = eventRepository.findById(changeRequest.getEventId())
                         .orElseThrow(() -> new ResourceNotFoundException("Event", changeRequest.getEventId()));
                 event.update(
-                        changeItem.getNewRoomId(),
-                        changeItem.getNewTitle(),
-                        changeItem.getNewDescription(),
-                        changeItem.getNewStartAt(),
-                        changeItem.getNewEndAt(),
-                        changeItem.getNewIsAllDay(),
-                        changeItem.getNewRecurrenceRule()
+                        after.getRoomId(),
+                        after.getTitle(),
+                        after.getDescription(),
+                        after.getStartAt(),
+                        after.getEndAt(),
+                        after.isAllDay(),
+                        after.getRecurrenceRule()
                 );
                 eventRepository.save(event);
             }

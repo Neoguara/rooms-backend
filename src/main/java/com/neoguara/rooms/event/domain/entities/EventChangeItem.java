@@ -2,10 +2,8 @@ package com.neoguara.rooms.event.domain.entities;
 
 import com.neoguara.rooms.event.domain.valueobjects.EventChangeItemId;
 import com.neoguara.rooms.event.domain.valueobjects.EventRequestId;
-import com.neoguara.rooms.event.domain.valueobjects.RoomId;
+import com.neoguara.rooms.event.domain.valueobjects.EventSnapshot;
 import jakarta.persistence.*;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "event_change_items")
@@ -18,135 +16,59 @@ public class EventChangeItem {
     private EventRequestId eventRequestId;
 
     @Embedded
-    @AttributeOverride(name = "id", column = @Column(name = "old_room_id"))
-    private RoomId oldRoomId;
+    @AttributeOverrides({
+        @AttributeOverride(name = "roomId.id",       column = @Column(name = "old_room_id")),
+        @AttributeOverride(name = "title",           column = @Column(name = "old_title")),
+        @AttributeOverride(name = "description",     column = @Column(name = "old_description")),
+        @AttributeOverride(name = "startAt",         column = @Column(name = "old_start_at")),
+        @AttributeOverride(name = "endAt",           column = @Column(name = "old_end_at")),
+        @AttributeOverride(name = "isAllDay",        column = @Column(name = "old_is_all_day")),
+        @AttributeOverride(name = "recurrenceRule",  column = @Column(name = "old_recurrence_rule"))
+    })
+    private EventSnapshot before;
 
     @Embedded
-    @AttributeOverride(name = "id", column = @Column(name = "new_room_id"))
-    private RoomId newRoomId;
-
-    private String oldTitle;
-    private String newTitle;
-
-    private String oldDescription;
-    private String newDescription;
-
-    private LocalDateTime oldStartAt;
-    private LocalDateTime newStartAt;
-
-    private LocalDateTime oldEndAt;
-    private LocalDateTime newEndAt;
-
-    private Boolean oldIsAllDay;
-    private Boolean newIsAllDay;
-
-    private String oldRecurrenceRule;
-    private String newRecurrenceRule;
+    @AttributeOverrides({
+        @AttributeOverride(name = "roomId.id",       column = @Column(name = "new_room_id")),
+        @AttributeOverride(name = "title",           column = @Column(name = "new_title")),
+        @AttributeOverride(name = "description",     column = @Column(name = "new_description")),
+        @AttributeOverride(name = "startAt",         column = @Column(name = "new_start_at")),
+        @AttributeOverride(name = "endAt",           column = @Column(name = "new_end_at")),
+        @AttributeOverride(name = "isAllDay",        column = @Column(name = "new_is_all_day")),
+        @AttributeOverride(name = "recurrenceRule",  column = @Column(name = "new_recurrence_rule"))
+    })
+    private EventSnapshot after;
 
     EventChangeItem() {}
 
-    private EventChangeItem(
-        EventRequestId eventRequestId,
-        RoomId oldRoomId, RoomId newRoomId,
-        String oldTitle, String newTitle,
-        String oldDescription, String newDescription,
-        LocalDateTime oldStartAt, LocalDateTime newStartAt,
-        LocalDateTime oldEndAt, LocalDateTime newEndAt,
-        Boolean oldIsAllDay, Boolean newIsAllDay,
-        String oldRecurrenceRule, String newRecurrenceRule
-    ) {
+    private EventChangeItem(EventRequestId eventRequestId, EventSnapshot before, EventSnapshot after) {
         this.id = new EventChangeItemId();
         this.eventRequestId = eventRequestId;
-        this.oldRoomId = oldRoomId;
-        this.newRoomId = newRoomId;
-        this.oldTitle = oldTitle;
-        this.newTitle = newTitle;
-        this.oldDescription = oldDescription;
-        this.newDescription = newDescription;
-        this.oldStartAt = oldStartAt;
-        this.newStartAt = newStartAt;
-        this.oldEndAt = oldEndAt;
-        this.newEndAt = newEndAt;
-        this.oldIsAllDay = oldIsAllDay;
-        this.newIsAllDay = newIsAllDay;
-        this.oldRecurrenceRule = oldRecurrenceRule;
-        this.newRecurrenceRule = newRecurrenceRule;
+        this.before = before;
+        this.after = after;
     }
 
-    public static EventChangeItem create(
-        EventRequestId eventRequestId,
-        RoomId roomId,
-        String title, String description,
-        LocalDateTime startAt, LocalDateTime endAt,
-        Boolean isAllDay, String recurrenceRule
-    ) {
-        return new EventChangeItem(
-                eventRequestId,
-            null, roomId,
-            null, title,
-            null, description,
-            null, startAt,
-            null, endAt,
-            null, isAllDay,
-            null, recurrenceRule
-        );
+    public static EventChangeItem create(EventRequestId eventRequestId, EventSnapshot after) {
+        return new EventChangeItem(eventRequestId, null, after);
     }
 
-    public static EventChangeItem update(
-        EventRequestId eventRequestId,
-        RoomId oldRoomId, RoomId newRoomId,
-        String oldTitle, String newTitle,
-        String oldDescription, String newDescription,
-        LocalDateTime oldStartAt, LocalDateTime newStartAt,
-        LocalDateTime oldEndAt, LocalDateTime newEndAt,
-        Boolean oldIsAllDay, Boolean newIsAllDay,
-        String oldRecurrenceRule, String newRecurrenceRule
-    ) {
-        return new EventChangeItem(
-                eventRequestId,
-            oldRoomId, newRoomId,
-            oldTitle, newTitle,
-            oldDescription, newDescription,
-            oldStartAt, newStartAt,
-            oldEndAt, newEndAt,
-            oldIsAllDay, newIsAllDay,
-            oldRecurrenceRule, newRecurrenceRule
-        );
+    public static EventChangeItem update(EventRequestId eventRequestId, Event old, EventSnapshot after) {
+        return new EventChangeItem(eventRequestId, snapshotOf(old), after);
     }
 
-    public static EventChangeItem delete(
-        EventRequestId eventRequestId,
-        RoomId roomId,
-        String title, String description,
-        LocalDateTime startAt, LocalDateTime endAt,
-        Boolean isAllDay, String recurrenceRule
-    ) {
-        return new EventChangeItem(
-                eventRequestId,
-            roomId, null,
-            title, null,
-            description, null,
-            startAt, null,
-            endAt, null,
-            isAllDay, null,
-            recurrenceRule, null
+    public static EventChangeItem delete(EventRequestId eventRequestId, Event event) {
+        return new EventChangeItem(eventRequestId, snapshotOf(event), null);
+    }
+
+    private static EventSnapshot snapshotOf(Event event) {
+        return EventSnapshot.of(
+            event.getRoomId(), event.getTitle(), event.getDescription(),
+            event.getStartAt(), event.getEndAt(), event.isAllDay(), event.getRecurrenceRule()
         );
     }
 
     public EventChangeItemId getId() { return id; }
-    public RoomId getOldRoomId() { return oldRoomId; }
-    public RoomId getNewRoomId() { return newRoomId; }
-    public String getOldTitle() { return oldTitle; }
-    public String getNewTitle() { return newTitle; }
-    public String getOldDescription() { return oldDescription; }
-    public String getNewDescription() { return newDescription; }
-    public LocalDateTime getOldStartAt() { return oldStartAt; }
-    public LocalDateTime getNewStartAt() { return newStartAt; }
-    public LocalDateTime getOldEndAt() { return oldEndAt; }
-    public LocalDateTime getNewEndAt() { return newEndAt; }
-    public Boolean getOldIsAllDay() { return oldIsAllDay; }
-    public Boolean getNewIsAllDay() { return newIsAllDay; }
-    public String getOldRecurrenceRule() { return oldRecurrenceRule; }
-    public String getNewRecurrenceRule() { return newRecurrenceRule; }
-    public EventRequestId getEventRequestId() {return eventRequestId;}
+    public EventRequestId getEventRequestId() { return eventRequestId; }
+    public EventSnapshot getBefore() { return before; }
+    public EventSnapshot getAfter() { return after; }
 }

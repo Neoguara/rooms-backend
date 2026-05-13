@@ -6,6 +6,7 @@ import com.neoguara.rooms.event.application.mappers.CreateEventRequestMapper;
 import com.neoguara.rooms.event.application.ports.EventChangeItemRepositoryPort;
 import com.neoguara.rooms.event.application.ports.EventRequestRepositoryPort;
 import com.neoguara.rooms.event.domain.entities.EventChangeItem;
+import com.neoguara.rooms.event.domain.valueobjects.EventSnapshot;
 import com.neoguara.rooms.event.domain.valueobjects.RoomId;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,16 +26,13 @@ public class RequestEventCreationUseCase {
 
         var changeRequest = CreateEventRequestMapper.toDomain(request);
 
-        var eventChangeItem = EventChangeItem.create(
-                changeRequest.getId(),
+        var snapshot = EventSnapshot.of(
                 RoomId.of(request.roomId()),
-                request.title(),
-                request.description(),
-                request.startAt(),
-                request.endAt(),
-                request.isAllDay(),
-                request.recurrenceRule()
+                request.title(), request.description(),
+                request.startAt(), request.endAt(),
+                request.isAllDay(), request.recurrenceRule()
         );
+        var eventChangeItem = EventChangeItem.create(changeRequest.getId(), snapshot);
 
         changeRequestRepository.save(changeRequest);
         changeItemRepository.save(eventChangeItem);

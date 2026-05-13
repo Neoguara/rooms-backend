@@ -9,6 +9,7 @@ import com.neoguara.rooms.event.application.ports.EventRepositoryPort;
 import com.neoguara.rooms.event.domain.entities.EventChangeItem;
 import com.neoguara.rooms.event.domain.entities.EventRequest;
 import com.neoguara.rooms.event.domain.valueobjects.EventId;
+import com.neoguara.rooms.event.domain.valueobjects.EventSnapshot;
 import com.neoguara.rooms.event.domain.valueobjects.RoomId;
 import com.neoguara.rooms.event.domain.valueobjects.UserId;
 import org.springframework.stereotype.Service;
@@ -46,16 +47,13 @@ public class RequestEventUpdateUseCase {
                 request.justification()
         );
 
-        var changeItem = EventChangeItem.update(
-                changeRequest.getId(),
-                event.getRoomId(), RoomId.of(request.roomId()),
-                event.getTitle(), request.title(),
-                event.getDescription(), request.description(),
-                event.getStartAt(), request.startAt(),
-                event.getEndAt(), request.endAt(),
-                event.isAllDay(), request.isAllDay(),
-                event.getRecurrenceRule(), request.recurrenceRule()
+        var after = EventSnapshot.of(
+                RoomId.of(request.roomId()),
+                request.title(), request.description(),
+                request.startAt(), request.endAt(),
+                request.isAllDay(), request.recurrenceRule()
         );
+        var changeItem = EventChangeItem.update(changeRequest.getId(), event, after);
 
         changeRequestRepository.save(changeRequest);
         changeItemRepository.save(changeItem);

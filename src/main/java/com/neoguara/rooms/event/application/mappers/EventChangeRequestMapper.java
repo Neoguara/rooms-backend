@@ -23,22 +23,24 @@ public class EventChangeRequestMapper {
     }
 
     private static EventChangeItemResponse toItemResponse(EventChangeItem item) {
+        var before = item.getBefore();
+        var after = item.getAfter();
         return new EventChangeItemResponse(
                 item.getId().id(),
-                item.getOldRoomId() != null ? item.getOldRoomId().id() : null,
-                item.getNewRoomId() != null ? item.getNewRoomId().id() : null,
-                item.getOldTitle(),
-                item.getNewTitle(),
-                item.getOldDescription(),
-                item.getNewDescription(),
-                item.getOldStartAt(),
-                item.getNewStartAt(),
-                item.getOldEndAt(),
-                item.getNewEndAt(),
-                item.getOldIsAllDay(),
-                item.getNewIsAllDay(),
-                item.getOldRecurrenceRule(),
-                item.getNewRecurrenceRule()
+                before != null ? before.getRoomId().id() : null,
+                after != null ? after.getRoomId().id() : null,
+                before != null ? before.getTitle() : null,
+                after != null ? after.getTitle() : null,
+                before != null ? before.getDescription() : null,
+                after != null ? after.getDescription() : null,
+                before != null ? before.getStartAt() : null,
+                after != null ? after.getStartAt() : null,
+                before != null ? before.getEndAt() : null,
+                after != null ? after.getEndAt() : null,
+                before != null ? before.isAllDay() : null,
+                after != null ? after.isAllDay() : null,
+                before != null ? before.getRecurrenceRule() : null,
+                after != null ? after.getRecurrenceRule() : null
         );
     }
 }
