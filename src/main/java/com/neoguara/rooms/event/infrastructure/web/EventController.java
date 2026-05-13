@@ -2,16 +2,16 @@ package com.neoguara.rooms.event.infrastructure.web;
 
 import com.neoguara.rooms.event.application.dtos.CreateEventRequest;
 import com.neoguara.rooms.event.application.dtos.CreateEventRequestResponse;
-import com.neoguara.rooms.event.application.dtos.DeleteEventRequest;
-import com.neoguara.rooms.event.application.dtos.EventChangeRequestResponse;
+import com.neoguara.rooms.event.application.dtos.CancelEventRequest;
+import com.neoguara.rooms.event.application.dtos.EventRequestResponse;
 import com.neoguara.rooms.event.application.dtos.EventResponse;
 import com.neoguara.rooms.event.application.dtos.UpdateEventRequest;
-import com.neoguara.rooms.event.application.usecases.ApproveEventChangeRequestUseCase;
-import com.neoguara.rooms.event.application.usecases.GetEventChangeRequestUseCase;
+import com.neoguara.rooms.event.application.usecases.ApproveEventRequestUseCase;
+import com.neoguara.rooms.event.application.usecases.GetEventRequestUseCase;
 import com.neoguara.rooms.event.application.usecases.GetEventUseCase;
-import com.neoguara.rooms.event.application.usecases.RejectEventChangeRequestUseCase;
+import com.neoguara.rooms.event.application.usecases.RejectEventRequestUseCase;
 import com.neoguara.rooms.event.application.usecases.RequestEventCreationUseCase;
-import com.neoguara.rooms.event.application.usecases.RequestEventDeletionUseCase;
+import com.neoguara.rooms.event.application.usecases.RequestEventCancellationUseCase;
 import com.neoguara.rooms.event.application.usecases.RequestEventUpdateUseCase;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,29 +25,29 @@ import java.util.UUID;
 public class EventController {
 
     private final GetEventUseCase getEventUseCase;
-    private final GetEventChangeRequestUseCase getEventChangeRequestUseCase;
+    private final GetEventRequestUseCase getEventRequestUseCase;
     private final RequestEventCreationUseCase requestEventCreationUseCase;
     private final RequestEventUpdateUseCase requestEventUpdateUseCase;
-    private final RequestEventDeletionUseCase requestEventDeletionUseCase;
-    private final ApproveEventChangeRequestUseCase approveEventChangeRequestUseCase;
-    private final RejectEventChangeRequestUseCase rejectEventChangeRequestUseCase;
+    private final RequestEventCancellationUseCase requestEventCancellationUseCase;
+    private final ApproveEventRequestUseCase approveEventRequestUseCase;
+    private final RejectEventRequestUseCase rejectEventRequestUseCase;
 
     EventController(
             GetEventUseCase getEventUseCase,
-            GetEventChangeRequestUseCase getEventChangeRequestUseCase,
+            GetEventRequestUseCase getEventRequestUseCase,
             RequestEventCreationUseCase requestEventCreationUseCase,
             RequestEventUpdateUseCase requestEventUpdateUseCase,
-            RequestEventDeletionUseCase requestEventDeletionUseCase,
-            ApproveEventChangeRequestUseCase approveEventChangeRequestUseCase,
-            RejectEventChangeRequestUseCase rejectEventChangeRequestUseCase
+            RequestEventCancellationUseCase requestEventCancellationUseCase,
+            ApproveEventRequestUseCase approveEventRequestUseCase,
+            RejectEventRequestUseCase rejectEventRequestUseCase
     ) {
         this.getEventUseCase = getEventUseCase;
-        this.getEventChangeRequestUseCase = getEventChangeRequestUseCase;
+        this.getEventRequestUseCase = getEventRequestUseCase;
         this.requestEventCreationUseCase = requestEventCreationUseCase;
         this.requestEventUpdateUseCase = requestEventUpdateUseCase;
-        this.requestEventDeletionUseCase = requestEventDeletionUseCase;
-        this.approveEventChangeRequestUseCase = approveEventChangeRequestUseCase;
-        this.rejectEventChangeRequestUseCase = rejectEventChangeRequestUseCase;
+        this.requestEventCancellationUseCase = requestEventCancellationUseCase;
+        this.approveEventRequestUseCase = approveEventRequestUseCase;
+        this.rejectEventRequestUseCase = rejectEventRequestUseCase;
     }
 
     @GetMapping
@@ -71,28 +71,28 @@ public class EventController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<CreateEventRequestResponse> requestDeletion(
+    public ResponseEntity<CreateEventRequestResponse> requestCancellation(
             @PathVariable UUID id,
-            @RequestBody DeleteEventRequest request
+            @RequestBody CancelEventRequest request
     ) {
-        var response = requestEventDeletionUseCase.execute(id, request);
+        var response = requestEventCancellationUseCase.execute(id, request);
         return ResponseEntity.accepted().body(response);
     }
 
     @GetMapping("/requests")
-    public ResponseEntity<List<EventChangeRequestResponse>> findAllRequests() {
-        return ResponseEntity.ok(getEventChangeRequestUseCase.findAll());
+    public ResponseEntity<List<EventRequestResponse>> findAllRequests() {
+        return ResponseEntity.ok(getEventRequestUseCase.findAll());
     }
 
     @PostMapping("/requests/{id}/approve")
     public ResponseEntity<Void> approve(@PathVariable UUID id) {
-        approveEventChangeRequestUseCase.execute(id);
+        approveEventRequestUseCase.execute(id);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/requests/{id}/reject")
     public ResponseEntity<Void> reject(@PathVariable UUID id) {
-        rejectEventChangeRequestUseCase.execute(id);
+        rejectEventRequestUseCase.execute(id);
         return ResponseEntity.noContent().build();
     }
 }

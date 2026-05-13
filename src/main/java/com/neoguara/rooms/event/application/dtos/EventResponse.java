@@ -13,7 +13,6 @@ public record EventResponse(
     Boolean isAllDay,
     String recurrenceRule,
     LocalDateTime createdAt,
-    LocalDateTime updatedAt,
-    LocalDateTime deletedAt
+    LocalDateTime updatedAt
     ) {
 }

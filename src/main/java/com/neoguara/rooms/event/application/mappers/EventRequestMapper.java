@@ -1,23 +1,23 @@
 package com.neoguara.rooms.event.application.mappers;
 
 import com.neoguara.rooms.event.application.dtos.EventChangeItemResponse;
-import com.neoguara.rooms.event.application.dtos.EventChangeRequestResponse;
+import com.neoguara.rooms.event.application.dtos.EventRequestResponse;
 import com.neoguara.rooms.event.domain.entities.EventChangeItem;
 import com.neoguara.rooms.event.domain.entities.EventRequest;
 
-public class EventChangeRequestMapper {
+public class EventRequestMapper {
 
-    private EventChangeRequestMapper() {}
+    private EventRequestMapper() {}
 
-    public static EventChangeRequestResponse toResponse(EventRequest changeRequest, EventChangeItem changeItem) {
-        return new EventChangeRequestResponse(
-                changeRequest.getId().id(),
-                changeRequest.getEventId() != null ? changeRequest.getEventId().id() : null,
-                changeRequest.getCreatedBy().id(),
-                changeRequest.getStatus(),
-                changeRequest.getType(),
-                changeRequest.getJustification(),
-                changeRequest.getCreatedAt(),
+    public static EventRequestResponse toResponse(EventRequest eventRequest, EventChangeItem changeItem) {
+        return new EventRequestResponse(
+                eventRequest.getId().id(),
+                eventRequest.getEventId() != null ? eventRequest.getEventId().id() : null,
+                eventRequest.getCreatedBy().id(),
+                eventRequest.getStatus().name(),
+                eventRequest.getType().name(),
+                eventRequest.getJustification(),
+                eventRequest.getCreatedAt(),
                 changeItem != null ? toItemResponse(changeItem) : null
         );
     }

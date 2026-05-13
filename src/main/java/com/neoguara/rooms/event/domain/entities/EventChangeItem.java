@@ -56,7 +56,7 @@ public class EventChangeItem {
         return new EventChangeItem(eventRequestId, snapshotOf(old), after);
     }
 
-    public static EventChangeItem delete(EventRequestId eventRequestId, Event event) {
+    public static EventChangeItem cancel(EventRequestId eventRequestId, Event event) {
         return new EventChangeItem(eventRequestId, snapshotOf(event), null);
     }
 

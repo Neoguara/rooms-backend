@@ -50,14 +50,24 @@ public class EventRequest {
         this.createdAt = LocalDateTime.now();
     }
 
-    public static EventRequest create(
-            EventId eventId,
-            UserId createdBy,
-            EventRequestType type,
-            String justification
-    ) {
+    public static EventRequest createEvent(UserId createdBy, String justification) {
+        EventRequest request = new EventRequest(null, createdBy, EventRequestType.CREATE, justification);
+        Notification notification = Notification.create();
+        new EventRequestValidation().validate(request, notification);
+        notification.raiseIfHasErrors();
+        return request;
+    }
 
-        EventRequest request = new EventRequest(eventId, createdBy, type, justification);
+    public static EventRequest updateEvent(EventId eventId, UserId createdBy, String justification) {
+        EventRequest request = new EventRequest(eventId, createdBy, EventRequestType.UPDATE, justification);
+        Notification notification = Notification.create();
+        new EventRequestValidation().validate(request, notification);
+        notification.raiseIfHasErrors();
+        return request;
+    }
+
+    public static EventRequest cancelEvent(EventId eventId, UserId createdBy, String justification) {
+        EventRequest request = new EventRequest(eventId, createdBy, EventRequestType.CANCEL, justification);
         Notification notification = Notification.create();
         new EventRequestValidation().validate(request, notification);
         notification.raiseIfHasErrors();
@@ -74,12 +84,6 @@ public class EventRequest {
         if (this.status != EventRequestStatus.PENDING)
             throw new InvalidStateException("Only pending requests can be rejected");
         this.status = EventRequestStatus.REJECTED;
-    }
-
-    public void cancel() {
-        if (this.status != EventRequestStatus.PENDING)
-            throw new InvalidStateException("Only pending requests can be cancelled");
-        this.status = EventRequestStatus.CANCELLED;
     }
 
     public EventRequestId getId() {return id;}

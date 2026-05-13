@@ -7,5 +7,5 @@ import java.util.Optional;
 
 public interface EventChangeItemRepositoryPort {
     EventChangeItem save (EventChangeItem eventChangeItem);
-    Optional<EventChangeItem> findByEventChangeRequestId(EventRequestId eventRequestId);
+    Optional<EventChangeItem> findByEventRequestId(EventRequestId eventRequestId);
 }

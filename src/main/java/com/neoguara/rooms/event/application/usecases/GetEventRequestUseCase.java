@@ -1,7 +1,7 @@
 package com.neoguara.rooms.event.application.usecases;
 
-import com.neoguara.rooms.event.application.dtos.EventChangeRequestResponse;
-import com.neoguara.rooms.event.application.mappers.EventChangeRequestMapper;
+import com.neoguara.rooms.event.application.dtos.EventRequestResponse;
+import com.neoguara.rooms.event.application.mappers.EventRequestMapper;
 import com.neoguara.rooms.event.application.ports.EventChangeItemRepositoryPort;
 import com.neoguara.rooms.event.application.ports.EventRequestRepositoryPort;
 import org.springframework.stereotype.Service;
@@ -9,12 +9,12 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class GetEventChangeRequestUseCase {
+public class GetEventRequestUseCase {
 
     private final EventRequestRepositoryPort repository;
     private final EventChangeItemRepositoryPort changeItemRepository;
 
-    GetEventChangeRequestUseCase(
+    GetEventRequestUseCase(
             EventRequestRepositoryPort repository,
             EventChangeItemRepositoryPort changeItemRepository
     ) {
@@ -22,13 +22,13 @@ public class GetEventChangeRequestUseCase {
         this.changeItemRepository = changeItemRepository;
     }
 
-    public List<EventChangeRequestResponse> findAll() {
+    public List<EventRequestResponse> findAll() {
         return repository.findAll().stream()
-                .map(changeRequest -> {
+                .map(eventRequest -> {
                     var changeItem = changeItemRepository
-                            .findByEventChangeRequestId(changeRequest.getId())
+                            .findByEventRequestId(eventRequest.getId())
                             .orElse(null);
-                    return EventChangeRequestMapper.toResponse(changeRequest, changeItem);
+                    return EventRequestMapper.toResponse(eventRequest, changeItem);
                 })
                 .toList();
     }

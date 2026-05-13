@@ -8,5 +8,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 public interface EventChangeItemJpaRepository extends JpaRepository<EventChangeItem, EventChangeItemId> {
-    Optional<EventChangeItem> findByEventChangeRequestId(EventRequestId eventRequestId);
+    Optional<EventChangeItem> findByEventRequestId(EventRequestId eventRequestId);
 }

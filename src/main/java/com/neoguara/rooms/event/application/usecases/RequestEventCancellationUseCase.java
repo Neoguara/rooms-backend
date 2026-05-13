@@ -1,7 +1,7 @@
 package com.neoguara.rooms.event.application.usecases;
 
+import com.neoguara.rooms.event.application.dtos.CancelEventRequest;
 import com.neoguara.rooms.event.application.dtos.CreateEventRequestResponse;
-import com.neoguara.rooms.event.application.dtos.DeleteEventRequest;
 import com.neoguara.rooms.event.application.mappers.CreateEventRequestMapper;
 import com.neoguara.rooms.event.application.ports.EventChangeItemRepositoryPort;
 import com.neoguara.rooms.event.application.ports.EventRequestRepositoryPort;
@@ -16,38 +16,38 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.UUID;
 
 @Service
-public class RequestEventDeletionUseCase {
+public class RequestEventCancellationUseCase {
 
     private final EventRepositoryPort eventRepository;
-    private final EventRequestRepositoryPort changeRequestRepository;
+    private final EventRequestRepositoryPort eventRequestRepository;
     private final EventChangeItemRepositoryPort changeItemRepository;
 
-    public RequestEventDeletionUseCase(
+    public RequestEventCancellationUseCase(
             EventRepositoryPort eventRepository,
-            EventRequestRepositoryPort changeRequestRepository,
+            EventRequestRepositoryPort eventRequestRepository,
             EventChangeItemRepositoryPort changeItemRepository
     ) {
         this.eventRepository = eventRepository;
-        this.changeRequestRepository = changeRequestRepository;
+        this.eventRequestRepository = eventRequestRepository;
         this.changeItemRepository = changeItemRepository;
     }
 
     @Transactional
-    public CreateEventRequestResponse execute(UUID eventId, DeleteEventRequest request) {
+    public CreateEventRequestResponse execute(UUID eventId, CancelEventRequest request) {
         var id = EventId.of(eventId);
 
         var event = eventRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Event not found: " + eventId));
 
-        var changeRequest = EventRequest.delete(
+        var changeRequest = EventRequest.cancelEvent(
                 id,
                 UserId.of(request.userId()),
                 request.justification()
         );
 
-        var changeItem = EventChangeItem.delete(changeRequest.getId(), event);
+        var changeItem = EventChangeItem.cancel(changeRequest.getId(), event);
 
-        changeRequestRepository.save(changeRequest);
+        eventRequestRepository.save(changeRequest);
         changeItemRepository.save(changeItem);
 
         return CreateEventRequestMapper.toResponse(changeRequest);

@@ -18,8 +18,7 @@ public class EventMapper {
                 event.isAllDay(),
                 event.getRecurrenceRule(),
                 event.getCreatedAt(),
-                event.getUpdatedAt(),
-                event.getDeletedAt()
+                event.getUpdatedAt()
         );
     }
 }

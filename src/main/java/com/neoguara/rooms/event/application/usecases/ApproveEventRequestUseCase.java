@@ -4,7 +4,7 @@ import com.neoguara.rooms.event.application.ports.EventChangeItemRepositoryPort;
 import com.neoguara.rooms.event.application.ports.EventRequestRepositoryPort;
 import com.neoguara.rooms.event.application.ports.EventRepositoryPort;
 import com.neoguara.rooms.event.domain.entities.Event;
-import com.neoguara.rooms.event.domain.enums.EventRequestType;
+import com.neoguara.rooms.event.domain.enums.EventRequestStatus;
 import com.neoguara.rooms.event.domain.valueobjects.EventRequestId;
 import com.neoguara.rooms.shared.domain.exceptions.InvalidStateException;
 import com.neoguara.rooms.shared.domain.exceptions.ResourceNotFoundException;
@@ -14,42 +14,39 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.UUID;
 
 @Service
-public class ApproveEventChangeRequestUseCase {
+public class ApproveEventRequestUseCase {
 
-    private final EventRequestRepositoryPort changeRequestRepository;
+    private final EventRequestRepositoryPort eventRequestRepository;
     private final EventChangeItemRepositoryPort changeItemRepository;
     private final EventRepositoryPort eventRepository;
 
-
-    public ApproveEventChangeRequestUseCase(EventRequestRepositoryPort changeRequestRepository, EventChangeItemRepositoryPort changeItemRepository, EventRepositoryPort eventRepository) {
-        this.changeRequestRepository = changeRequestRepository;
+    public ApproveEventRequestUseCase(EventRequestRepositoryPort eventRequestRepository, EventChangeItemRepositoryPort changeItemRepository, EventRepositoryPort eventRepository) {
+        this.eventRequestRepository = eventRequestRepository;
         this.changeItemRepository = changeItemRepository;
         this.eventRepository = eventRepository;
     }
 
     @Transactional
-    public void execute(UUID changeRequestId) {
+    public void execute(UUID eventRequestId) {
 
-        var requestId = EventRequestId.of(changeRequestId);
+        var requestId = EventRequestId.of(eventRequestId);
 
-        var changeRequest = changeRequestRepository.findById(requestId)
-                .orElseThrow(() -> new ResourceNotFoundException("Change request", changeRequestId));
+        var eventRequest = eventRequestRepository.findById(requestId)
+                .orElseThrow(() -> new ResourceNotFoundException("Event request", eventRequestId));
 
-        if (changeRequest.isApproved()) {
-            throw new InvalidStateException("Change request already approved: " + changeRequestId);
+        if (eventRequest.getStatus() == EventRequestStatus.APPROVED) {
+            throw new InvalidStateException("Event request already approved: " + eventRequestId);
         }
 
-        var changeItem = changeItemRepository.findByEventChangeRequestId(requestId)
-                .orElseThrow(() -> new ResourceNotFoundException("Change item for request", changeRequestId));
+        var changeItem = changeItemRepository.findByEventRequestId(requestId)
+                .orElseThrow(() -> new ResourceNotFoundException("Change item for request", eventRequestId));
 
-        changeRequest.approve();
-        changeRequestRepository.save(changeRequest);
-
-        var changeType = EventRequestType.valueOf(changeRequest.getType());
+        eventRequest.approve();
+        eventRequestRepository.save(eventRequest);
 
         var after = changeItem.getAfter();
 
-        switch (changeType) {
+        switch (eventRequest.getType()) {
             case CREATE -> eventRepository.save(Event.create(
                     after.getRoomId(),
                     after.getTitle(),
@@ -60,8 +57,8 @@ public class ApproveEventChangeRequestUseCase {
                     after.getRecurrenceRule()
             ));
             case UPDATE -> {
-                var event = eventRepository.findById(changeRequest.getEventId())
-                        .orElseThrow(() -> new ResourceNotFoundException("Event", changeRequest.getEventId()));
+                var event = eventRepository.findById(eventRequest.getEventId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Event", eventRequest.getEventId()));
                 event.update(
                         after.getRoomId(),
                         after.getTitle(),
@@ -73,13 +70,12 @@ public class ApproveEventChangeRequestUseCase {
                 );
                 eventRepository.save(event);
             }
-            case DELETE -> {
-                var event = eventRepository.findById(changeRequest.getEventId())
-                        .orElseThrow(() -> new ResourceNotFoundException("Event", changeRequest.getEventId()));
-                event.delete();
+            case CANCEL -> {
+                var event = eventRepository.findById(eventRequest.getEventId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Event", eventRequest.getEventId()));
+                event.cancel();
                 eventRepository.save(event);
             }
         }
     }
-
 }

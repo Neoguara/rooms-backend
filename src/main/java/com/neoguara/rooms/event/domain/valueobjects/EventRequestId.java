@@ -7,7 +7,7 @@ import java.util.UUID;
 
 public record EventRequestId(UUID id) {
     public EventRequestId {
-        if (id == null) throw new DomainValidationException(Notification.create().addError("EventChangeRequestId must not be null"));
+        if (id == null) throw new DomainValidationException(Notification.create().addError("EventRequestId must not be null"));
     }
     public EventRequestId() {
         this(UUID.randomUUID());

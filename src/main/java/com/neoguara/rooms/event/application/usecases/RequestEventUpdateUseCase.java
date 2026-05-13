@@ -21,16 +21,16 @@ import java.util.UUID;
 public class RequestEventUpdateUseCase {
 
     private final EventRepositoryPort eventRepository;
-    private final EventRequestRepositoryPort changeRequestRepository;
+    private final EventRequestRepositoryPort eventRequestRepository;
     private final EventChangeItemRepositoryPort changeItemRepository;
 
     public RequestEventUpdateUseCase(
             EventRepositoryPort eventRepository,
-            EventRequestRepositoryPort changeRequestRepository,
+            EventRequestRepositoryPort eventRequestRepository,
             EventChangeItemRepositoryPort changeItemRepository
     ) {
         this.eventRepository = eventRepository;
-        this.changeRequestRepository = changeRequestRepository;
+        this.eventRequestRepository = eventRequestRepository;
         this.changeItemRepository = changeItemRepository;
     }
 
@@ -41,7 +41,7 @@ public class RequestEventUpdateUseCase {
         var event = eventRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Event not found: " + eventId));
 
-        var changeRequest = EventRequest.update(
+        var changeRequest = EventRequest.updateEvent(
                 id,
                 UserId.of(request.userId()),
                 request.justification()
@@ -55,7 +55,7 @@ public class RequestEventUpdateUseCase {
         );
         var changeItem = EventChangeItem.update(changeRequest.getId(), event, after);
 
-        changeRequestRepository.save(changeRequest);
+        eventRequestRepository.save(changeRequest);
         changeItemRepository.save(changeItem);
 
         return CreateEventRequestMapper.toResponse(changeRequest);

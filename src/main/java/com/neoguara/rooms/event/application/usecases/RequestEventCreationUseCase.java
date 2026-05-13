@@ -13,11 +13,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class RequestEventCreationUseCase {
-    private final EventRequestRepositoryPort changeRequestRepository;
+    private final EventRequestRepositoryPort eventRequestRepository;
     private final EventChangeItemRepositoryPort changeItemRepository;
 
-    public RequestEventCreationUseCase(EventRequestRepositoryPort changeRequestRepository, EventChangeItemRepositoryPort changeItemRepository) {
-        this.changeRequestRepository = changeRequestRepository;
+    public RequestEventCreationUseCase(EventRequestRepositoryPort eventRequestRepository, EventChangeItemRepositoryPort changeItemRepository) {
+        this.eventRequestRepository = eventRequestRepository;
         this.changeItemRepository = changeItemRepository;
     }
 
@@ -34,7 +34,7 @@ public class RequestEventCreationUseCase {
         );
         var eventChangeItem = EventChangeItem.create(changeRequest.getId(), snapshot);
 
-        changeRequestRepository.save(changeRequest);
+        eventRequestRepository.save(changeRequest);
         changeItemRepository.save(eventChangeItem);
 
         return CreateEventRequestMapper.toResponse(changeRequest);

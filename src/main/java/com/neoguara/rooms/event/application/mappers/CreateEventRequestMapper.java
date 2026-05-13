@@ -9,24 +9,21 @@ public class CreateEventRequestMapper {
 
     private CreateEventRequestMapper() {}
 
-    public static EventRequest toDomain(CreateEventRequest eventChangeRequest) {
-
-        return EventRequest.create(
-                UserId.of(eventChangeRequest.userId()),
-                eventChangeRequest.justification()
+    public static EventRequest toDomain(CreateEventRequest dto) {
+        return EventRequest.createEvent(
+                UserId.of(dto.userId()),
+                dto.justification()
         );
     }
 
     public static CreateEventRequestResponse toResponse(EventRequest req) {
-
-            return new CreateEventRequestResponse(
-                    req.getId().id(),
-                    req.getCreatedBy().id(),
-                    req.getStatus(),
-                    req.getType(),
-                    req.getJustification(),
-                    req.getCreatedAt()
-            );
+        return new CreateEventRequestResponse(
+                req.getId().id(),
+                req.getCreatedBy().id(),
+                req.getStatus().name(),
+                req.getType().name(),
+                req.getJustification(),
+                req.getCreatedAt()
+        );
     }
-
 }
