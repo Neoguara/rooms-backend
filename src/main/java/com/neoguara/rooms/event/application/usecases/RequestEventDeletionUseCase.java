@@ -4,7 +4,7 @@ import com.neoguara.rooms.event.application.dtos.CreateEventRequestResponse;
 import com.neoguara.rooms.event.application.dtos.DeleteEventRequest;
 import com.neoguara.rooms.event.application.mappers.CreateEventRequestMapper;
 import com.neoguara.rooms.event.application.ports.EventChangeItemRepositoryPort;
-import com.neoguara.rooms.event.application.ports.EventChangeRequestRepositoryPort;
+import com.neoguara.rooms.event.application.ports.EventRequestRepositoryPort;
 import com.neoguara.rooms.event.application.ports.EventRepositoryPort;
 import com.neoguara.rooms.event.domain.entities.EventChangeItem;
 import com.neoguara.rooms.event.domain.entities.EventRequest;
@@ -19,12 +19,12 @@ import java.util.UUID;
 public class RequestEventDeletionUseCase {
 
     private final EventRepositoryPort eventRepository;
-    private final EventChangeRequestRepositoryPort changeRequestRepository;
+    private final EventRequestRepositoryPort changeRequestRepository;
     private final EventChangeItemRepositoryPort changeItemRepository;
 
     public RequestEventDeletionUseCase(
             EventRepositoryPort eventRepository,
-            EventChangeRequestRepositoryPort changeRequestRepository,
+            EventRequestRepositoryPort changeRequestRepository,
             EventChangeItemRepositoryPort changeItemRepository
     ) {
         this.eventRepository = eventRepository;

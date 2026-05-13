@@ -3,7 +3,7 @@ package com.neoguara.rooms.event.application.usecases;
 import com.neoguara.rooms.event.application.dtos.EventChangeRequestResponse;
 import com.neoguara.rooms.event.application.mappers.EventChangeRequestMapper;
 import com.neoguara.rooms.event.application.ports.EventChangeItemRepositoryPort;
-import com.neoguara.rooms.event.application.ports.EventChangeRequestRepositoryPort;
+import com.neoguara.rooms.event.application.ports.EventRequestRepositoryPort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -11,11 +11,11 @@ import java.util.List;
 @Service
 public class GetEventChangeRequestUseCase {
 
-    private final EventChangeRequestRepositoryPort repository;
+    private final EventRequestRepositoryPort repository;
     private final EventChangeItemRepositoryPort changeItemRepository;
 
     GetEventChangeRequestUseCase(
-            EventChangeRequestRepositoryPort repository,
+            EventRequestRepositoryPort repository,
             EventChangeItemRepositoryPort changeItemRepository
     ) {
         this.repository = repository;

@@ -2,7 +2,7 @@ package com.neoguara.rooms.event.infrastructure.repositories;
 
 import com.neoguara.rooms.event.application.ports.EventChangeItemRepositoryPort;
 import com.neoguara.rooms.event.domain.entities.EventChangeItem;
-import com.neoguara.rooms.event.domain.valueobjects.EventChangeRequestId;
+import com.neoguara.rooms.event.domain.valueobjects.EventRequestId;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -22,7 +22,7 @@ public class EventChangeItemRepositoryImpl implements EventChangeItemRepositoryP
     }
 
     @Override
-    public Optional<EventChangeItem> findByEventChangeRequestId(EventChangeRequestId eventChangeRequestId) {
-        return jpaRepository.findByEventChangeRequestId(eventChangeRequestId);
+    public Optional<EventChangeItem> findByEventChangeRequestId(EventRequestId eventRequestId) {
+        return jpaRepository.findByEventChangeRequestId(eventRequestId);
     }
 }

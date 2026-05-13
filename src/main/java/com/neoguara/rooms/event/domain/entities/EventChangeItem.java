@@ -1,7 +1,7 @@
 package com.neoguara.rooms.event.domain.entities;
 
 import com.neoguara.rooms.event.domain.valueobjects.EventChangeItemId;
-import com.neoguara.rooms.event.domain.valueobjects.EventChangeRequestId;
+import com.neoguara.rooms.event.domain.valueobjects.EventRequestId;
 import com.neoguara.rooms.event.domain.valueobjects.RoomId;
 import jakarta.persistence.*;
 
@@ -14,8 +14,8 @@ public class EventChangeItem {
     private EventChangeItemId id;
 
     @Embedded
-    @AttributeOverride(name = "id", column = @Column(name = "event_change_request_id"))
-    private EventChangeRequestId eventChangeRequestId;
+    @AttributeOverride(name = "id", column = @Column(name = "event_request_id"))
+    private EventRequestId eventRequestId;
 
     @Embedded
     @AttributeOverride(name = "id", column = @Column(name = "old_room_id"))
@@ -46,7 +46,7 @@ public class EventChangeItem {
     EventChangeItem() {}
 
     private EventChangeItem(
-        EventChangeRequestId eventChangeRequestId,
+        EventRequestId eventRequestId,
         RoomId oldRoomId, RoomId newRoomId,
         String oldTitle, String newTitle,
         String oldDescription, String newDescription,
@@ -56,7 +56,7 @@ public class EventChangeItem {
         String oldRecurrenceRule, String newRecurrenceRule
     ) {
         this.id = new EventChangeItemId();
-        this.eventChangeRequestId = eventChangeRequestId;
+        this.eventRequestId = eventRequestId;
         this.oldRoomId = oldRoomId;
         this.newRoomId = newRoomId;
         this.oldTitle = oldTitle;
@@ -74,14 +74,14 @@ public class EventChangeItem {
     }
 
     public static EventChangeItem create(
-        EventChangeRequestId eventChangeRequestId,
+        EventRequestId eventRequestId,
         RoomId roomId,
         String title, String description,
         LocalDateTime startAt, LocalDateTime endAt,
         Boolean isAllDay, String recurrenceRule
     ) {
         return new EventChangeItem(
-            eventChangeRequestId,
+                eventRequestId,
             null, roomId,
             null, title,
             null, description,
@@ -93,7 +93,7 @@ public class EventChangeItem {
     }
 
     public static EventChangeItem update(
-        EventChangeRequestId eventChangeRequestId,
+        EventRequestId eventRequestId,
         RoomId oldRoomId, RoomId newRoomId,
         String oldTitle, String newTitle,
         String oldDescription, String newDescription,
@@ -103,7 +103,7 @@ public class EventChangeItem {
         String oldRecurrenceRule, String newRecurrenceRule
     ) {
         return new EventChangeItem(
-            eventChangeRequestId,
+                eventRequestId,
             oldRoomId, newRoomId,
             oldTitle, newTitle,
             oldDescription, newDescription,
@@ -115,14 +115,14 @@ public class EventChangeItem {
     }
 
     public static EventChangeItem delete(
-        EventChangeRequestId eventChangeRequestId,
+        EventRequestId eventRequestId,
         RoomId roomId,
         String title, String description,
         LocalDateTime startAt, LocalDateTime endAt,
         Boolean isAllDay, String recurrenceRule
     ) {
         return new EventChangeItem(
-            eventChangeRequestId,
+                eventRequestId,
             roomId, null,
             title, null,
             description, null,
@@ -136,7 +136,6 @@ public class EventChangeItem {
     public EventChangeItemId getId() { return id; }
     public RoomId getOldRoomId() { return oldRoomId; }
     public RoomId getNewRoomId() { return newRoomId; }
-    public EventChangeRequestId getEventChangeRequestId() { return eventChangeRequestId; }
     public String getOldTitle() { return oldTitle; }
     public String getNewTitle() { return newTitle; }
     public String getOldDescription() { return oldDescription; }
@@ -149,5 +148,5 @@ public class EventChangeItem {
     public Boolean getNewIsAllDay() { return newIsAllDay; }
     public String getOldRecurrenceRule() { return oldRecurrenceRule; }
     public String getNewRecurrenceRule() { return newRecurrenceRule; }
-
+    public EventRequestId getEventRequestId() {return eventRequestId;}
 }

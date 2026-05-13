@@ -1,11 +1,11 @@
 package com.neoguara.rooms.event.application.usecases;
 
 import com.neoguara.rooms.event.application.ports.EventChangeItemRepositoryPort;
-import com.neoguara.rooms.event.application.ports.EventChangeRequestRepositoryPort;
+import com.neoguara.rooms.event.application.ports.EventRequestRepositoryPort;
 import com.neoguara.rooms.event.application.ports.EventRepositoryPort;
 import com.neoguara.rooms.event.domain.entities.Event;
 import com.neoguara.rooms.event.domain.enums.EventRequestType;
-import com.neoguara.rooms.event.domain.valueobjects.EventChangeRequestId;
+import com.neoguara.rooms.event.domain.valueobjects.EventRequestId;
 import com.neoguara.rooms.shared.domain.exceptions.InvalidStateException;
 import com.neoguara.rooms.shared.domain.exceptions.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
@@ -16,12 +16,12 @@ import java.util.UUID;
 @Service
 public class ApproveEventChangeRequestUseCase {
 
-    private final EventChangeRequestRepositoryPort changeRequestRepository;
+    private final EventRequestRepositoryPort changeRequestRepository;
     private final EventChangeItemRepositoryPort changeItemRepository;
     private final EventRepositoryPort eventRepository;
 
 
-    public ApproveEventChangeRequestUseCase(EventChangeRequestRepositoryPort changeRequestRepository, EventChangeItemRepositoryPort changeItemRepository, EventRepositoryPort eventRepository) {
+    public ApproveEventChangeRequestUseCase(EventRequestRepositoryPort changeRequestRepository, EventChangeItemRepositoryPort changeItemRepository, EventRepositoryPort eventRepository) {
         this.changeRequestRepository = changeRequestRepository;
         this.changeItemRepository = changeItemRepository;
         this.eventRepository = eventRepository;
@@ -30,7 +30,7 @@ public class ApproveEventChangeRequestUseCase {
     @Transactional
     public void execute(UUID changeRequestId) {
 
-        var requestId = EventChangeRequestId.of(changeRequestId);
+        var requestId = EventRequestId.of(changeRequestId);
 
         var changeRequest = changeRequestRepository.findById(requestId)
                 .orElseThrow(() -> new ResourceNotFoundException("Change request", changeRequestId));

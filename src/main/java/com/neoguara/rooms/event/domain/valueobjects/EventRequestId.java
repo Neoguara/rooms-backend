@@ -5,16 +5,16 @@ import com.neoguara.rooms.shared.domain.validation.Notification;
 
 import java.util.UUID;
 
-public record EventChangeRequestId (UUID id) {
-    public EventChangeRequestId {
+public record EventRequestId(UUID id) {
+    public EventRequestId {
         if (id == null) throw new DomainValidationException(Notification.create().addError("EventChangeRequestId must not be null"));
     }
-    public EventChangeRequestId() {
+    public EventRequestId() {
         this(UUID.randomUUID());
     }
 
-    public static EventChangeRequestId of (UUID id) {
-        return new EventChangeRequestId(id);
+    public static EventRequestId of (UUID id) {
+        return new EventRequestId(id);
     }
 
 }
