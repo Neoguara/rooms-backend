@@ -4,17 +4,12 @@ import com.neoguara.rooms.shared.domain.validation.Notification;
 import com.neoguara.rooms.user.domain.enums.UserRole;
 import com.neoguara.rooms.user.domain.valueobjects.UserId;
 import jakarta.persistence.*;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.List;
 
 @Entity
 @Table(name = "users")
-public class User implements UserDetails {
+public class User {
 
     @EmbeddedId
     private UserId id;
@@ -72,16 +67,6 @@ public class User implements UserDetails {
     public void softDelete() {
         this.isActive = false;
         this.deletedAt = LocalDateTime.now();
-    }
-
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
-    }
-
-    @Override
-    public String getUsername() {
-        return email;
     }
 
     public UserId getId() { return id; }

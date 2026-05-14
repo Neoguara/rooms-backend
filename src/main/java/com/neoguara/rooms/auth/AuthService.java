@@ -2,8 +2,7 @@ package com.neoguara.rooms.auth;
 
 import com.neoguara.rooms.auth.dto.LoginRequest;
 import com.neoguara.rooms.auth.dto.TokenResponse;
-import com.neoguara.rooms.user.application.mappers.UserMapper;
-import com.neoguara.rooms.user.domain.entities.User;
+import com.neoguara.rooms.auth.infrastructure.security.AuthUserDetails;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
@@ -22,18 +21,18 @@ public class AuthService {
     public TokenResponse login(LoginRequest request) {
         var authToken = new UsernamePasswordAuthenticationToken(request.email(), request.password());
         var authentication = authenticationManager.authenticate(authToken);
-        var user = (User) authentication.getPrincipal();
-        var userResponse = UserMapper.toResponse(user);
+        var userDetails = (AuthUserDetails) authentication.getPrincipal();
+        var data = userDetails.getData();
         return new TokenResponse(
-                jwtService.generateToken(user.getUsername()),
-                userResponse.id(),
-                userResponse.name(),
-                userResponse.email(),
-                userResponse.role(),
-                userResponse.isActive(),
-                userResponse.createdAt(),
-                userResponse.updatedAt(),
-                userResponse.deletedAt()
+                jwtService.generateToken(userDetails.getUsername()),
+                data.id(),
+                data.name(),
+                data.email(),
+                data.role(),
+                data.isActive(),
+                data.createdAt(),
+                data.updatedAt(),
+                data.deletedAt()
         );
     }
 }

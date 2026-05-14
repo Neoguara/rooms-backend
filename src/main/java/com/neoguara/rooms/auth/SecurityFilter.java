@@ -1,6 +1,7 @@
 package com.neoguara.rooms.auth;
 
-import com.neoguara.rooms.user.application.ports.UserRepositoryPort;
+import com.neoguara.rooms.auth.application.ports.UserAuthPort;
+import com.neoguara.rooms.auth.infrastructure.security.AuthUserDetails;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -19,12 +20,12 @@ import java.io.IOException;
 public class SecurityFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
-    private final UserRepositoryPort userRepository;
+    private final UserAuthPort userAuthPort;
 
     @Autowired
-    public SecurityFilter(JwtService jwtService, UserRepositoryPort userRepository) {
+    public SecurityFilter(JwtService jwtService, UserAuthPort userAuthPort) {
         this.jwtService = jwtService;
-        this.userRepository = userRepository;
+        this.userAuthPort = userAuthPort;
     }
 
     @Override
@@ -35,10 +36,11 @@ public class SecurityFilter extends OncePerRequestFilter {
 
         if (token != null && jwtService.isTokenValid(token)) {
             var email = jwtService.extractUsername(token);
-            var user = userRepository.findByEmail(email).orElse(null);
+            var userData = userAuthPort.findByEmail(email).orElse(null);
 
-            if (user != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                var auth = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+            if (userData != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                var userDetails = new AuthUserDetails(userData);
+                var auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                 auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(auth);
             }
