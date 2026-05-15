@@ -1,12 +1,12 @@
 package com.neoguara.rooms.room.application.usecases.building;
 
 import com.neoguara.rooms.room.application.dtos.building.BuildingResponse;
+import com.neoguara.rooms.room.application.dtos.building.UpdateBuildingStatusRequest;
 import com.neoguara.rooms.room.application.mappers.BuildingMapper;
 import com.neoguara.rooms.room.application.ports.BuildingRepositoryPort;
 import com.neoguara.rooms.room.domain.entities.Building;
 import com.neoguara.rooms.room.domain.enums.BuildingStatus;
 import com.neoguara.rooms.room.domain.valueobjects.BuildingId;
-import com.neoguara.rooms.shared.domain.exceptions.InvalidStateException;
 import com.neoguara.rooms.shared.domain.exceptions.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +21,7 @@ public class UpdateBuildingStatusUseCase {
         this.repository = repository;
     }
 
-    public BuildingResponse execute(UUID id, BuildingStatus status) {
+    public BuildingResponse execute(UUID id, UpdateBuildingStatusRequest.Status status) {
         Building building = repository.findById(BuildingId.of(id))
                 .orElseThrow(() -> new ResourceNotFoundException("Building", id));
 
@@ -35,7 +35,6 @@ public class UpdateBuildingStatusUseCase {
             }
             case INACTIVE -> building.deactivate();
             case ARCHIVED -> building.archive();
-            case DELETED -> throw new InvalidStateException("Use DELETE /buildings/{id} to delete a building");
         }
 
         return BuildingMapper.toResponse(repository.save(building));
