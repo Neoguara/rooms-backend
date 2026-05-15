@@ -113,7 +113,7 @@ public class BuildingController {
             @ApiResponse(responseCode = "404", description = "Edifício não encontrado"),
             @ApiResponse(responseCode = "422", description = "Transição de status inválida")
     })
-    @PatchMapping("/{id}")
+    @PatchMapping("/{id}/status")
     public ResponseEntity<BuildingResponse> updateStatus(
             @Parameter(description = "ID do edifício") @PathVariable UUID id,
             @RequestBody UpdateBuildingStatusRequest request) {

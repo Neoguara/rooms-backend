@@ -140,7 +140,7 @@ public class RoomController {
             @ApiResponse(responseCode = "404", description = "Sala não encontrada"),
             @ApiResponse(responseCode = "422", description = "Transição de status inválida")
     })
-    @PatchMapping("/{id}")
+    @PatchMapping("/{id}/status")
     public ResponseEntity<RoomResponse> updateStatus(
             @Parameter(description = "ID da sala") @PathVariable UUID id,
             @RequestBody UpdateRoomStatusRequest request) {

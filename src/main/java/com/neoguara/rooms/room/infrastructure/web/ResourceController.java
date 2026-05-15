@@ -91,7 +91,7 @@ public class ResourceController {
             @ApiResponse(responseCode = "404", description = "Recurso não encontrado"),
             @ApiResponse(responseCode = "422", description = "Transição de status inválida")
     })
-    @PatchMapping("/{id}")
+    @PatchMapping("/{id}/status")
     public ResponseEntity<ResourceResponse> updateStatus(
             @Parameter(description = "ID do recurso") @PathVariable UUID id,
             @RequestBody UpdateResourceStatusRequest request) {
