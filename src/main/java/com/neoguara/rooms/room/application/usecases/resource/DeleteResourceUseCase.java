@@ -20,7 +20,7 @@ public class DeleteResourceUseCase {
     public void execute(UUID id) {
         Resource resource = repository.findById(ResourceId.of(id))
                 .orElseThrow(() -> new ResourceNotFoundException("Resource", id));
-        resource.deactivate();
+        resource.delete();
         repository.save(resource);
     }
 }

@@ -4,7 +4,9 @@ import com.neoguara.rooms.room.application.dtos.roomtype.RoomTypeResponse;
 import com.neoguara.rooms.room.application.mappers.RoomTypeMapper;
 import com.neoguara.rooms.room.application.ports.RoomTypeRepositoryPort;
 import com.neoguara.rooms.room.domain.entities.RoomType;
+import com.neoguara.rooms.room.domain.enums.RoomTypeStatus;
 import com.neoguara.rooms.room.domain.valueobjects.RoomTypeId;
+import com.neoguara.rooms.shared.domain.exceptions.InvalidStateException;
 import com.neoguara.rooms.shared.domain.exceptions.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -19,14 +21,14 @@ public class UpdateRoomTypeStatusUseCase {
         this.repository = repository;
     }
 
-    public RoomTypeResponse execute(UUID id, Boolean active) {
+    public RoomTypeResponse execute(UUID id, RoomTypeStatus status) {
         RoomType roomType = repository.findById(RoomTypeId.of(id))
                 .orElseThrow(() -> new ResourceNotFoundException("RoomType", id));
 
-        if (active) {
-            roomType.activate();
-        } else {
-            roomType.deactivate();
+        switch (status) {
+            case ACTIVE -> roomType.activate();
+            case INACTIVE -> roomType.deactivate();
+            case DELETED -> throw new InvalidStateException("Use DELETE /room-types/{id} to delete a room type");
         }
 
         return RoomTypeMapper.toResponse(repository.save(roomType));

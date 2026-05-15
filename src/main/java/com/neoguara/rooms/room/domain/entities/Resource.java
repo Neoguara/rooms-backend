@@ -1,7 +1,9 @@
 package com.neoguara.rooms.room.domain.entities;
 
+import com.neoguara.rooms.room.domain.enums.ResourceStatus;
 import com.neoguara.rooms.room.domain.validation.ResourceValidation;
 import com.neoguara.rooms.room.domain.valueobjects.ResourceId;
+import com.neoguara.rooms.shared.domain.exceptions.InvalidStateException;
 import com.neoguara.rooms.shared.domain.validation.Notification;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
@@ -18,7 +20,7 @@ public class Resource {
     private String name;
     private String description;
     private String icon;
-    private Boolean active;
+    private ResourceStatus status;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -30,7 +32,7 @@ public class Resource {
         this.name = name;
         this.description = description;
         this.icon = icon;
-        this.active = true;
+        this.status = ResourceStatus.ACTIVE;
         this.createdAt = LocalDateTime.now();
     }
 
@@ -53,18 +55,24 @@ public class Resource {
     }
 
     public void activate() {
-        this.active = true;
+        if (status == ResourceStatus.DELETED) throw new InvalidStateException("Deleted resource cannot be modified");
+        this.status = ResourceStatus.ACTIVE;
     }
 
     public void deactivate() {
-        this.active = false;
+        if (status == ResourceStatus.DELETED) throw new InvalidStateException("Deleted resource cannot be modified");
+        this.status = ResourceStatus.INACTIVE;
     }
 
-    public ResourceId getId() {return id;}
-    public String getName() {return name;}
-    public String getDescription() {return description;}
-    public String getIcon() {return icon;}
-    public Boolean getActive() {return active;}
-    public LocalDateTime getCreatedAt() {return createdAt;}
-    public LocalDateTime getUpdatedAt() {return updatedAt;}
+    public void delete() {
+        this.status = ResourceStatus.DELETED;
+    }
+
+    public ResourceId getId() { return id; }
+    public String getName() { return name; }
+    public String getDescription() { return description; }
+    public String getIcon() { return icon; }
+    public ResourceStatus getStatus() { return status; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
 }

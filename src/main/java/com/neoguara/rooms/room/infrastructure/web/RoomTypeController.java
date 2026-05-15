@@ -85,21 +85,22 @@ public class RoomTypeController {
         return ResponseEntity.ok(updateRoomTypeUseCase.execute(id, request));
     }
 
-    @Operation(description = "Ativa ou desativa um tipo de sala pelo seu ID.")
+    @Operation(description = "Altera o status do tipo de sala. Transições permitidas: ACTIVE ↔ INACTIVE. Para remover permanentemente use DELETE /room-types/{id}.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Status atualizado com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Tipo de sala não encontrado")
+            @ApiResponse(responseCode = "404", description = "Tipo de sala não encontrado"),
+            @ApiResponse(responseCode = "422", description = "Transição de status inválida")
     })
     @PatchMapping("/{id}")
     public ResponseEntity<RoomTypeResponse> updateStatus(
             @Parameter(description = "ID do tipo de sala") @PathVariable UUID id,
             @RequestBody UpdateRoomTypeStatusRequest request) {
-        return ResponseEntity.ok(updateRoomTypeStatusUseCase.execute(id, request.active()));
+        return ResponseEntity.ok(updateRoomTypeStatusUseCase.execute(id, request.status()));
     }
 
-    @Operation(description = "Desativa um tipo de sala pelo seu ID (soft delete).")
+    @Operation(description = "Remove permanentemente um tipo de sala (soft delete). O status passa para DELETED e o tipo de sala deixa de ser visível para usuários não-admin.")
     @ApiResponses({
-            @ApiResponse(responseCode = "204", description = "Tipo de sala desativado com sucesso"),
+            @ApiResponse(responseCode = "204", description = "Tipo de sala removido com sucesso"),
             @ApiResponse(responseCode = "404", description = "Tipo de sala não encontrado")
     })
     @DeleteMapping("/{id}")

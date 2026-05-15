@@ -1,5 +1,7 @@
 package com.neoguara.rooms.room.application.dtos.resource;
 
+import com.neoguara.rooms.room.domain.enums.ResourceStatus;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -8,7 +10,7 @@ public record ResourceResponse(
         String name,
         String description,
         String icon,
-        Boolean active,
+        ResourceStatus status,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) {}

@@ -26,7 +26,7 @@ public class RoomTypeMapper {
                 roomType.getDefaultCapacity(),
                 roomType.getColor(),
                 roomType.getIcon(),
-                roomType.getActive(),
+                roomType.getStatus(),
                 roomType.getCreatedAt(),
                 roomType.getUpdatedAt()
         );

@@ -1,3 +1,5 @@
 package com.neoguara.rooms.room.application.dtos.resource;
 
-public record UpdateResourceStatusRequest(Boolean active) {}
+import com.neoguara.rooms.room.domain.enums.ResourceStatus;
+
+public record UpdateResourceStatusRequest(ResourceStatus status) {}

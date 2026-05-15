@@ -1,7 +1,9 @@
 package com.neoguara.rooms.room.domain.entities;
 
+import com.neoguara.rooms.room.domain.enums.RoomTypeStatus;
 import com.neoguara.rooms.room.domain.validation.RoomTypeValidation;
 import com.neoguara.rooms.room.domain.valueobjects.RoomTypeId;
+import com.neoguara.rooms.shared.domain.exceptions.InvalidStateException;
 import com.neoguara.rooms.shared.domain.validation.Notification;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
@@ -20,7 +22,7 @@ public class RoomType {
     private String defaultCapacity;
     private String color;
     private String icon;
-    private Boolean active;
+    private RoomTypeStatus status;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -40,7 +42,7 @@ public class RoomType {
         this.defaultCapacity = defaultCapacity;
         this.color = color;
         this.icon = icon;
-        this.active = true;
+        this.status = RoomTypeStatus.ACTIVE;
         this.createdAt = LocalDateTime.now();
     }
 
@@ -77,20 +79,26 @@ public class RoomType {
     }
 
     public void activate() {
-        this.active = true;
+        if (status == RoomTypeStatus.DELETED) throw new InvalidStateException("Deleted room type cannot be modified");
+        this.status = RoomTypeStatus.ACTIVE;
     }
 
     public void deactivate() {
-        this.active = false;
+        if (status == RoomTypeStatus.DELETED) throw new InvalidStateException("Deleted room type cannot be modified");
+        this.status = RoomTypeStatus.INACTIVE;
     }
 
-    public RoomTypeId getId() { return id;}
-    public String getName() {return name;}
-    public String getDescription() {return description;}
-    public String getDefaultCapacity() {return defaultCapacity;}
-    public String getColor() {return color;}
-    public String getIcon() {return icon;}
-    public Boolean getActive() {return active;}
-    public LocalDateTime getCreatedAt() {return createdAt;}
-    public LocalDateTime getUpdatedAt() {return updatedAt;}
+    public void delete() {
+        this.status = RoomTypeStatus.DELETED;
+    }
+
+    public RoomTypeId getId() { return id; }
+    public String getName() { return name; }
+    public String getDescription() { return description; }
+    public String getDefaultCapacity() { return defaultCapacity; }
+    public String getColor() { return color; }
+    public String getIcon() { return icon; }
+    public RoomTypeStatus getStatus() { return status; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
 }

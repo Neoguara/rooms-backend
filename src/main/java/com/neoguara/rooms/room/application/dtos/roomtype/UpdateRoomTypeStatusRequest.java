@@ -1,3 +1,5 @@
 package com.neoguara.rooms.room.application.dtos.roomtype;
 
-public record UpdateRoomTypeStatusRequest(Boolean active) {}
+import com.neoguara.rooms.room.domain.enums.RoomTypeStatus;
+
+public record UpdateRoomTypeStatusRequest(RoomTypeStatus status) {}
