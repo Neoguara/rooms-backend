@@ -56,28 +56,30 @@ public class Building {
     }
 
     public void activate() {
-        if (this.status == BuildingStatus.ARCHIVED) {
-            throw new InvalidStateException("Archived building cannot be activated");
-        }
+        if (status == BuildingStatus.DELETED) throw new InvalidStateException("Deleted building cannot be modified");
+        if (status == BuildingStatus.ARCHIVED) throw new InvalidStateException("Archived building cannot be activated");
         this.status = BuildingStatus.ACTIVE;
     }
 
     public void deactivate() {
-        if (status == BuildingStatus.ARCHIVED) {
-            throw new InvalidStateException("Archived building cannot be deactivated");
-        }
+        if (status == BuildingStatus.DELETED) throw new InvalidStateException("Deleted building cannot be modified");
+        if (status == BuildingStatus.ARCHIVED) throw new InvalidStateException("Archived building cannot be deactivated");
         this.status = BuildingStatus.INACTIVE;
     }
 
     public void archive() {
+        if (status == BuildingStatus.DELETED) throw new InvalidStateException("Deleted building cannot be modified");
         this.status = BuildingStatus.ARCHIVED;
     }
 
     public void restore() {
-        if (status != BuildingStatus.ARCHIVED) {
-            throw new InvalidStateException("Only archived building can be restored");
-        }
+        if (status == BuildingStatus.DELETED) throw new InvalidStateException("Deleted building cannot be modified");
+        if (status != BuildingStatus.ARCHIVED) throw new InvalidStateException("Only archived building can be restored");
         this.status = BuildingStatus.ACTIVE;
+    }
+
+    public void delete() {
+        this.status = BuildingStatus.DELETED;
     }
 
     public boolean isAvailable() {

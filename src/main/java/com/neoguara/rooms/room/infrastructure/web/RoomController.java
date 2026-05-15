@@ -99,9 +99,9 @@ public class RoomController {
         return ResponseEntity.ok(updateRoomUseCase.execute(id, request));
     }
 
-    @Operation(description = "Arquiva uma sala pelo seu ID, alterando seu status para ARCHIVED.")
+    @Operation(description = "Remove permanentemente uma sala (soft delete). O status passa para DELETED e a sala deixa de ser visível para usuários não-admin.")
     @ApiResponses({
-            @ApiResponse(responseCode = "204", description = "Sala arquivada com sucesso"),
+            @ApiResponse(responseCode = "204", description = "Sala removida com sucesso"),
             @ApiResponse(responseCode = "404", description = "Sala não encontrada")
     })
     @DeleteMapping("/{id}")
@@ -132,6 +132,7 @@ public class RoomController {
                     - **ARCHIVED**: arquiva a sala independente do status atual.
 
                     Transições inválidas retornam 422 (ex: tentar desativar ou colocar em manutenção uma sala ARCHIVED).
+                    Para remover permanentemente uma sala use DELETE /rooms/{id}.
                     """
     )
     @ApiResponses({

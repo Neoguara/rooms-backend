@@ -85,9 +85,9 @@ public class BuildingController {
         return ResponseEntity.ok(updateBuildingUseCase.execute(id, request));
     }
 
-    @Operation(description = "Arquiva um edifício pelo seu ID, alterando seu status para ARCHIVED.")
+    @Operation(description = "Remove permanentemente um edifício (soft delete). O status passa para DELETED e o edifício deixa de ser visível para usuários não-admin.")
     @ApiResponses({
-            @ApiResponse(responseCode = "204", description = "Edifício arquivado com sucesso"),
+            @ApiResponse(responseCode = "204", description = "Edifício removido com sucesso"),
             @ApiResponse(responseCode = "404", description = "Edifício não encontrado")
     })
     @DeleteMapping("/{id}")
@@ -105,6 +105,7 @@ public class BuildingController {
                     - **ARCHIVED**: arquiva o edifício independente do status atual.
 
                     Transições inválidas retornam 422 (ex: ativar um edifício já ARCHIVED diretamente).
+                    Para remover permanentemente um edifício use DELETE /buildings/{id}.
                     """
     )
     @ApiResponses({

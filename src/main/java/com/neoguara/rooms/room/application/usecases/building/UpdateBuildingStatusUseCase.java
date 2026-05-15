@@ -6,6 +6,7 @@ import com.neoguara.rooms.room.application.ports.BuildingRepositoryPort;
 import com.neoguara.rooms.room.domain.entities.Building;
 import com.neoguara.rooms.room.domain.enums.BuildingStatus;
 import com.neoguara.rooms.room.domain.valueobjects.BuildingId;
+import com.neoguara.rooms.shared.domain.exceptions.InvalidStateException;
 import com.neoguara.rooms.shared.domain.exceptions.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -34,6 +35,7 @@ public class UpdateBuildingStatusUseCase {
             }
             case INACTIVE -> building.deactivate();
             case ARCHIVED -> building.archive();
+            case DELETED -> throw new InvalidStateException("Use DELETE /buildings/{id} to delete a building");
         }
 
         return BuildingMapper.toResponse(repository.save(building));

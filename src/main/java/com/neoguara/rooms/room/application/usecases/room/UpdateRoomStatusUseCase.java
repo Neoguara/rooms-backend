@@ -6,6 +6,7 @@ import com.neoguara.rooms.room.application.ports.RoomRepositoryPort;
 import com.neoguara.rooms.room.domain.entities.Room;
 import com.neoguara.rooms.room.domain.enums.RoomStatus;
 import com.neoguara.rooms.room.domain.valueobjects.RoomId;
+import com.neoguara.rooms.shared.domain.exceptions.InvalidStateException;
 import com.neoguara.rooms.shared.domain.exceptions.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -35,6 +36,7 @@ public class UpdateRoomStatusUseCase {
             case INACTIVE -> room.deactivate();
             case ARCHIVED -> room.archive();
             case MAINTENANCE -> room.putUnderMaintenance();
+            case DELETED -> throw new InvalidStateException("Use DELETE /rooms/{id} to delete a room");
         }
 
         return RoomMapper.toResponse(repository.save(room));

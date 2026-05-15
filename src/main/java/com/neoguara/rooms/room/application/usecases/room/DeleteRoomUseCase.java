@@ -20,7 +20,7 @@ public class DeleteRoomUseCase {
     public void execute(UUID id) {
         Room room = repository.findById(RoomId.of(id))
                 .orElseThrow(() -> new ResourceNotFoundException("Room", id));
-        room.deactivate();
+        room.delete();
         repository.save(room);
     }
 }

@@ -94,33 +94,35 @@ public class Room {
     }
 
     public void activate () {
-        if (status == RoomStatus.ARCHIVED) {
-            throw new InvalidStateException("Archived room cannot be activated");
-        }
+        if (status == RoomStatus.DELETED) throw new InvalidStateException("Deleted room cannot be modified");
+        if (status == RoomStatus.ARCHIVED) throw new InvalidStateException("Archived room cannot be activated");
         this.status = RoomStatus.AVAILABLE;
     }
 
     public void deactivate () {
-        if (status == RoomStatus.ARCHIVED) {
-            throw new InvalidStateException("Archived room cannot be deactivated");
-        }
+        if (status == RoomStatus.DELETED) throw new InvalidStateException("Deleted room cannot be modified");
+        if (status == RoomStatus.ARCHIVED) throw new InvalidStateException("Archived room cannot be deactivated");
         this.status = RoomStatus.INACTIVE;
     }
 
     public void archive() {
+        if (status == RoomStatus.DELETED) throw new InvalidStateException("Deleted room cannot be modified");
         this.status = RoomStatus.ARCHIVED;
     }
 
     public void restore() {
+        if (status == RoomStatus.DELETED) throw new InvalidStateException("Deleted room cannot be modified");
         this.status = RoomStatus.AVAILABLE;
     }
 
     public void putUnderMaintenance() {
-        if (status == RoomStatus.ARCHIVED) {
-            throw new InvalidStateException("Archived room cannot enter maintenance");
-        }
-
+        if (status == RoomStatus.DELETED) throw new InvalidStateException("Deleted room cannot be modified");
+        if (status == RoomStatus.ARCHIVED) throw new InvalidStateException("Archived room cannot enter maintenance");
         this.status = RoomStatus.MAINTENANCE;
+    }
+
+    public void delete() {
+        this.status = RoomStatus.DELETED;
     }
 
     public RoomId getId() {return id;}
