@@ -56,6 +56,7 @@ public class Room {
         this.capacity = capacity;
         this.status = RoomStatus.AVAILABLE;
         this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
 
     public static Room create (

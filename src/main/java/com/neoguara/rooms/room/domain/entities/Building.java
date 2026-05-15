@@ -35,6 +35,7 @@ public class Building {
         this.totalFloors = totalFloors;
         this.status = BuildingStatus.ACTIVE;
         this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
 
     public static Building create(String name, String address, Integer totalFloors) {

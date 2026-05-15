@@ -42,6 +42,7 @@ public class User {
         this.password = password;
         this.role = role;
         this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
         this.isActive = true;
     }
 

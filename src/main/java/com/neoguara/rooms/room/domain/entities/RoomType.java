@@ -44,6 +44,7 @@ public class RoomType {
         this.icon = icon;
         this.status = RoomTypeStatus.ACTIVE;
         this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
 
     public static RoomType create (

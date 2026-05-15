@@ -51,6 +51,7 @@ public class Event {
         this.recurrenceRule = recurrenceRule;
         this.status = EventStatus.ACTIVE;
         this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
 
     public static Event create(

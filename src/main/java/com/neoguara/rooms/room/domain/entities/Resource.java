@@ -34,6 +34,7 @@ public class Resource {
         this.icon = icon;
         this.status = ResourceStatus.ACTIVE;
         this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
 
     public static Resource create(String name, String description, String icon) {
