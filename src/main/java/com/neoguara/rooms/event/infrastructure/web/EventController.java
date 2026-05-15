@@ -24,7 +24,7 @@ public class EventController {
     @Operation(description = "Retorna todos os eventos cadastrados.")
     @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso")
     @GetMapping
-    public ResponseEntity<List<EventResponse>> findAll() {
+    public ResponseEntity<List<EventResponse>> listEvents() {
         return ResponseEntity.ok(getEventUseCase.findAll());
     }
 }

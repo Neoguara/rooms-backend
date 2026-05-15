@@ -50,14 +50,14 @@ public class RoomTypeController {
             @ApiResponse(responseCode = "422", description = "Dados inválidos")
     })
     @PostMapping
-    public ResponseEntity<RoomTypeResponse> create(@RequestBody CreateRoomTypeRequest request) {
+    public ResponseEntity<RoomTypeResponse> createRoomType(@RequestBody CreateRoomTypeRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(createRoomTypeUseCase.execute(request));
     }
 
     @Operation(description = "Retorna todos os tipos de sala cadastrados.")
     @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso")
     @GetMapping
-    public ResponseEntity<List<RoomTypeResponse>> findAll() {
+    public ResponseEntity<List<RoomTypeResponse>> listRoomTypes() {
         return ResponseEntity.ok(getRoomTypeUseCase.findAll());
     }
 
@@ -67,7 +67,7 @@ public class RoomTypeController {
             @ApiResponse(responseCode = "404", description = "Tipo de sala não encontrado")
     })
     @GetMapping("/{id}")
-    public ResponseEntity<RoomTypeResponse> findById(
+    public ResponseEntity<RoomTypeResponse> getRoomType(
             @Parameter(description = "ID do tipo de sala") @PathVariable UUID id) {
         return ResponseEntity.ok(getRoomTypeUseCase.findById(id));
     }
@@ -79,7 +79,7 @@ public class RoomTypeController {
             @ApiResponse(responseCode = "422", description = "Dados inválidos")
     })
     @PutMapping("/{id}")
-    public ResponseEntity<RoomTypeResponse> updateById(
+    public ResponseEntity<RoomTypeResponse> updateRoomType(
             @Parameter(description = "ID do tipo de sala") @PathVariable UUID id,
             @RequestBody UpdateRoomTypeRequest request) {
         return ResponseEntity.ok(updateRoomTypeUseCase.execute(id, request));
@@ -92,7 +92,7 @@ public class RoomTypeController {
             @ApiResponse(responseCode = "422", description = "Transição de status inválida")
     })
     @PatchMapping("/{id}/status")
-    public ResponseEntity<RoomTypeResponse> updateStatus(
+    public ResponseEntity<RoomTypeResponse> updateRoomTypeStatus(
             @Parameter(description = "ID do tipo de sala") @PathVariable UUID id,
             @RequestBody UpdateRoomTypeStatusRequest request) {
         return ResponseEntity.ok(updateRoomTypeStatusUseCase.execute(id, request.status()));
@@ -104,7 +104,7 @@ public class RoomTypeController {
             @ApiResponse(responseCode = "404", description = "Tipo de sala não encontrado")
     })
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteById(
+    public ResponseEntity<Void> deleteRoomType(
             @Parameter(description = "ID do tipo de sala") @PathVariable UUID id) {
         deleteRoomTypeUseCase.execute(id);
         return ResponseEntity.noContent().build();

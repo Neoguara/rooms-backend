@@ -50,14 +50,14 @@ public class BuildingController {
             @ApiResponse(responseCode = "422", description = "Dados inválidos (nome, endereço ou andares ausentes/inválidos)")
     })
     @PostMapping
-    public ResponseEntity<BuildingResponse> create(@RequestBody CreateBuildingRequest request) {
+    public ResponseEntity<BuildingResponse> createBuilding(@RequestBody CreateBuildingRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(createBuildingUseCase.execute(request));
     }
 
     @Operation(description = "Retorna todos os edifícios cadastrados.")
     @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso")
     @GetMapping
-    public ResponseEntity<List<BuildingResponse>> findAll() {
+    public ResponseEntity<List<BuildingResponse>> listBuildings() {
         return ResponseEntity.ok(getBuildingUseCase.findAll());
     }
 
@@ -67,7 +67,7 @@ public class BuildingController {
             @ApiResponse(responseCode = "404", description = "Edifício não encontrado")
     })
     @GetMapping("/{id}")
-    public ResponseEntity<BuildingResponse> findById(
+    public ResponseEntity<BuildingResponse> getBuilding(
             @Parameter(description = "ID do edifício") @PathVariable UUID id) {
         return ResponseEntity.ok(getBuildingUseCase.findById(id));
     }
@@ -79,7 +79,7 @@ public class BuildingController {
             @ApiResponse(responseCode = "422", description = "Dados inválidos")
     })
     @PutMapping("/{id}")
-    public ResponseEntity<BuildingResponse> updateById(
+    public ResponseEntity<BuildingResponse> updateBuilding(
             @Parameter(description = "ID do edifício") @PathVariable UUID id,
             @RequestBody UpdateBuildingRequest request) {
         return ResponseEntity.ok(updateBuildingUseCase.execute(id, request));
@@ -91,7 +91,7 @@ public class BuildingController {
             @ApiResponse(responseCode = "404", description = "Edifício não encontrado")
     })
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteById(
+    public ResponseEntity<Void> deleteBuilding(
             @Parameter(description = "ID do edifício") @PathVariable UUID id) {
         deleteBuildingUseCase.execute(id);
         return ResponseEntity.noContent().build();
@@ -114,7 +114,7 @@ public class BuildingController {
             @ApiResponse(responseCode = "422", description = "Transição de status inválida")
     })
     @PatchMapping("/{id}/status")
-    public ResponseEntity<BuildingResponse> updateStatus(
+    public ResponseEntity<BuildingResponse> updateBuildingStatus(
             @Parameter(description = "ID do edifício") @PathVariable UUID id,
             @RequestBody UpdateBuildingStatusRequest request) {
         return ResponseEntity.ok(updateBuildingStatusUseCase.execute(id, request.status()));

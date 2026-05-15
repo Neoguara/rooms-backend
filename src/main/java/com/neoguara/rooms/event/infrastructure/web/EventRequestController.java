@@ -54,7 +54,7 @@ public class EventRequestController {
     @Operation(description = "Retorna todas as solicitações de eventos.")
     @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso")
     @GetMapping
-    public ResponseEntity<List<EventRequestResponse>> findAll() {
+    public ResponseEntity<List<EventRequestResponse>> listEventRequests() {
         return ResponseEntity.ok(getEventRequestUseCase.findAll());
     }
 
@@ -64,7 +64,7 @@ public class EventRequestController {
             @ApiResponse(responseCode = "422", description = "Dados inválidos")
     })
     @PostMapping("/create-event")
-    public ResponseEntity<CreateEventRequestResponse> createEvent(@RequestBody CreateEventRequest request) {
+    public ResponseEntity<CreateEventRequestResponse> requestEventCreation(@RequestBody CreateEventRequest request) {
         var response = requestEventCreationUseCase.execute(request);
         return ResponseEntity.created(URI.create("/event-requests/" + response.id())).body(response);
     }
@@ -76,7 +76,7 @@ public class EventRequestController {
             @ApiResponse(responseCode = "422", description = "Dados inválidos")
     })
     @PostMapping("/update-event")
-    public ResponseEntity<CreateEventRequestResponse> updateEvent(@RequestBody UpdateEventRequest request) {
+    public ResponseEntity<CreateEventRequestResponse> requestEventUpdate(@RequestBody UpdateEventRequest request) {
         var response = requestEventUpdateUseCase.execute(request.eventId(), request);
         return ResponseEntity.created(URI.create("/event-requests/" + response.id())).body(response);
     }
@@ -88,7 +88,7 @@ public class EventRequestController {
             @ApiResponse(responseCode = "422", description = "Dados inválidos")
     })
     @PostMapping("/cancel-event")
-    public ResponseEntity<CreateEventRequestResponse> cancelEvent(@RequestBody CancelEventRequest request) {
+    public ResponseEntity<CreateEventRequestResponse> requestEventCancellation(@RequestBody CancelEventRequest request) {
         var response = requestEventCancellationUseCase.execute(request.eventId(), request);
         return ResponseEntity.created(URI.create("/event-requests/" + response.id())).body(response);
     }
@@ -100,7 +100,7 @@ public class EventRequestController {
             @ApiResponse(responseCode = "422", description = "Solicitação já foi processada")
     })
     @PostMapping("/{id}/approve")
-    public ResponseEntity<Void> approve(
+    public ResponseEntity<Void> approveEventRequest(
             @Parameter(description = "ID da solicitação") @PathVariable UUID id) {
         approveEventRequestUseCase.execute(id);
         return ResponseEntity.noContent().build();
@@ -113,7 +113,7 @@ public class EventRequestController {
             @ApiResponse(responseCode = "422", description = "Solicitação já foi processada")
     })
     @PostMapping("/{id}/reject")
-    public ResponseEntity<Void> reject(
+    public ResponseEntity<Void> rejectEventRequest(
             @Parameter(description = "ID da solicitação") @PathVariable UUID id) {
         rejectEventRequestUseCase.execute(id);
         return ResponseEntity.noContent().build();

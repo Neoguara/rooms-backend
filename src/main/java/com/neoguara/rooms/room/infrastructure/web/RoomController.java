@@ -60,14 +60,14 @@ public class RoomController {
             @ApiResponse(responseCode = "422", description = "Dados inválidos")
     })
     @PostMapping
-    public ResponseEntity<RoomResponse> create(@RequestBody CreateRoomRequest request) {
+    public ResponseEntity<RoomResponse> createRoom(@RequestBody CreateRoomRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(createRoomUseCase.execute(request));
     }
 
     @Operation(description = "Retorna todas as salas cadastradas.")
     @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso")
     @GetMapping
-    public ResponseEntity<List<RoomDetailResponse>> findAll(
+    public ResponseEntity<List<RoomDetailResponse>> listRooms(
             @Parameter(description = "Expandable fields: building, roomType, resources")
             @RequestParam(required = false) List<String> expand) {
         return ResponseEntity.ok(getRoomUseCase.findAll(parseExpand(expand)));
@@ -79,7 +79,7 @@ public class RoomController {
             @ApiResponse(responseCode = "404", description = "Sala não encontrada")
     })
     @GetMapping("/{id}")
-    public ResponseEntity<RoomDetailResponse> findById(
+    public ResponseEntity<RoomDetailResponse> getRoom(
             @Parameter(description = "ID da sala") @PathVariable UUID id,
             @Parameter(description = "Expandable fields: building, roomType, resources")
             @RequestParam(required = false) List<String> expand) {
@@ -93,7 +93,7 @@ public class RoomController {
             @ApiResponse(responseCode = "422", description = "Dados inválidos")
     })
     @PutMapping("/{id}")
-    public ResponseEntity<RoomResponse> updateById(
+    public ResponseEntity<RoomResponse> updateRoom(
             @Parameter(description = "ID da sala") @PathVariable UUID id,
             @RequestBody UpdateRoomRequest request) {
         return ResponseEntity.ok(updateRoomUseCase.execute(id, request));
@@ -105,7 +105,7 @@ public class RoomController {
             @ApiResponse(responseCode = "404", description = "Sala não encontrada")
     })
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteById(
+    public ResponseEntity<Void> deleteRoom(
             @Parameter(description = "ID da sala") @PathVariable UUID id) {
         deleteRoomUseCase.execute(id);
         return ResponseEntity.noContent().build();
@@ -117,7 +117,7 @@ public class RoomController {
             @ApiResponse(responseCode = "404", description = "Sala ou recurso não encontrado")
     })
     @PutMapping("/{id}/resources")
-    public ResponseEntity<RoomResourcesResponse> replaceResources(
+    public ResponseEntity<RoomResourcesResponse> replaceRoomResources(
             @Parameter(description = "ID da sala") @PathVariable UUID id,
             @RequestBody ReplaceRoomResourcesRequest request) {
         return ResponseEntity.ok(replaceRoomResourcesUseCase.execute(id, request));
@@ -141,7 +141,7 @@ public class RoomController {
             @ApiResponse(responseCode = "422", description = "Transição de status inválida")
     })
     @PatchMapping("/{id}/status")
-    public ResponseEntity<RoomResponse> updateStatus(
+    public ResponseEntity<RoomResponse> updateRoomStatus(
             @Parameter(description = "ID da sala") @PathVariable UUID id,
             @RequestBody UpdateRoomStatusRequest request) {
         return ResponseEntity.ok(updateRoomStatusUseCase.execute(id, request.status()));

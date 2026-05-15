@@ -50,14 +50,14 @@ public class ResourceController {
             @ApiResponse(responseCode = "422", description = "Dados inválidos (nome, descrição ou ícone ausentes)")
     })
     @PostMapping
-    public ResponseEntity<ResourceResponse> create(@RequestBody CreateResourceRequest request) {
+    public ResponseEntity<ResourceResponse> createResource(@RequestBody CreateResourceRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(createResourceUseCase.execute(request));
     }
 
     @Operation(description = "Retorna todos os recursos cadastrados.")
     @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso")
     @GetMapping
-    public ResponseEntity<List<ResourceResponse>> findAll() {
+    public ResponseEntity<List<ResourceResponse>> listResources() {
         return ResponseEntity.ok(getResourceUseCase.findAll());
     }
 
@@ -67,7 +67,7 @@ public class ResourceController {
             @ApiResponse(responseCode = "404", description = "Recurso não encontrado")
     })
     @GetMapping("/{id}")
-    public ResponseEntity<ResourceResponse> findById(
+    public ResponseEntity<ResourceResponse> getResource(
             @Parameter(description = "ID do recurso") @PathVariable UUID id) {
         return ResponseEntity.ok(getResourceUseCase.findById(id));
     }
@@ -79,7 +79,7 @@ public class ResourceController {
             @ApiResponse(responseCode = "422", description = "Dados inválidos")
     })
     @PutMapping("/{id}")
-    public ResponseEntity<ResourceResponse> updateById(
+    public ResponseEntity<ResourceResponse> updateResource(
             @Parameter(description = "ID do recurso") @PathVariable UUID id,
             @RequestBody UpdateResourceRequest request) {
         return ResponseEntity.ok(updateResourceUseCase.execute(id, request));
@@ -92,7 +92,7 @@ public class ResourceController {
             @ApiResponse(responseCode = "422", description = "Transição de status inválida")
     })
     @PatchMapping("/{id}/status")
-    public ResponseEntity<ResourceResponse> updateStatus(
+    public ResponseEntity<ResourceResponse> updateResourceStatus(
             @Parameter(description = "ID do recurso") @PathVariable UUID id,
             @RequestBody UpdateResourceStatusRequest request) {
         return ResponseEntity.ok(updateResourceStatusUseCase.execute(id, request.status()));
@@ -104,7 +104,7 @@ public class ResourceController {
             @ApiResponse(responseCode = "404", description = "Recurso não encontrado")
     })
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteById(
+    public ResponseEntity<Void> deleteResource(
             @Parameter(description = "ID do recurso") @PathVariable UUID id) {
         deleteResourceUseCase.execute(id);
         return ResponseEntity.noContent().build();
