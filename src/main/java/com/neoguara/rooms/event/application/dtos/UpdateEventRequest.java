@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 public record UpdateEventRequest(
+        UUID eventId,
         String title,
         String description,
         LocalDateTime startAt,
