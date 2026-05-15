@@ -99,7 +99,7 @@ public class RoomController {
         return ResponseEntity.ok(updateRoomUseCase.execute(id, request));
     }
 
-    @Operation(description = "Remove permanentemente uma sala (soft delete). O status passa para DELETED e a sala deixa de ser visível para usuários não-admin.")
+    @Operation(description = "Remove uma sala (soft delete). O status passa para DELETED e a sala deixa de ser visível.")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Sala removida com sucesso"),
             @ApiResponse(responseCode = "404", description = "Sala não encontrada")

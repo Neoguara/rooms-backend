@@ -98,7 +98,7 @@ public class ResourceController {
         return ResponseEntity.ok(updateResourceStatusUseCase.execute(id, request.status()));
     }
 
-    @Operation(description = "Remove permanentemente um recurso (soft delete). O status passa para DELETED e o recurso deixa de ser visível para usuários não-admin.")
+    @Operation(description = "Remove um recurso (soft delete). O status passa para DELETED e o recurso deixa de ser visível.")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Recurso removido com sucesso"),
             @ApiResponse(responseCode = "404", description = "Recurso não encontrado")

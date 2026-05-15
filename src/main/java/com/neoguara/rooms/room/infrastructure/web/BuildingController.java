@@ -85,7 +85,7 @@ public class BuildingController {
         return ResponseEntity.ok(updateBuildingUseCase.execute(id, request));
     }
 
-    @Operation(description = "Remove permanentemente um edifício (soft delete). O status passa para DELETED e o edifício deixa de ser visível para usuários não-admin.")
+    @Operation(description = "Remove um edifício (soft delete). O status passa para DELETED e o edifício deixa de ser visível.")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Edifício removido com sucesso"),
             @ApiResponse(responseCode = "404", description = "Edifício não encontrado")

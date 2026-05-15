@@ -98,7 +98,7 @@ public class RoomTypeController {
         return ResponseEntity.ok(updateRoomTypeStatusUseCase.execute(id, request.status()));
     }
 
-    @Operation(description = "Remove permanentemente um tipo de sala (soft delete). O status passa para DELETED e o tipo de sala deixa de ser visível para usuários não-admin.")
+    @Operation(description = "Remove um tipo de sala (soft delete). O status passa para DELETED e o tipo de sala deixa de ser visível.")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Tipo de sala removido com sucesso"),
             @ApiResponse(responseCode = "404", description = "Tipo de sala não encontrado")
