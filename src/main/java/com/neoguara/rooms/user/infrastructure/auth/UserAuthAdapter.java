@@ -3,6 +3,7 @@ package com.neoguara.rooms.user.infrastructure.auth;
 import com.neoguara.rooms.auth.application.ports.AuthUserData;
 import com.neoguara.rooms.auth.application.ports.UserAuthPort;
 import com.neoguara.rooms.user.application.ports.UserRepositoryPort;
+import com.neoguara.rooms.user.domain.enums.UserStatus;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -25,10 +26,10 @@ public class UserAuthAdapter implements UserAuthPort {
                         user.getEmail(),
                         user.getPassword(),
                         user.getRole().name(),
-                        user.getActive(),
+                        user.getStatus() == UserStatus.ACTIVE,
                         user.getCreatedAt(),
                         user.getUpdatedAt(),
-                        user.getDeletedAt()
+                        null
                 ));
     }
 }

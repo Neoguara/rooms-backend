@@ -1,7 +1,10 @@
 package com.neoguara.rooms.user.domain.entities;
 
+import com.neoguara.rooms.shared.domain.exceptions.InvalidStateException;
 import com.neoguara.rooms.shared.domain.validation.Notification;
 import com.neoguara.rooms.user.domain.enums.UserRole;
+import com.neoguara.rooms.user.domain.enums.UserStatus;
+import com.neoguara.rooms.user.domain.validation.UserValidator;
 import com.neoguara.rooms.user.domain.valueobjects.UserId;
 import jakarta.persistence.*;
 
@@ -27,11 +30,12 @@ public class User {
     @Column(nullable = false)
     private UserRole role;
 
-    private Boolean isActive;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private UserStatus status;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private LocalDateTime deletedAt;
 
     protected User() {}
 
@@ -41,33 +45,42 @@ public class User {
         this.email = email;
         this.password = password;
         this.role = role;
+        this.status = UserStatus.ACTIVE;
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
-        this.isActive = true;
     }
 
     public static User create(String name, String email, String password, UserRole role) {
-        Notification notification = Notification.create()
-                .addErrorIf(name == null || name.isBlank(), "name is required")
-                .addErrorIf(email == null || email.isBlank(), "email is required")
-                .addErrorIf(password == null || password.isBlank(), "password is required")
-                .addErrorIf(role == null, "role is required");
+        User user = new User(name, email, password, role);
+        Notification notification = Notification.create();
+        new UserValidator().validate(user, notification);
         notification.raiseIfHasErrors();
-        return new User(name, email, password, role);
+        return user;
     }
 
-    public void update(String name, String email, String password, UserRole role, Boolean isActive) {
+    public void update(String name, String email, String password, UserRole role) {
         this.name = name;
         this.email = email;
         this.password = password;
         this.role = role;
-        this.isActive = isActive;
+        Notification notification = Notification.create();
+        new UserValidator().validate(this, notification);
+        notification.raiseIfHasErrors();
         this.updatedAt = LocalDateTime.now();
     }
 
-    public void softDelete() {
-        this.isActive = false;
-        this.deletedAt = LocalDateTime.now();
+    public void activate() {
+        if (status == UserStatus.DELETED) throw new InvalidStateException("Deleted user cannot be modified");
+        this.status = UserStatus.ACTIVE;
+    }
+
+    public void deactivate() {
+        if (status == UserStatus.DELETED) throw new InvalidStateException("Deleted user cannot be modified");
+        this.status = UserStatus.INACTIVE;
+    }
+
+    public void delete() {
+        this.status = UserStatus.DELETED;
     }
 
     public UserId getId() { return id; }
@@ -75,9 +88,7 @@ public class User {
     public String getEmail() { return email; }
     public String getPassword() { return password; }
     public UserRole getRole() { return role; }
-    public Boolean getActive() {return isActive;}
-
-    public LocalDateTime getCreatedAt() {return createdAt;}
-    public LocalDateTime getUpdatedAt() {return updatedAt;}
-    public LocalDateTime getDeletedAt() {return deletedAt;}
+    public UserStatus getStatus() { return status; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
 }

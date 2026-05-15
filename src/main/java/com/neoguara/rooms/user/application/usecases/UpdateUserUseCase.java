@@ -32,7 +32,7 @@ public class UpdateUserUseCase {
 
         var newRole = request.role() != null ? request.role() : user.getRole();
 
-        user.update(request.name(), request.email(), newPassword, newRole, request.isActive());
+        user.update(request.name(), request.email(), newPassword, newRole);
         return UserMapper.toResponse(repository.save(user));
     }
 }

@@ -1,6 +1,7 @@
 package com.neoguara.rooms.user.application.dtos;
 
 import com.neoguara.rooms.user.domain.enums.UserRole;
+import com.neoguara.rooms.user.domain.enums.UserStatus;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -10,8 +11,7 @@ public record UserResponse(
         String name,
         String email,
         UserRole role,
-        Boolean isActive,
+        UserStatus status,
         LocalDateTime createdAt,
-        LocalDateTime updatedAt,
-        LocalDateTime deletedAt
+        LocalDateTime updatedAt
 ) {}
