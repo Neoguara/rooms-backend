@@ -1,8 +1,10 @@
 package com.neoguara.rooms.event.domain.entities;
 
+import com.neoguara.rooms.event.domain.validation.EventChangeItemValidation;
 import com.neoguara.rooms.event.domain.valueobjects.EventChangeItemId;
 import com.neoguara.rooms.event.domain.valueobjects.EventRequestId;
 import com.neoguara.rooms.event.domain.valueobjects.EventSnapshot;
+import com.neoguara.rooms.shared.domain.validation.Notification;
 import jakarta.persistence.*;
 
 @Entity
@@ -48,16 +50,24 @@ public class EventChangeItem {
         this.after = after;
     }
 
+    private static EventChangeItem validated(EventRequestId eventRequestId, EventSnapshot before, EventSnapshot after) {
+        EventChangeItem item = new EventChangeItem(eventRequestId, before, after);
+        Notification notification = Notification.create();
+        new EventChangeItemValidation().validate(item, notification);
+        notification.raiseIfHasErrors();
+        return item;
+    }
+
     public static EventChangeItem create(EventRequestId eventRequestId, EventSnapshot after) {
-        return new EventChangeItem(eventRequestId, null, after);
+        return validated(eventRequestId, null, after);
     }
 
     public static EventChangeItem update(EventRequestId eventRequestId, Event old, EventSnapshot after) {
-        return new EventChangeItem(eventRequestId, snapshotOf(old), after);
+        return validated(eventRequestId, snapshotOf(old), after);
     }
 
     public static EventChangeItem cancel(EventRequestId eventRequestId, Event event) {
-        return new EventChangeItem(eventRequestId, snapshotOf(event), null);
+        return validated(eventRequestId, snapshotOf(event), null);
     }
 
     private static EventSnapshot snapshotOf(Event event) {
