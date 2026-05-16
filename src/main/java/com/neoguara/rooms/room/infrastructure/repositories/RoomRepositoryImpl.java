@@ -2,6 +2,7 @@ package com.neoguara.rooms.room.infrastructure.repositories;
 
 import com.neoguara.rooms.room.application.ports.RoomRepositoryPort;
 import com.neoguara.rooms.room.domain.entities.Room;
+import com.neoguara.rooms.room.domain.enums.RoomStatus;
 import com.neoguara.rooms.room.domain.valueobjects.RoomId;
 import org.springframework.stereotype.Repository;
 
@@ -24,12 +25,12 @@ public class RoomRepositoryImpl implements RoomRepositoryPort {
 
     @Override
     public Optional<Room> findById(RoomId id) {
-        return jpaRepository.findById(id);
+        return jpaRepository.findByIdAndStatusNot(id, RoomStatus.DELETED);
     }
 
     @Override
     public List<Room> findAll() {
-        return jpaRepository.findAll();
+        return jpaRepository.findAllByStatusNot(RoomStatus.DELETED);
     }
 
     @Override

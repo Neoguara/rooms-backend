@@ -2,6 +2,7 @@ package com.neoguara.rooms.user.infrastructure.repositories;
 
 import com.neoguara.rooms.user.application.ports.UserRepositoryPort;
 import com.neoguara.rooms.user.domain.entities.User;
+import com.neoguara.rooms.user.domain.enums.UserStatus;
 import com.neoguara.rooms.user.domain.valueobjects.UserId;
 import org.springframework.stereotype.Repository;
 
@@ -24,22 +25,22 @@ public class UserRepositoryImpl implements UserRepositoryPort {
 
     @Override
     public Optional<User> findById(UserId id) {
-        return jpaRepository.findById(id);
+        return jpaRepository.findByIdAndStatusNot(id, UserStatus.DELETED);
     }
 
     @Override
     public List<User> findAll() {
-        return jpaRepository.findAll();
+        return jpaRepository.findAllByStatusNot(UserStatus.DELETED);
     }
 
     @Override
     public Optional<User> findByEmail(String email) {
-        return jpaRepository.findByEmail(email);
+        return jpaRepository.findByEmailAndStatusNot(email, UserStatus.DELETED);
     }
 
     @Override
     public boolean existsByEmail(String email) {
-        return jpaRepository.existsByEmail(email);
+        return jpaRepository.existsByEmailAndStatusNot(email, UserStatus.DELETED);
     }
 
     @Override
