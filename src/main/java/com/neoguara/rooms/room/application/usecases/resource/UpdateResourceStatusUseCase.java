@@ -5,6 +5,7 @@ import com.neoguara.rooms.room.application.dtos.resource.UpdateResourceStatusReq
 import com.neoguara.rooms.room.application.mappers.ResourceMapper;
 import com.neoguara.rooms.room.application.ports.ResourceRepositoryPort;
 import com.neoguara.rooms.room.domain.entities.Resource;
+import com.neoguara.rooms.room.domain.enums.ResourceStatus;
 import com.neoguara.rooms.room.domain.valueobjects.ResourceId;
 import com.neoguara.rooms.shared.domain.exceptions.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
@@ -25,8 +26,15 @@ public class UpdateResourceStatusUseCase {
                 .orElseThrow(() -> new ResourceNotFoundException("Resource", id));
 
         switch (status) {
-            case ACTIVE -> resource.activate();
+            case ACTIVE -> {
+                if (resource.getStatus() == ResourceStatus.ARCHIVED) {
+                    resource.restore();
+                } else {
+                    resource.activate();
+                }
+            }
             case INACTIVE -> resource.deactivate();
+            case ARCHIVED -> resource.archive();
         }
 
         return ResourceMapper.toResponse(repository.save(resource));

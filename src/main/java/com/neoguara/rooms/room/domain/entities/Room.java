@@ -123,6 +123,7 @@ public class Room {
     }
 
     public void delete() {
+        if (status != RoomStatus.ARCHIVED) throw new InvalidStateException("Room must be archived before deletion");
         this.status = RoomStatus.DELETED;
     }
 

@@ -5,6 +5,7 @@ import com.neoguara.rooms.room.application.dtos.roomtype.UpdateRoomTypeStatusReq
 import com.neoguara.rooms.room.application.mappers.RoomTypeMapper;
 import com.neoguara.rooms.room.application.ports.RoomTypeRepositoryPort;
 import com.neoguara.rooms.room.domain.entities.RoomType;
+import com.neoguara.rooms.room.domain.enums.RoomTypeStatus;
 import com.neoguara.rooms.room.domain.valueobjects.RoomTypeId;
 import com.neoguara.rooms.shared.domain.exceptions.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
@@ -25,8 +26,15 @@ public class UpdateRoomTypeStatusUseCase {
                 .orElseThrow(() -> new ResourceNotFoundException("RoomType", id));
 
         switch (status) {
-            case ACTIVE -> roomType.activate();
+            case ACTIVE -> {
+                if (roomType.getStatus() == RoomTypeStatus.ARCHIVED) {
+                    roomType.restore();
+                } else {
+                    roomType.activate();
+                }
+            }
             case INACTIVE -> roomType.deactivate();
+            case ARCHIVED -> roomType.archive();
         }
 
         return RoomTypeMapper.toResponse(repository.save(roomType));

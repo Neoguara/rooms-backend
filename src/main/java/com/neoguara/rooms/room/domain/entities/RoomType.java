@@ -81,15 +81,29 @@ public class RoomType {
 
     public void activate() {
         if (status == RoomTypeStatus.DELETED) throw new InvalidStateException("Deleted room type cannot be modified");
+        if (status == RoomTypeStatus.ARCHIVED) throw new InvalidStateException("Archived room type cannot be activated");
         this.status = RoomTypeStatus.ACTIVE;
     }
 
     public void deactivate() {
         if (status == RoomTypeStatus.DELETED) throw new InvalidStateException("Deleted room type cannot be modified");
+        if (status == RoomTypeStatus.ARCHIVED) throw new InvalidStateException("Archived room type cannot be deactivated");
         this.status = RoomTypeStatus.INACTIVE;
     }
 
+    public void archive() {
+        if (status == RoomTypeStatus.DELETED) throw new InvalidStateException("Deleted room type cannot be modified");
+        this.status = RoomTypeStatus.ARCHIVED;
+    }
+
+    public void restore() {
+        if (status == RoomTypeStatus.DELETED) throw new InvalidStateException("Deleted room type cannot be modified");
+        if (status != RoomTypeStatus.ARCHIVED) throw new InvalidStateException("Only archived room type can be restored");
+        this.status = RoomTypeStatus.ACTIVE;
+    }
+
     public void delete() {
+        if (status != RoomTypeStatus.ARCHIVED) throw new InvalidStateException("Room type must be archived before deletion");
         this.status = RoomTypeStatus.DELETED;
     }
 

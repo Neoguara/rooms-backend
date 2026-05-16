@@ -85,10 +85,11 @@ public class BuildingController {
         return ResponseEntity.ok(updateBuildingUseCase.execute(id, request));
     }
 
-    @Operation(description = "Remove um edifício (soft delete). O status passa para DELETED e o edifício deixa de ser visível.")
+    @Operation(description = "Remove um edifício (soft delete). O edifício deve estar com status ARCHIVED antes de ser deletado; caso contrário retorna 422.")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Edifício removido com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Edifício não encontrado")
+            @ApiResponse(responseCode = "404", description = "Edifício não encontrado"),
+            @ApiResponse(responseCode = "422", description = "Edifício não está arquivado")
     })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteBuilding(

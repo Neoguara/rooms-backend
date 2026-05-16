@@ -85,7 +85,17 @@ public class RoomTypeController {
         return ResponseEntity.ok(updateRoomTypeUseCase.execute(id, request));
     }
 
-    @Operation(description = "Altera o status do tipo de sala. Transições permitidas: ACTIVE ↔ INACTIVE. Para remover permanentemente use DELETE /room-types/{id}.")
+    @Operation(
+            description = """
+                    Altera o status do tipo de sala. Transições permitidas:
+                    - **ACTIVE**: ativa um tipo de sala INACTIVE, ou restaura um ARCHIVED.
+                    - **INACTIVE**: desativa um tipo de sala ACTIVE.
+                    - **ARCHIVED**: arquiva o tipo de sala independente do status atual.
+
+                    Transições inválidas retornam 422 (ex: ativar diretamente um tipo ARCHIVED sem restaurar).
+                    Para remover permanentemente use DELETE /room-types/{id} (exige ARCHIVED).
+                    """
+    )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Status atualizado com sucesso"),
             @ApiResponse(responseCode = "404", description = "Tipo de sala não encontrado"),
@@ -98,10 +108,11 @@ public class RoomTypeController {
         return ResponseEntity.ok(updateRoomTypeStatusUseCase.execute(id, request.status()));
     }
 
-    @Operation(description = "Remove um tipo de sala (soft delete). O status passa para DELETED e o tipo de sala deixa de ser visível.")
+    @Operation(description = "Remove um tipo de sala (soft delete). O tipo de sala deve estar com status ARCHIVED antes de ser deletado; caso contrário retorna 422.")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Tipo de sala removido com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Tipo de sala não encontrado")
+            @ApiResponse(responseCode = "404", description = "Tipo de sala não encontrado"),
+            @ApiResponse(responseCode = "422", description = "Tipo de sala não está arquivado")
     })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteRoomType(

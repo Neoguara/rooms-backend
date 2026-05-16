@@ -85,7 +85,17 @@ public class ResourceController {
         return ResponseEntity.ok(updateResourceUseCase.execute(id, request));
     }
 
-    @Operation(description = "Altera o status do recurso. Transições permitidas: ACTIVE ↔ INACTIVE. Para remover permanentemente use DELETE /resources/{id}.")
+    @Operation(
+            description = """
+                    Altera o status do recurso. Transições permitidas:
+                    - **ACTIVE**: ativa um recurso INACTIVE, ou restaura um ARCHIVED.
+                    - **INACTIVE**: desativa um recurso ACTIVE.
+                    - **ARCHIVED**: arquiva o recurso independente do status atual.
+
+                    Transições inválidas retornam 422 (ex: ativar diretamente um recurso ARCHIVED sem restaurar).
+                    Para remover permanentemente use DELETE /resources/{id} (exige ARCHIVED).
+                    """
+    )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Status atualizado com sucesso"),
             @ApiResponse(responseCode = "404", description = "Recurso não encontrado"),
@@ -98,10 +108,11 @@ public class ResourceController {
         return ResponseEntity.ok(updateResourceStatusUseCase.execute(id, request.status()));
     }
 
-    @Operation(description = "Remove um recurso (soft delete). O status passa para DELETED e o recurso deixa de ser visível.")
+    @Operation(description = "Remove um recurso (soft delete). O recurso deve estar com status ARCHIVED antes de ser deletado; caso contrário retorna 422.")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Recurso removido com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Recurso não encontrado")
+            @ApiResponse(responseCode = "404", description = "Recurso não encontrado"),
+            @ApiResponse(responseCode = "422", description = "Recurso não está arquivado")
     })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteResource(

@@ -99,10 +99,11 @@ public class RoomController {
         return ResponseEntity.ok(updateRoomUseCase.execute(id, request));
     }
 
-    @Operation(description = "Remove uma sala (soft delete). O status passa para DELETED e a sala deixa de ser visível.")
+    @Operation(description = "Remove uma sala (soft delete). A sala deve estar com status ARCHIVED antes de ser deletada; caso contrário retorna 422.")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Sala removida com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Sala não encontrada")
+            @ApiResponse(responseCode = "404", description = "Sala não encontrada"),
+            @ApiResponse(responseCode = "422", description = "Sala não está arquivada")
     })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteRoom(

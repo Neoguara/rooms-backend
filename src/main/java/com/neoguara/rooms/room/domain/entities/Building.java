@@ -80,8 +80,10 @@ public class Building {
     }
 
     public void delete() {
+        if (status != BuildingStatus.ARCHIVED) throw new InvalidStateException("Building must be archived before deletion");
         this.status = BuildingStatus.DELETED;
     }
+
 
     public boolean isAvailable() {
         return status == BuildingStatus.ACTIVE;
