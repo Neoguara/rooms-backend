@@ -1,7 +1,5 @@
 package com.neoguara.rooms.auth;
 
-import com.neoguara.rooms.auth.dto.LoginRequest;
-import com.neoguara.rooms.auth.dto.TokenResponse;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;

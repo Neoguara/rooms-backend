@@ -1,7 +1,5 @@
 package com.neoguara.rooms.auth;
 
-import com.neoguara.rooms.auth.application.ports.UserAuthPort;
-import com.neoguara.rooms.auth.infrastructure.security.AuthUserDetails;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;

@@ -1,13 +1,13 @@
-package com.neoguara.rooms.auth.dto;
+package com.neoguara.rooms.auth;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public record TokenResponse(
-        String token,
+public record AuthUserData(
         UUID id,
         String name,
         String email,
+        String encodedPassword,
         String role,
         Boolean isActive,
         LocalDateTime createdAt,

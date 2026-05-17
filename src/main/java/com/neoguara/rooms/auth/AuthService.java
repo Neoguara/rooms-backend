@@ -1,8 +1,5 @@
 package com.neoguara.rooms.auth;
 
-import com.neoguara.rooms.auth.dto.LoginRequest;
-import com.neoguara.rooms.auth.dto.TokenResponse;
-import com.neoguara.rooms.auth.infrastructure.security.AuthUserDetails;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;

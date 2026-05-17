@@ -1,6 +1,5 @@
-package com.neoguara.rooms.auth.infrastructure.security;
+package com.neoguara.rooms.auth;
 
-import com.neoguara.rooms.auth.application.ports.AuthUserData;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

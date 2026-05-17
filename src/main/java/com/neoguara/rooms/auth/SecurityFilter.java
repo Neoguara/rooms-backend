@@ -1,7 +1,5 @@
 package com.neoguara.rooms.auth;
 
-import com.neoguara.rooms.auth.application.ports.UserAuthPort;
-import com.neoguara.rooms.auth.infrastructure.security.AuthUserDetails;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;

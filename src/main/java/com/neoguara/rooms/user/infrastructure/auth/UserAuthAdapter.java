@@ -1,7 +1,7 @@
 package com.neoguara.rooms.user.infrastructure.auth;
 
-import com.neoguara.rooms.auth.application.ports.AuthUserData;
-import com.neoguara.rooms.auth.application.ports.UserAuthPort;
+import com.neoguara.rooms.auth.AuthUserData;
+import com.neoguara.rooms.auth.UserAuthPort;
 import com.neoguara.rooms.user.application.ports.UserRepositoryPort;
 import com.neoguara.rooms.user.domain.enums.UserStatus;
 import org.springframework.stereotype.Component;

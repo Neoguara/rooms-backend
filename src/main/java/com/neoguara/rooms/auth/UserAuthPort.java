@@ -1,4 +1,4 @@
-package com.neoguara.rooms.auth.application.ports;
+package com.neoguara.rooms.auth;
 
 import java.util.Optional;
 
