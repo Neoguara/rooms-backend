@@ -2,6 +2,7 @@ package com.neoguara.rooms.room.infrastructure.web;
 
 import com.neoguara.rooms.room.application.dtos.room.CreateRoomRequest;
 import com.neoguara.rooms.room.application.dtos.room.ReplaceRoomResourcesRequest;
+import com.neoguara.rooms.room.application.dtos.room.RoomAvailabilityFilter;
 import com.neoguara.rooms.room.application.dtos.room.RoomDetailResponse;
 import com.neoguara.rooms.room.application.dtos.room.RoomExpandField;
 import com.neoguara.rooms.room.application.dtos.room.RoomResourcesResponse;
@@ -10,6 +11,7 @@ import com.neoguara.rooms.room.application.dtos.room.UpdateRoomRequest;
 import com.neoguara.rooms.room.application.dtos.room.UpdateRoomStatusRequest;
 import com.neoguara.rooms.room.application.usecases.room.CreateRoomUseCase;
 import com.neoguara.rooms.room.application.usecases.room.DeleteRoomUseCase;
+import com.neoguara.rooms.room.application.usecases.room.GetAvailableRoomsUseCase;
 import com.neoguara.rooms.room.application.usecases.room.GetRoomUseCase;
 import com.neoguara.rooms.room.application.usecases.room.ReplaceRoomResourcesUseCase;
 import com.neoguara.rooms.room.application.usecases.room.UpdateRoomStatusUseCase;
@@ -19,10 +21,12 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -35,6 +39,7 @@ public class RoomController {
 
     private final CreateRoomUseCase createRoomUseCase;
     private final GetRoomUseCase getRoomUseCase;
+    private final GetAvailableRoomsUseCase getAvailableRoomsUseCase;
     private final UpdateRoomUseCase updateRoomUseCase;
     private final UpdateRoomStatusUseCase updateRoomStatusUseCase;
     private final DeleteRoomUseCase deleteRoomUseCase;
@@ -42,12 +47,14 @@ public class RoomController {
 
     public RoomController(CreateRoomUseCase createRoomUseCase,
                           GetRoomUseCase getRoomUseCase,
+                          GetAvailableRoomsUseCase getAvailableRoomsUseCase,
                           UpdateRoomUseCase updateRoomUseCase,
                           UpdateRoomStatusUseCase updateRoomStatusUseCase,
                           DeleteRoomUseCase deleteRoomUseCase,
                           ReplaceRoomResourcesUseCase replaceRoomResourcesUseCase) {
         this.createRoomUseCase = createRoomUseCase;
         this.getRoomUseCase = getRoomUseCase;
+        this.getAvailableRoomsUseCase = getAvailableRoomsUseCase;
         this.updateRoomUseCase = updateRoomUseCase;
         this.updateRoomStatusUseCase = updateRoomStatusUseCase;
         this.deleteRoomUseCase = deleteRoomUseCase;
@@ -62,6 +69,23 @@ public class RoomController {
     @PostMapping
     public ResponseEntity<RoomResponse> createRoom(@RequestBody CreateRoomRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(createRoomUseCase.execute(request));
+    }
+
+    @Operation(description = "Retorna todas as salas disponíveis no período informado, com filtros opcionais por tipo, recursos e capacidade mínima.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Salas disponíveis retornadas"),
+            @ApiResponse(responseCode = "422", description = "Período inválido (startAt >= endAt ou ausente)")
+    })
+    @GetMapping("/available")
+    public ResponseEntity<List<RoomDetailResponse>> getAvailableRooms(
+            @Parameter(description = "Início do período (ISO-8601, ex: 2024-06-01T09:00:00)") @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startAt,
+            @Parameter(description = "Fim do período (ISO-8601, ex: 2024-06-01T11:00:00)") @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endAt,
+            @Parameter(description = "Filtrar por tipo de sala (UUID)") @RequestParam(required = false) UUID roomTypeId,
+            @Parameter(description = "Filtrar por recursos que a sala deve ter (lista de UUIDs)") @RequestParam(required = false) List<UUID> resourceIds,
+            @Parameter(description = "Capacidade mínima da sala") @RequestParam(required = false) Integer minCapacity,
+            @Parameter(description = "Expandable fields: building, roomType, resources") @RequestParam(required = false) List<String> expand) {
+        RoomAvailabilityFilter filter = new RoomAvailabilityFilter(startAt, endAt, roomTypeId, resourceIds, minCapacity);
+        return ResponseEntity.ok(getAvailableRoomsUseCase.execute(filter, parseExpand(expand)));
     }
 
     @Operation(description = "Retorna todas as salas cadastradas.")
