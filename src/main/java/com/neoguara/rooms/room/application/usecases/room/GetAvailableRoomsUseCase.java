@@ -1,6 +1,6 @@
 package com.neoguara.rooms.room.application.usecases.room;
 
-import com.neoguara.rooms.event.EventAvailabilityService;
+import com.neoguara.rooms.room.application.ports.RoomAvailabilityPort;
 import com.neoguara.rooms.room.application.dtos.building.BuildingResponse;
 import com.neoguara.rooms.room.application.dtos.resource.ResourceResponse;
 import com.neoguara.rooms.room.application.dtos.room.RoomAvailabilityFilter;
@@ -37,7 +37,7 @@ public class GetAvailableRoomsUseCase {
     private final ResourceRepositoryPort resourceRepository;
     private final BuildingRepositoryPort buildingRepository;
     private final RoomTypeRepositoryPort roomTypeRepository;
-    private final EventAvailabilityService eventAvailabilityService;
+    private final RoomAvailabilityPort roomAvailabilityPort;
 
     public GetAvailableRoomsUseCase(
             RoomRepositoryPort roomRepository,
@@ -45,19 +45,19 @@ public class GetAvailableRoomsUseCase {
             ResourceRepositoryPort resourceRepository,
             BuildingRepositoryPort buildingRepository,
             RoomTypeRepositoryPort roomTypeRepository,
-            EventAvailabilityService eventAvailabilityService) {
+            RoomAvailabilityPort roomAvailabilityPort) {
         this.roomRepository = roomRepository;
         this.roomResourceRepository = roomResourceRepository;
         this.resourceRepository = resourceRepository;
         this.buildingRepository = buildingRepository;
         this.roomTypeRepository = roomTypeRepository;
-        this.eventAvailabilityService = eventAvailabilityService;
+        this.roomAvailabilityPort = roomAvailabilityPort;
     }
 
     public List<RoomDetailResponse> execute(RoomAvailabilityFilter filter, Set<RoomExpandField> expand) {
         validate(filter);
 
-        Set<UUID> occupiedRoomIds = eventAvailabilityService.findOccupiedRoomIds(filter.startAt(), filter.endAt());
+        Set<UUID> occupiedRoomIds = roomAvailabilityPort.findOccupiedRoomIds(filter.startAt(), filter.endAt());
 
         return roomRepository.findAll().stream()
                 .filter(r -> r.getStatus() == RoomStatus.AVAILABLE)

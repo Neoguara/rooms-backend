@@ -2,11 +2,14 @@ package com.neoguara.rooms.event.infrastructure.repositories;
 
 import com.neoguara.rooms.event.application.ports.EventRepositoryPort;
 import com.neoguara.rooms.event.domain.entities.Event;
+import com.neoguara.rooms.event.domain.enums.EventStatus;
 import com.neoguara.rooms.event.domain.valueobjects.EventId;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public class EventRepositoryImpl implements EventRepositoryPort {
@@ -30,6 +33,11 @@ public class EventRepositoryImpl implements EventRepositoryPort {
     @Override
     public Event save(Event event) {
         return jpaRepository.save(event);
+    }
+
+    @Override
+    public List<UUID> findOccupiedRoomIds(EventStatus status, LocalDateTime startAt, LocalDateTime endAt) {
+        return jpaRepository.findOccupiedRoomIds(status, startAt, endAt);
     }
 
 }
