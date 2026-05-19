@@ -61,7 +61,7 @@ public class RoomController {
         this.replaceRoomResourcesUseCase = replaceRoomResourcesUseCase;
     }
 
-    @Operation(description = "Cadastra uma nova sala com status inicial ACTIVE.")
+    @Operation(description = "Cadastra uma nova sala com status inicial AVAILABLE.")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Sala criada com sucesso"),
             @ApiResponse(responseCode = "422", description = "Dados inválidos")
@@ -71,7 +71,13 @@ public class RoomController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createRoomUseCase.execute(request));
     }
 
-    @Operation(description = "Retorna todas as salas disponíveis no período informado, com filtros opcionais por tipo, recursos e capacidade mínima.")
+    @Operation(description = """
+            Retorna todas as salas disponíveis no período informado.
+            Filtros opcionais por tipo de sala, prédio, recursos e capacidade mínima.
+            O parâmetro `search` realiza busca textual (case-insensitive) nos campos:
+            nome e código da sala, nome e descrição do tipo de sala, nome do prédio,
+            nome e descrição dos recursos associados.
+            """)
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Salas disponíveis retornadas"),
             @ApiResponse(responseCode = "422", description = "Período inválido (startAt >= endAt ou ausente)")
@@ -80,11 +86,13 @@ public class RoomController {
     public ResponseEntity<List<RoomDetailResponse>> getAvailableRooms(
             @Parameter(description = "Início do período (ISO-8601, ex: 2024-06-01T09:00:00)") @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startAt,
             @Parameter(description = "Fim do período (ISO-8601, ex: 2024-06-01T11:00:00)") @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endAt,
-            @Parameter(description = "Filtrar por tipo de sala (UUID)") @RequestParam(required = false) UUID roomTypeId,
+            @Parameter(description = "Filtrar por tipos de sala (lista de UUIDs)") @RequestParam(required = false) List<UUID> roomTypeIds,
             @Parameter(description = "Filtrar por recursos que a sala deve ter (lista de UUIDs)") @RequestParam(required = false) List<UUID> resourceIds,
+            @Parameter(description = "Filtrar por prédios (lista de UUIDs)") @RequestParam(required = false) List<UUID> buildingIds,
             @Parameter(description = "Capacidade mínima da sala") @RequestParam(required = false) Integer minCapacity,
-            @Parameter(description = "Expandable fields: building, roomType, resources") @RequestParam(required = false) List<String> expand) {
-        RoomAvailabilityFilter filter = new RoomAvailabilityFilter(startAt, endAt, roomTypeId, resourceIds, minCapacity);
+            @Parameter(description = "Busca textual: nome/código da sala, nome/descrição do tipo, nome do prédio, nome/descrição dos recursos") @RequestParam(required = false) String search,
+            @Parameter(description = "Campos expandidos na resposta: building, roomType, resources") @RequestParam(required = false) List<String> expand) {
+        RoomAvailabilityFilter filter = new RoomAvailabilityFilter(startAt, endAt, roomTypeIds, resourceIds, buildingIds, minCapacity, search);
         return ResponseEntity.ok(getAvailableRoomsUseCase.execute(filter, parseExpand(expand)));
     }
 

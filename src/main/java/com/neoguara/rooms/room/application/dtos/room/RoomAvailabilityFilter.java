@@ -7,7 +7,9 @@ import java.util.UUID;
 public record RoomAvailabilityFilter(
         LocalDateTime startAt,
         LocalDateTime endAt,
-        UUID roomTypeId,
+        List<UUID> roomTypeIds,
         List<UUID> resourceIds,
-        Integer minCapacity
+        List<UUID> buildingIds,
+        Integer minCapacity,
+        String search
 ) {}

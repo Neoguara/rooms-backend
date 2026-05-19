@@ -16,7 +16,10 @@ import com.neoguara.rooms.room.application.ports.ResourceRepositoryPort;
 import com.neoguara.rooms.room.application.ports.RoomRepositoryPort;
 import com.neoguara.rooms.room.application.ports.RoomResourceRepositoryPort;
 import com.neoguara.rooms.room.application.ports.RoomTypeRepositoryPort;
+import com.neoguara.rooms.room.domain.entities.Building;
+import com.neoguara.rooms.room.domain.entities.Resource;
 import com.neoguara.rooms.room.domain.entities.Room;
+import com.neoguara.rooms.room.domain.entities.RoomType;
 import com.neoguara.rooms.room.domain.enums.RoomStatus;
 import com.neoguara.rooms.room.domain.valueobjects.ResourceId;
 import com.neoguara.rooms.room.domain.valueobjects.RoomId;
@@ -25,6 +28,7 @@ import com.neoguara.rooms.shared.domain.validation.Notification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -59,14 +63,34 @@ public class GetAvailableRoomsUseCase {
 
         Set<UUID> occupiedRoomIds = roomAvailabilityPort.findOccupiedRoomIds(filter.startAt(), filter.endAt());
 
+        boolean hasSearch = filter.search() != null && !filter.search().isBlank();
+        Map<UUID, RoomType> roomTypeMap = hasSearch
+                ? roomTypeRepository.findAll().stream().collect(Collectors.toMap(rt -> rt.getId().id(), rt -> rt))
+                : Map.of();
+        Map<UUID, Building> buildingMap = hasSearch
+                ? buildingRepository.findAll().stream().collect(Collectors.toMap(b -> b.getId().id(), b -> b))
+                : Map.of();
+
         return roomRepository.findAll().stream()
                 .filter(r -> r.getStatus() == RoomStatus.AVAILABLE)
-                .filter(r -> filter.roomTypeId() == null || r.getRoomTypeId().id().equals(filter.roomTypeId()))
                 .filter(r -> filter.minCapacity() == null || r.getCapacity() >= filter.minCapacity())
+                .filter(r -> hasAnyRoomTypes(r, filter.roomTypeIds()))
+                .filter(r -> hasAnyBuildings(r, filter.buildingIds()))
                 .filter(r -> !occupiedRoomIds.contains(r.getId().id()))
                 .filter(r -> hasAllResources(r.getId(), filter.resourceIds()))
+                .filter(r -> matchesSearch(r, filter.search(), roomTypeMap, buildingMap))
                 .map(r -> toDetailResponse(r, expand))
                 .toList();
+    }
+
+    private boolean hasAnyBuildings(Room room, List<UUID> buildingIds) {
+        if (buildingIds == null || buildingIds.isEmpty()) return true;
+        return buildingIds.stream().anyMatch(id -> id.equals(room.getBuildingId().id()));
+    }
+
+    private boolean hasAnyRoomTypes(Room room, List<UUID> roomTypeIds) {
+        if (roomTypeIds == null || roomTypeIds.isEmpty()) return true;
+        return roomTypeIds.stream().anyMatch(id -> id.equals(room.getRoomTypeId().id()));
     }
 
     private boolean hasAllResources(RoomId roomId, List<UUID> requiredResourceIds) {
@@ -100,6 +124,29 @@ public class GetAvailableRoomsUseCase {
         return resourceRepository.findAllById(resourceIds).stream()
                 .map(ResourceMapper::toResponse)
                 .toList();
+    }
+
+    private boolean matchesSearch(Room room, String search, Map<UUID, RoomType> roomTypeMap, Map<UUID, Building> buildingMap) {
+        if (search == null || search.isBlank()) return true;
+        String q = search.toLowerCase();
+
+        if (contains(room.getName(), q) || contains(room.getCode(), q)) return true;
+
+        RoomType roomType = roomTypeMap.get(room.getRoomTypeId().id());
+        if (roomType != null && (contains(roomType.getName(), q) || contains(roomType.getDescription(), q))) return true;
+
+        Building building = buildingMap.get(room.getBuildingId().id());
+        if (building != null && contains(building.getName(), q)) return true;
+
+        List<ResourceId> roomResourceIds = roomResourceRepository.findByRoomId(room.getId()).stream()
+                .map(rr -> rr.getResourceId())
+                .toList();
+        List<Resource> resources = resourceRepository.findAllById(roomResourceIds);
+        return resources.stream().anyMatch(res -> contains(res.getName(), q) || contains(res.getDescription(), q));
+    }
+
+    private boolean contains(String value, String q) {
+        return value != null && value.toLowerCase().contains(q);
     }
 
     private void validate(RoomAvailabilityFilter filter) {
