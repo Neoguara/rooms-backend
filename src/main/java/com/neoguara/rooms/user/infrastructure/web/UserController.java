@@ -45,7 +45,10 @@ public class UserController {
         this.deleteUserUseCase = deleteUserUseCase;
     }
 
-    @Operation(description = "Cadastra um novo usuário com status inicial ACTIVE.")
+    @Operation(description = """
+            Cadastra um novo usuário com status inicial ACTIVE.
+            Campos obrigatórios: `name`, `email`, `password` (mínimo 6 caracteres) e `role`.
+            Não há campos opcionais.""")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Usuário criado com sucesso"),
             @ApiResponse(responseCode = "409", description = "Email já cadastrado"),
@@ -74,7 +77,10 @@ public class UserController {
         return ResponseEntity.ok(getUserUseCase.findById(id));
     }
 
-    @Operation(description = "Atualiza nome, email, senha e papel do usuário.")
+    @Operation(description = """
+            Atualiza nome, email, senha e papel do usuário.
+            Campos obrigatórios: `name` e `email`.
+            Campos opcionais: `password` e `role` — quando omitidos, os valores atuais são mantidos.""")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Usuário atualizado com sucesso"),
             @ApiResponse(responseCode = "404", description = "Usuário não encontrado"),
@@ -101,7 +107,7 @@ public class UserController {
 
     @Operation(
             description = """
-                    Altera o status do usuário. Transições permitidas:
+                    Altera o status do usuário. Campo obrigatório: `status`. Transições permitidas:
                     - **ACTIVE**: ativa um usuário INACTIVE.
                     - **INACTIVE**: desativa um usuário ACTIVE.
 

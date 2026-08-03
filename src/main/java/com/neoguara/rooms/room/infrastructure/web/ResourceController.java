@@ -44,7 +44,10 @@ public class ResourceController {
         this.deleteResourceUseCase = deleteResourceUseCase;
     }
 
-    @Operation(description = "Cadastra um novo recurso.")
+    @Operation(description = """
+            Cadastra um novo recurso.
+            Campos obrigatórios: `name`, `description` e `icon`.
+            Não há campos opcionais.""")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Recurso criado com sucesso"),
             @ApiResponse(responseCode = "422", description = "Dados inválidos (nome, descrição ou ícone ausentes)")
@@ -72,7 +75,10 @@ public class ResourceController {
         return ResponseEntity.ok(getResourceUseCase.findById(id));
     }
 
-    @Operation(description = "Atualiza nome, descrição e ícone do recurso.")
+    @Operation(description = """
+            Atualiza nome, descrição e ícone do recurso.
+            A atualização substitui todos os campos: `name`, `description` e `icon` são obrigatórios.
+            Não há campos opcionais — campos omitidos são tratados como nulos e resultam em 422.""")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Recurso atualizado com sucesso"),
             @ApiResponse(responseCode = "404", description = "Recurso não encontrado"),
@@ -87,7 +93,7 @@ public class ResourceController {
 
     @Operation(
             description = """
-                    Altera o status do recurso. Transições permitidas:
+                    Altera o status do recurso. Campo obrigatório: `status`. Transições permitidas:
                     - **ACTIVE**: ativa um recurso INACTIVE, ou restaura um ARCHIVED.
                     - **INACTIVE**: desativa um recurso ACTIVE.
                     - **ARCHIVED**: arquiva o recurso independente do status atual.

@@ -61,7 +61,10 @@ public class RoomController {
         this.replaceRoomResourcesUseCase = replaceRoomResourcesUseCase;
     }
 
-    @Operation(description = "Cadastra uma nova sala com status inicial AVAILABLE.")
+    @Operation(description = """
+            Cadastra uma nova sala com status inicial AVAILABLE.
+            Campos obrigatórios: `name`, `code`, `roomTypeId`, `buildingId`, `floor` (zero ou maior) e `capacity` (mínimo 1).
+            Campo opcional: `resourceIds` — quando omitido, a sala é criada sem recursos.""")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Sala criada com sucesso"),
             @ApiResponse(responseCode = "422", description = "Dados inválidos")
@@ -73,6 +76,7 @@ public class RoomController {
 
     @Operation(description = """
             Retorna todas as salas disponíveis no período informado.
+            Os parâmetros `startAt` e `endAt` são obrigatórios; todos os demais são opcionais.
             Filtros opcionais por tipo de sala, prédio, recursos e capacidade mínima.
             O parâmetro `search` realiza busca textual (case-insensitive) nos campos:
             nome e código da sala, nome e descrição do tipo de sala, nome do prédio,
@@ -84,23 +88,23 @@ public class RoomController {
     })
     @GetMapping("/available")
     public ResponseEntity<List<RoomDetailResponse>> getAvailableRooms(
-            @Parameter(description = "Início do período (ISO-8601, ex: 2024-06-01T09:00:00)") @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startAt,
-            @Parameter(description = "Fim do período (ISO-8601, ex: 2024-06-01T11:00:00)") @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endAt,
-            @Parameter(description = "Filtrar por tipos de sala (lista de UUIDs)") @RequestParam(required = false) List<UUID> roomTypeIds,
-            @Parameter(description = "Filtrar por recursos que a sala deve ter (lista de UUIDs)") @RequestParam(required = false) List<UUID> resourceIds,
-            @Parameter(description = "Filtrar por prédios (lista de UUIDs)") @RequestParam(required = false) List<UUID> buildingIds,
-            @Parameter(description = "Capacidade mínima da sala") @RequestParam(required = false) Integer minCapacity,
-            @Parameter(description = "Busca textual: nome/código da sala, nome/descrição do tipo, nome do prédio, nome/descrição dos recursos") @RequestParam(required = false) String search,
-            @Parameter(description = "Campos expandidos na resposta: building, roomType, resources") @RequestParam(required = false) List<String> expand) {
+            @Parameter(description = "Obrigatório. Início do período (ISO-8601, ex: 2024-06-01T09:00:00)", required = true) @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startAt,
+            @Parameter(description = "Obrigatório. Fim do período (ISO-8601, ex: 2024-06-01T11:00:00)", required = true) @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endAt,
+            @Parameter(description = "Opcional. Filtrar por tipos de sala (lista de UUIDs)", required = false) @RequestParam(required = false) List<UUID> roomTypeIds,
+            @Parameter(description = "Opcional. Filtrar por recursos que a sala deve ter (lista de UUIDs)", required = false) @RequestParam(required = false) List<UUID> resourceIds,
+            @Parameter(description = "Opcional. Filtrar por prédios (lista de UUIDs)", required = false) @RequestParam(required = false) List<UUID> buildingIds,
+            @Parameter(description = "Opcional. Capacidade mínima da sala", required = false) @RequestParam(required = false) Integer minCapacity,
+            @Parameter(description = "Opcional. Busca textual: nome/código da sala, nome/descrição do tipo, nome do prédio, nome/descrição dos recursos", required = false) @RequestParam(required = false) String search,
+            @Parameter(description = "Opcional. Campos expandidos na resposta: building, roomType, resources", required = false) @RequestParam(required = false) List<String> expand) {
         RoomAvailabilityFilter filter = new RoomAvailabilityFilter(startAt, endAt, roomTypeIds, resourceIds, buildingIds, minCapacity, search);
         return ResponseEntity.ok(getAvailableRoomsUseCase.execute(filter, parseExpand(expand)));
     }
 
-    @Operation(description = "Retorna todas as salas cadastradas.")
+    @Operation(description = "Retorna todas as salas cadastradas. Não possui parâmetros obrigatórios.")
     @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso")
     @GetMapping
     public ResponseEntity<List<RoomDetailResponse>> listRooms(
-            @Parameter(description = "Expandable fields: building, roomType, resources")
+            @Parameter(description = "Opcional. Campos expandidos na resposta: building, roomType, resources", required = false)
             @RequestParam(required = false) List<String> expand) {
         return ResponseEntity.ok(getRoomUseCase.findAll(parseExpand(expand)));
     }
@@ -112,13 +116,17 @@ public class RoomController {
     })
     @GetMapping("/{id}")
     public ResponseEntity<RoomDetailResponse> getRoom(
-            @Parameter(description = "ID da sala") @PathVariable UUID id,
-            @Parameter(description = "Expandable fields: building, roomType, resources")
+            @Parameter(description = "Obrigatório. ID da sala", required = true) @PathVariable UUID id,
+            @Parameter(description = "Opcional. Campos expandidos na resposta: building, roomType, resources", required = false)
             @RequestParam(required = false) List<String> expand) {
         return ResponseEntity.ok(getRoomUseCase.findById(id, parseExpand(expand)));
     }
 
-    @Operation(description = "Atualiza os dados da sala.")
+    @Operation(description = """
+            Atualiza os dados da sala.
+            A atualização substitui todos os campos: `name`, `code`, `roomTypeId`, `buildingId`, `floor` e `capacity` são obrigatórios.
+            Não há campos opcionais — campos omitidos são tratados como nulos (ou zero) e resultam em 422.
+            Os recursos da sala são alterados em PUT /rooms/{id}/resources.""")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Sala atualizada com sucesso"),
             @ApiResponse(responseCode = "404", description = "Sala não encontrada"),
@@ -144,7 +152,9 @@ public class RoomController {
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(description = "Substitui todos os recursos da sala pela lista informada.")
+    @Operation(description = """
+            Substitui todos os recursos da sala pela lista informada.
+            Campo obrigatório: `resourceIds` — envie uma lista vazia para remover todos os recursos.""")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Recursos atualizados com sucesso"),
             @ApiResponse(responseCode = "404", description = "Sala ou recurso não encontrado")
@@ -158,7 +168,7 @@ public class RoomController {
 
     @Operation(
             description = """
-                    Altera o status da sala. Transições permitidas:
+                    Altera o status da sala. Campo obrigatório: `status`. Transições permitidas:
                     - **AVAILABLE**: ativa uma sala INACTIVE ou MAINTENANCE. Se a sala estiver ARCHIVED, restaura para AVAILABLE.
                     - **INACTIVE**: desativa uma sala AVAILABLE ou MAINTENANCE. Inválido se ARCHIVED.
                     - **MAINTENANCE**: coloca a sala em manutenção. Inválido se ARCHIVED.

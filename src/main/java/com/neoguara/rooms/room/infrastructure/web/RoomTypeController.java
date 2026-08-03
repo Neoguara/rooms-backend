@@ -44,7 +44,10 @@ public class RoomTypeController {
         this.deleteRoomTypeUseCase = deleteRoomTypeUseCase;
     }
 
-    @Operation(description = "Cadastra um novo tipo de sala.")
+    @Operation(description = """
+            Cadastra um novo tipo de sala.
+            Campos obrigatórios: `name`, `description`, `defaultCapacity`, `color` e `icon`.
+            Não há campos opcionais.""")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Tipo de sala criado com sucesso"),
             @ApiResponse(responseCode = "422", description = "Dados inválidos")
@@ -72,7 +75,10 @@ public class RoomTypeController {
         return ResponseEntity.ok(getRoomTypeUseCase.findById(id));
     }
 
-    @Operation(description = "Atualiza os dados de um tipo de sala.")
+    @Operation(description = """
+            Atualiza os dados de um tipo de sala.
+            A atualização substitui todos os campos: `name`, `description`, `defaultCapacity`, `color` e `icon` são obrigatórios.
+            Não há campos opcionais — campos omitidos são tratados como nulos e resultam em 422.""")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Tipo de sala atualizado com sucesso"),
             @ApiResponse(responseCode = "404", description = "Tipo de sala não encontrado"),
@@ -87,7 +93,7 @@ public class RoomTypeController {
 
     @Operation(
             description = """
-                    Altera o status do tipo de sala. Transições permitidas:
+                    Altera o status do tipo de sala. Campo obrigatório: `status`. Transições permitidas:
                     - **ACTIVE**: ativa um tipo de sala INACTIVE, ou restaura um ARCHIVED.
                     - **INACTIVE**: desativa um tipo de sala ACTIVE.
                     - **ARCHIVED**: arquiva o tipo de sala independente do status atual.

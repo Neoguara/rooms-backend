@@ -44,7 +44,10 @@ public class BuildingController {
         this.deleteBuildingUseCase = deleteBuildingUseCase;
     }
 
-    @Operation(description = "Cadastra um novo edifício com status inicial ACTIVE.")
+    @Operation(description = """
+            Cadastra um novo edifício com status inicial ACTIVE.
+            Campos obrigatórios: `name`, `address` e `totalFloors` (mínimo 1).
+            Não há campos opcionais.""")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Edifício criado com sucesso"),
             @ApiResponse(responseCode = "422", description = "Dados inválidos (nome, endereço ou andares ausentes/inválidos)")
@@ -72,7 +75,10 @@ public class BuildingController {
         return ResponseEntity.ok(getBuildingUseCase.findById(id));
     }
 
-    @Operation(description = "Atualiza nome, endereço e total de andares do edifício.")
+    @Operation(description = """
+            Atualiza nome, endereço e total de andares do edifício.
+            A atualização substitui todos os campos: `name`, `address` e `totalFloors` são obrigatórios.
+            Não há campos opcionais — campos omitidos são tratados como nulos e resultam em 422.""")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Edifício atualizado com sucesso"),
             @ApiResponse(responseCode = "404", description = "Edifício não encontrado"),
@@ -100,7 +106,7 @@ public class BuildingController {
 
     @Operation(
             description = """
-                    Altera o status do edifício. Transições permitidas:
+                    Altera o status do edifício. Campo obrigatório: `status`. Transições permitidas:
                     - **ACTIVE**: ativa um edifício INACTIVE, ou restaura um ARCHIVED.
                     - **INACTIVE**: desativa um edifício ACTIVE.
                     - **ARCHIVED**: arquiva o edifício independente do status atual.

@@ -58,7 +58,10 @@ public class EventRequestController {
         return ResponseEntity.ok(getEventRequestUseCase.findAll());
     }
 
-    @Operation(description = "Solicita a criação de um novo evento. Fica pendente até ser aprovada ou rejeitada.")
+    @Operation(description = """
+            Solicita a criação de um novo evento. Fica pendente até ser aprovada ou rejeitada.
+            Campos obrigatórios: `title`, `startAt`, `endAt` (posterior a `startAt`), `userId` e `roomId`.
+            Campos opcionais: `description`, `isAllDay`, `recurrenceRule` e `justification`.""")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Solicitação registrada com sucesso"),
             @ApiResponse(responseCode = "422", description = "Dados inválidos")
@@ -69,7 +72,12 @@ public class EventRequestController {
         return ResponseEntity.created(URI.create("/event-requests/" + response.id())).body(response);
     }
 
-    @Operation(description = "Solicita a atualização de um evento existente. Fica pendente até ser aprovada ou rejeitada.")
+    @Operation(description = """
+            Solicita a atualização de um evento existente. Fica pendente até ser aprovada ou rejeitada.
+            A solicitação descreve o estado completo desejado do evento.
+            Campos obrigatórios: `eventId`, `title`, `startAt`, `endAt` (posterior a `startAt`), `userId` e `roomId` — \
+            também os que não foram alterados.
+            Campos opcionais: `description`, `isAllDay`, `recurrenceRule` e `justification`.""")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Solicitação registrada com sucesso"),
             @ApiResponse(responseCode = "404", description = "Evento não encontrado"),
@@ -81,7 +89,10 @@ public class EventRequestController {
         return ResponseEntity.created(URI.create("/event-requests/" + response.id())).body(response);
     }
 
-    @Operation(description = "Solicita o cancelamento de um evento existente. Fica pendente até ser aprovada ou rejeitada.")
+    @Operation(description = """
+            Solicita o cancelamento de um evento existente. Fica pendente até ser aprovada ou rejeitada.
+            Campos obrigatórios: `eventId` e `userId`.
+            Campo opcional: `justification`.""")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Solicitação registrada com sucesso"),
             @ApiResponse(responseCode = "404", description = "Evento não encontrado"),
@@ -93,7 +104,9 @@ public class EventRequestController {
         return ResponseEntity.created(URI.create("/event-requests/" + response.id())).body(response);
     }
 
-    @Operation(description = "Aprova uma solicitação, efetivando a operação sobre o evento.")
+    @Operation(description = """
+            Aprova uma solicitação, efetivando a operação sobre o evento.
+            Não possui corpo: o único dado obrigatório é o `id` da solicitação, informado na URL.""")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Solicitação aprovada com sucesso"),
             @ApiResponse(responseCode = "404", description = "Solicitação não encontrada"),
@@ -106,7 +119,9 @@ public class EventRequestController {
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(description = "Rejeita uma solicitação sem alterar o evento.")
+    @Operation(description = """
+            Rejeita uma solicitação sem alterar o evento.
+            Não possui corpo: o único dado obrigatório é o `id` da solicitação, informado na URL.""")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Solicitação rejeitada com sucesso"),
             @ApiResponse(responseCode = "404", description = "Solicitação não encontrada"),
