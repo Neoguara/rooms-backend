@@ -6,8 +6,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
-@Schema(description = "Grupo de alterações solicitadas. Apenas `justification` pode vir nula.")
-public record EventRequestResponse(
+@Schema(description = """
+        Grupo de alterações com a trilha de auditoria de cada item. Apenas `justification` pode \
+        vir nula.""")
+public record EventRequestAuditResponse(
         @Schema(description = "ID do grupo", requiredMode = Schema.RequiredMode.REQUIRED)
         UUID id,
 
@@ -15,10 +17,9 @@ public record EventRequestResponse(
         UUID createdBy,
 
         @Schema(description = """
-                Status do grupo, derivado dos itens: `PENDING` (nenhum item decidido), `IN_REVIEW` \
-                (parte decidida), `APPROVED` (todos aprovados), `REJECTED` (todos rejeitados) ou \
-                `PARTIALLY_APPROVED` (todos decididos, com aprovações e rejeições)""",
-                example = "PENDING", requiredMode = Schema.RequiredMode.REQUIRED)
+                Status do grupo, derivado dos itens: `PENDING`, `IN_REVIEW`, `APPROVED`, `REJECTED` \
+                ou `PARTIALLY_APPROVED`""",
+                example = "PARTIALLY_APPROVED", requiredMode = Schema.RequiredMode.REQUIRED)
         String status,
 
         @Schema(description = "Justificativa informada no grupo. Nula quando não informada",
@@ -28,6 +29,7 @@ public record EventRequestResponse(
         @Schema(description = "Data de criação do grupo", requiredMode = Schema.RequiredMode.REQUIRED)
         LocalDateTime createdAt,
 
-        @Schema(description = "Alterações que compõem o grupo", requiredMode = Schema.RequiredMode.REQUIRED)
-        List<EventChangeItemResponse> changes
+        @Schema(description = "Alterações do grupo, cada uma com seu histórico de decisões",
+                requiredMode = Schema.RequiredMode.REQUIRED)
+        List<EventChangeItemAuditResponse> changes
 ) {}

@@ -1,16 +1,13 @@
 package com.neoguara.rooms.event.infrastructure.web;
 
-import com.neoguara.rooms.event.application.dtos.CancelEventRequest;
-import com.neoguara.rooms.event.application.dtos.CreateEventRequest;
-import com.neoguara.rooms.event.application.dtos.CreateEventRequestResponse;
+import com.neoguara.rooms.event.application.dtos.EventRequestAuditResponse;
 import com.neoguara.rooms.event.application.dtos.EventRequestResponse;
-import com.neoguara.rooms.event.application.dtos.UpdateEventRequest;
-import com.neoguara.rooms.event.application.usecases.ApproveEventRequestUseCase;
+import com.neoguara.rooms.event.application.dtos.ReviewEventRequest;
+import com.neoguara.rooms.event.application.dtos.SubmitEventRequest;
+import com.neoguara.rooms.event.application.usecases.GetEventRequestAuditUseCase;
 import com.neoguara.rooms.event.application.usecases.GetEventRequestUseCase;
-import com.neoguara.rooms.event.application.usecases.RejectEventRequestUseCase;
-import com.neoguara.rooms.event.application.usecases.RequestEventCancellationUseCase;
-import com.neoguara.rooms.event.application.usecases.RequestEventCreationUseCase;
-import com.neoguara.rooms.event.application.usecases.RequestEventUpdateUseCase;
+import com.neoguara.rooms.event.application.usecases.RequestEventChangesUseCase;
+import com.neoguara.rooms.event.application.usecases.ReviewEventRequestUseCase;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -29,29 +26,23 @@ import java.util.UUID;
 public class EventRequestController {
 
     private final GetEventRequestUseCase getEventRequestUseCase;
-    private final RequestEventCreationUseCase requestEventCreationUseCase;
-    private final RequestEventUpdateUseCase requestEventUpdateUseCase;
-    private final RequestEventCancellationUseCase requestEventCancellationUseCase;
-    private final ApproveEventRequestUseCase approveEventRequestUseCase;
-    private final RejectEventRequestUseCase rejectEventRequestUseCase;
+    private final GetEventRequestAuditUseCase getEventRequestAuditUseCase;
+    private final RequestEventChangesUseCase requestEventChangesUseCase;
+    private final ReviewEventRequestUseCase reviewEventRequestUseCase;
 
     EventRequestController(
             GetEventRequestUseCase getEventRequestUseCase,
-            RequestEventCreationUseCase requestEventCreationUseCase,
-            RequestEventUpdateUseCase requestEventUpdateUseCase,
-            RequestEventCancellationUseCase requestEventCancellationUseCase,
-            ApproveEventRequestUseCase approveEventRequestUseCase,
-            RejectEventRequestUseCase rejectEventRequestUseCase
+            GetEventRequestAuditUseCase getEventRequestAuditUseCase,
+            RequestEventChangesUseCase requestEventChangesUseCase,
+            ReviewEventRequestUseCase reviewEventRequestUseCase
     ) {
         this.getEventRequestUseCase = getEventRequestUseCase;
-        this.requestEventCreationUseCase = requestEventCreationUseCase;
-        this.requestEventUpdateUseCase = requestEventUpdateUseCase;
-        this.requestEventCancellationUseCase = requestEventCancellationUseCase;
-        this.approveEventRequestUseCase = approveEventRequestUseCase;
-        this.rejectEventRequestUseCase = rejectEventRequestUseCase;
+        this.getEventRequestAuditUseCase = getEventRequestAuditUseCase;
+        this.requestEventChangesUseCase = requestEventChangesUseCase;
+        this.reviewEventRequestUseCase = reviewEventRequestUseCase;
     }
 
-    @Operation(description = "Retorna todas as solicitações de eventos.")
+    @Operation(description = "Retorna todos os grupos de solicitações com suas alterações.")
     @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso")
     @GetMapping
     public ResponseEntity<List<EventRequestResponse>> listEventRequests() {
@@ -59,78 +50,57 @@ public class EventRequestController {
     }
 
     @Operation(description = """
-            Solicita a criação de um novo evento. Fica pendente até ser aprovada ou rejeitada.
-            Campos obrigatórios: `title`, `startAt`, `endAt` (posterior a `startAt`), `userId` e `roomId`.
-            Campos opcionais: `description`, `isAllDay`, `recurrenceRule` e `justification`.""")
+            Submete um grupo de alterações de eventos. Criações, atualizações e cancelamentos podem \
+            ser misturados na mesma lista `changes`, e cada alteração é aprovada ou rejeitada \
+            individualmente depois.
+            Campos obrigatórios: `userId` e `changes` (com ao menos um item). Campo opcional: `justification`.
+            Cada item de `changes` é identificado pelo campo `type`:
+            - `CREATE`: exige `title`, `startAt`, `endAt` (posterior a `startAt`) e `roomId`; não aceita `eventId`.
+            - `UPDATE`: exige `eventId` e o estado completo desejado — `title`, `startAt`, `endAt` e `roomId` — \
+            também os campos que não foram alterados.
+            - `CANCEL`: exige apenas `eventId`.""")
     @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "Solicitação registrada com sucesso"),
+            @ApiResponse(responseCode = "201", description = "Grupo registrado com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Evento referenciado por um item não encontrado"),
             @ApiResponse(responseCode = "422", description = "Dados inválidos")
     })
-    @PostMapping("/create-event")
-    public ResponseEntity<CreateEventRequestResponse> requestEventCreation(@RequestBody CreateEventRequest request) {
-        var response = requestEventCreationUseCase.execute(request);
+    @PostMapping
+    public ResponseEntity<EventRequestResponse> requestEventChanges(@RequestBody SubmitEventRequest request) {
+        var response = requestEventChangesUseCase.execute(request);
         return ResponseEntity.created(URI.create("/event-requests/" + response.id())).body(response);
     }
 
     @Operation(description = """
-            Solicita a atualização de um evento existente. Fica pendente até ser aprovada ou rejeitada.
-            A solicitação descreve o estado completo desejado do evento.
-            Campos obrigatórios: `eventId`, `title`, `startAt`, `endAt` (posterior a `startAt`), `userId` e `roomId` — \
-            também os que não foram alterados.
-            Campos opcionais: `description`, `isAllDay`, `recurrenceRule` e `justification`.""")
+            Aprova ou rejeita alterações do grupo, uma a uma, em uma única chamada. Alterações \
+            aprovadas são efetivadas imediatamente sobre os eventos; alterações rejeitadas não \
+            alteram nada. Itens que não aparecerem em `decisions` continuam pendentes, e o status \
+            do grupo é recalculado a partir dos itens.
+            Campos obrigatórios: `reviewedBy` e `decisions` (com ao menos um item, cada um com \
+            `itemId` e `decision`). Campo opcional por item: `comment`.
+            Cada decisão é registrada no histórico de auditoria e nunca é sobrescrita.""")
     @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "Solicitação registrada com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Evento não encontrado"),
-            @ApiResponse(responseCode = "422", description = "Dados inválidos")
+            @ApiResponse(responseCode = "200", description = "Decisões registradas com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Grupo, item de alteração ou evento não encontrado"),
+            @ApiResponse(responseCode = "422", description = "Dados inválidos ou item já decidido")
     })
-    @PostMapping("/update-event")
-    public ResponseEntity<CreateEventRequestResponse> requestEventUpdate(@RequestBody UpdateEventRequest request) {
-        var response = requestEventUpdateUseCase.execute(request.eventId(), request);
-        return ResponseEntity.created(URI.create("/event-requests/" + response.id())).body(response);
+    @PostMapping("/{id}/review")
+    public ResponseEntity<EventRequestResponse> reviewEventRequest(
+            @Parameter(description = "ID do grupo de solicitações") @PathVariable UUID id,
+            @RequestBody ReviewEventRequest request) {
+        return ResponseEntity.ok(reviewEventRequestUseCase.execute(id, request));
     }
 
     @Operation(description = """
-            Solicita o cancelamento de um evento existente. Fica pendente até ser aprovada ou rejeitada.
-            Campos obrigatórios: `eventId` e `userId`.
-            Campo opcional: `justification`.""")
+            Retorna o grupo com a trilha de auditoria de cada alteração: todas as decisões tomadas, \
+            por quem, quando e com qual comentário, da mais antiga para a mais recente.
+            Não possui corpo: o único dado obrigatório é o `id` do grupo, informado na URL.""")
     @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "Solicitação registrada com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Evento não encontrado"),
-            @ApiResponse(responseCode = "422", description = "Dados inválidos")
+            @ApiResponse(responseCode = "200", description = "Histórico retornado com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Grupo não encontrado")
     })
-    @PostMapping("/cancel-event")
-    public ResponseEntity<CreateEventRequestResponse> requestEventCancellation(@RequestBody CancelEventRequest request) {
-        var response = requestEventCancellationUseCase.execute(request.eventId(), request);
-        return ResponseEntity.created(URI.create("/event-requests/" + response.id())).body(response);
-    }
-
-    @Operation(description = """
-            Aprova uma solicitação, efetivando a operação sobre o evento.
-            Não possui corpo: o único dado obrigatório é o `id` da solicitação, informado na URL.""")
-    @ApiResponses({
-            @ApiResponse(responseCode = "204", description = "Solicitação aprovada com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Solicitação não encontrada"),
-            @ApiResponse(responseCode = "422", description = "Solicitação já foi processada")
-    })
-    @PostMapping("/{id}/approve")
-    public ResponseEntity<Void> approveEventRequest(
-            @Parameter(description = "ID da solicitação") @PathVariable UUID id) {
-        approveEventRequestUseCase.execute(id);
-        return ResponseEntity.noContent().build();
-    }
-
-    @Operation(description = """
-            Rejeita uma solicitação sem alterar o evento.
-            Não possui corpo: o único dado obrigatório é o `id` da solicitação, informado na URL.""")
-    @ApiResponses({
-            @ApiResponse(responseCode = "204", description = "Solicitação rejeitada com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Solicitação não encontrada"),
-            @ApiResponse(responseCode = "422", description = "Solicitação já foi processada")
-    })
-    @PostMapping("/{id}/reject")
-    public ResponseEntity<Void> rejectEventRequest(
-            @Parameter(description = "ID da solicitação") @PathVariable UUID id) {
-        rejectEventRequestUseCase.execute(id);
-        return ResponseEntity.noContent().build();
+    @GetMapping("/{id}/audit")
+    public ResponseEntity<EventRequestAuditResponse> getEventRequestAudit(
+            @Parameter(description = "ID do grupo de solicitações") @PathVariable UUID id) {
+        return ResponseEntity.ok(getEventRequestAuditUseCase.execute(id));
     }
 }

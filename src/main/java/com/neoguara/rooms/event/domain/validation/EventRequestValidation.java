@@ -8,7 +8,6 @@ public class EventRequestValidation implements Validator<EventRequest> {
     @Override
     public void validate(EventRequest target, Notification notification) {
         notification
-                .addErrorIf(target.getCreatedBy() == null, "createdBy is required")
-                .addErrorIf(target.getType() == null, "type is required");
+                .addErrorIf(target.getCreatedBy() == null, "createdBy is required");
     }
 }

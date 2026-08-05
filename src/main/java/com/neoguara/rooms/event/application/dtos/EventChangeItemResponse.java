@@ -6,13 +6,26 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Schema(description = """
-        Estado do evento antes (`old*`) e depois (`new*`) da alteração solicitada. Somente `id` é \
-        sempre retornado: em solicitações CREATE os campos `old*` são nulos, em solicitações CANCEL \
-        os campos `new*` são nulos, e campos opcionais do evento (descrição, dia inteiro e recorrência) \
-        podem ser nulos em qualquer tipo.""")
+        Uma alteração solicitada, com o estado do evento antes (`old*`) e depois (`new*`) dela. \
+        Em alterações CREATE os campos `old*` e `eventId` são nulos, em alterações CANCEL os campos \
+        `new*` são nulos, e campos opcionais do evento (descrição, dia inteiro e recorrência) podem \
+        ser nulos em qualquer tipo.""")
 public record EventChangeItemResponse(
         @Schema(description = "ID do item de alteração", requiredMode = Schema.RequiredMode.REQUIRED)
         UUID id,
+
+        @Schema(description = "Tipo da alteração: CREATE, UPDATE ou CANCEL",
+                example = "CREATE", requiredMode = Schema.RequiredMode.REQUIRED)
+        String type,
+
+        @Schema(description = "ID do evento alterado. Nulo em alterações do tipo CREATE, "
+                + "pois o evento só passa a existir após a aprovação",
+                requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
+        UUID eventId,
+
+        @Schema(description = "Status desta alteração: PENDING, APPROVED ou REJECTED",
+                example = "PENDING", requiredMode = Schema.RequiredMode.REQUIRED)
+        String status,
 
         @Schema(description = "Sala antes da alteração", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
         UUID oldRoomId,

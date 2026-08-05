@@ -4,9 +4,17 @@ import com.neoguara.rooms.event.domain.entities.EventChangeItem;
 import com.neoguara.rooms.event.domain.valueobjects.EventChangeItemId;
 import com.neoguara.rooms.event.domain.valueobjects.EventRequestId;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
-import java.util.Optional;
+import java.util.Collection;
+import java.util.List;
+import java.util.UUID;
 
 public interface EventChangeItemJpaRepository extends JpaRepository<EventChangeItem, EventChangeItemId> {
-    Optional<EventChangeItem> findByEventRequestId(EventRequestId eventRequestId);
+
+    List<EventChangeItem> findByEventRequestId(EventRequestId eventRequestId);
+
+    @Query("SELECT i FROM EventChangeItem i WHERE i.eventRequestId.id IN :ids")
+    List<EventChangeItem> findByEventRequestIdIn(@Param("ids") Collection<UUID> ids);
 }

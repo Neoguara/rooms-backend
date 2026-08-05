@@ -4,9 +4,12 @@ import com.neoguara.rooms.event.application.dtos.EventRequestResponse;
 import com.neoguara.rooms.event.application.mappers.EventRequestMapper;
 import com.neoguara.rooms.event.application.ports.EventChangeItemRepositoryPort;
 import com.neoguara.rooms.event.application.ports.EventRequestRepositoryPort;
+import com.neoguara.rooms.event.domain.entities.EventChangeItem;
+import com.neoguara.rooms.event.domain.entities.EventRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class GetEventRequestUseCase {
@@ -23,13 +26,18 @@ public class GetEventRequestUseCase {
     }
 
     public List<EventRequestResponse> findAll() {
-        return repository.findAll().stream()
-                .map(eventRequest -> {
-                    var changeItem = changeItemRepository
-                            .findByEventRequestId(eventRequest.getId())
-                            .orElse(null);
-                    return EventRequestMapper.toResponse(eventRequest, changeItem);
-                })
+        var eventRequests = repository.findAll();
+
+        var itemsByRequest = changeItemRepository
+                .findByEventRequestIdIn(eventRequests.stream().map(EventRequest::getId).toList())
+                .stream()
+                .collect(Collectors.groupingBy(EventChangeItem::getEventRequestId));
+
+        return eventRequests.stream()
+                .map(eventRequest -> EventRequestMapper.toResponse(
+                        eventRequest,
+                        itemsByRequest.getOrDefault(eventRequest.getId(), List.of())
+                ))
                 .toList();
     }
 }

@@ -6,9 +6,10 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Schema(description = """
-        Dados da solicitação de criação de evento. `description`, `isAllDay`, `recurrenceRule` \
-        e `justification` são opcionais; os demais campos são obrigatórios.""")
-public record CreateEventRequest(
+        Alteração do tipo `CREATE`: descreve um evento a ser criado. `description`, `isAllDay` e \
+        `recurrenceRule` são opcionais; os demais campos são obrigatórios. O evento só passa a \
+        existir quando esta alteração for aprovada.""")
+public record CreateEventChange(
         @Schema(description = "Título do evento", example = "Reunião de planejamento",
                 requiredMode = Schema.RequiredMode.REQUIRED)
         String title,
@@ -33,14 +34,6 @@ public record CreateEventRequest(
                 example = "FREQ=WEEKLY;BYDAY=MO", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
         String recurrenceRule,
 
-        @Schema(description = "Justificativa da solicitação, exibida para quem aprova",
-                requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
-        String justification,
-
-        @Schema(description = "ID do usuário que está solicitando a criação",
-                requiredMode = Schema.RequiredMode.REQUIRED)
-        UUID userId,
-
         @Schema(description = "ID da sala reservada para o evento", requiredMode = Schema.RequiredMode.REQUIRED)
         UUID roomId
-) {}
+) implements EventChangeRequest {}

@@ -5,7 +5,8 @@ import com.neoguara.rooms.event.domain.entities.EventChangeItem;
 import com.neoguara.rooms.event.domain.valueobjects.EventRequestId;
 import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
+import java.util.Collection;
+import java.util.List;
 
 @Repository
 public class EventChangeItemRepositoryImpl implements EventChangeItemRepositoryPort {
@@ -22,7 +23,20 @@ public class EventChangeItemRepositoryImpl implements EventChangeItemRepositoryP
     }
 
     @Override
-    public Optional<EventChangeItem> findByEventRequestId(EventRequestId eventRequestId) {
+    public List<EventChangeItem> saveAll(List<EventChangeItem> eventChangeItems) {
+        return jpaRepository.saveAll(eventChangeItems);
+    }
+
+    @Override
+    public List<EventChangeItem> findByEventRequestId(EventRequestId eventRequestId) {
         return jpaRepository.findByEventRequestId(eventRequestId);
+    }
+
+    @Override
+    public List<EventChangeItem> findByEventRequestIdIn(Collection<EventRequestId> eventRequestIds) {
+        if (eventRequestIds.isEmpty()) return List.of();
+        return jpaRepository.findByEventRequestIdIn(
+                eventRequestIds.stream().map(EventRequestId::id).toList()
+        );
     }
 }

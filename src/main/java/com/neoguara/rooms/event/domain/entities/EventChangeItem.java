@@ -1,9 +1,13 @@
 package com.neoguara.rooms.event.domain.entities;
 
+import com.neoguara.rooms.event.domain.enums.EventChangeItemStatus;
+import com.neoguara.rooms.event.domain.enums.EventChangeType;
 import com.neoguara.rooms.event.domain.validation.EventChangeItemValidation;
 import com.neoguara.rooms.event.domain.valueobjects.EventChangeItemId;
+import com.neoguara.rooms.event.domain.valueobjects.EventId;
 import com.neoguara.rooms.event.domain.valueobjects.EventRequestId;
 import com.neoguara.rooms.event.domain.valueobjects.EventSnapshot;
+import com.neoguara.rooms.shared.domain.exceptions.InvalidStateException;
 import com.neoguara.rooms.shared.domain.validation.Notification;
 import jakarta.persistence.*;
 
@@ -16,6 +20,16 @@ public class EventChangeItem {
     @Embedded
     @AttributeOverride(name = "id", column = @Column(name = "event_request_id"))
     private EventRequestId eventRequestId;
+
+    @Embedded
+    @AttributeOverride(name = "id", column = @Column(name = "event_id"))
+    private EventId eventId;
+
+    @Enumerated(EnumType.STRING)
+    private EventChangeType type;
+
+    @Enumerated(EnumType.STRING)
+    private EventChangeItemStatus status;
 
     @Embedded
     @AttributeOverrides({
@@ -43,15 +57,30 @@ public class EventChangeItem {
 
     EventChangeItem() {}
 
-    private EventChangeItem(EventRequestId eventRequestId, EventSnapshot before, EventSnapshot after) {
+    private EventChangeItem(
+            EventRequestId eventRequestId,
+            EventChangeType type,
+            EventId eventId,
+            EventSnapshot before,
+            EventSnapshot after
+    ) {
         this.id = new EventChangeItemId();
         this.eventRequestId = eventRequestId;
+        this.type = type;
+        this.eventId = eventId;
+        this.status = EventChangeItemStatus.PENDING;
         this.before = before;
         this.after = after;
     }
 
-    private static EventChangeItem validated(EventRequestId eventRequestId, EventSnapshot before, EventSnapshot after) {
-        EventChangeItem item = new EventChangeItem(eventRequestId, before, after);
+    private static EventChangeItem validated(
+            EventRequestId eventRequestId,
+            EventChangeType type,
+            EventId eventId,
+            EventSnapshot before,
+            EventSnapshot after
+    ) {
+        EventChangeItem item = new EventChangeItem(eventRequestId, type, eventId, before, after);
         Notification notification = Notification.create();
         new EventChangeItemValidation().validate(item, notification);
         notification.raiseIfHasErrors();
@@ -59,15 +88,27 @@ public class EventChangeItem {
     }
 
     public static EventChangeItem create(EventRequestId eventRequestId, EventSnapshot after) {
-        return validated(eventRequestId, null, after);
+        return validated(eventRequestId, EventChangeType.CREATE, null, null, after);
     }
 
     public static EventChangeItem update(EventRequestId eventRequestId, Event old, EventSnapshot after) {
-        return validated(eventRequestId, snapshotOf(old), after);
+        return validated(eventRequestId, EventChangeType.UPDATE, old.getId(), snapshotOf(old), after);
     }
 
     public static EventChangeItem cancel(EventRequestId eventRequestId, Event event) {
-        return validated(eventRequestId, snapshotOf(event), null);
+        return validated(eventRequestId, EventChangeType.CANCEL, event.getId(), snapshotOf(event), null);
+    }
+
+    public void approve() {
+        if (this.status != EventChangeItemStatus.PENDING)
+            throw new InvalidStateException("Only pending change items can be approved");
+        this.status = EventChangeItemStatus.APPROVED;
+    }
+
+    public void reject() {
+        if (this.status != EventChangeItemStatus.PENDING)
+            throw new InvalidStateException("Only pending change items can be rejected");
+        this.status = EventChangeItemStatus.REJECTED;
     }
 
     private static EventSnapshot snapshotOf(Event event) {
@@ -79,6 +120,9 @@ public class EventChangeItem {
 
     public EventChangeItemId getId() { return id; }
     public EventRequestId getEventRequestId() { return eventRequestId; }
+    public EventId getEventId() { return eventId; }
+    public EventChangeType getType() { return type; }
+    public EventChangeItemStatus getStatus() { return status; }
     public EventSnapshot getBefore() { return before; }
     public EventSnapshot getAfter() { return after; }
 }
