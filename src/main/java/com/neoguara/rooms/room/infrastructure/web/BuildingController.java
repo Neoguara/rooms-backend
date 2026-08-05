@@ -91,11 +91,11 @@ public class BuildingController {
         return ResponseEntity.ok(updateBuildingUseCase.execute(id, request));
     }
 
-    @Operation(description = "Remove um edifício (soft delete). O edifício deve estar com status ARCHIVED antes de ser deletado; caso contrário retorna 422.")
+    @Operation(description = "Remove um edifício (soft delete). O edifício deve estar com status INACTIVE antes de ser deletado; caso contrário retorna 422.")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Edifício removido com sucesso"),
             @ApiResponse(responseCode = "404", description = "Edifício não encontrado"),
-            @ApiResponse(responseCode = "422", description = "Edifício não está arquivado")
+            @ApiResponse(responseCode = "422", description = "Edifício não está inativo")
     })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteBuilding(
@@ -107,12 +107,11 @@ public class BuildingController {
     @Operation(
             description = """
                     Altera o status do edifício. Campo obrigatório: `status`. Transições permitidas:
-                    - **ACTIVE**: ativa um edifício INACTIVE, ou restaura um ARCHIVED.
+                    - **ACTIVE**: ativa um edifício INACTIVE.
                     - **INACTIVE**: desativa um edifício ACTIVE.
-                    - **ARCHIVED**: arquiva o edifício independente do status atual.
 
-                    Transições inválidas retornam 422 (ex: ativar um edifício já ARCHIVED diretamente).
-                    Para remover permanentemente um edifício use DELETE /buildings/{id}.
+                    Transições inválidas retornam 422 (ex: alterar o status de um edifício já deletado).
+                    Para remover um edifício use DELETE /buildings/{id} — ele precisa estar INACTIVE antes.
                     """
     )
     @ApiResponses({

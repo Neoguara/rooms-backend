@@ -80,6 +80,7 @@ public class User {
     }
 
     public void delete() {
+        if (status != UserStatus.INACTIVE) throw new InvalidStateException("User must be inactive before deletion");
         this.status = UserStatus.DELETED;
     }
 

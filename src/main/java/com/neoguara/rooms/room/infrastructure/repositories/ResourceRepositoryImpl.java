@@ -37,9 +37,4 @@ public class ResourceRepositoryImpl implements ResourceRepositoryPort {
     public List<Resource> findAll() {
         return jpaRepository.findAllByStatusNot(ResourceStatus.DELETED);
     }
-
-    @Override
-    public void delete(Resource resource) {
-        jpaRepository.delete(resource);
-    }
 }

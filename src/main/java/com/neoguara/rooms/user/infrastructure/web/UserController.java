@@ -93,10 +93,12 @@ public class UserController {
         return ResponseEntity.ok(updateUserUseCase.execute(id, request));
     }
 
-    @Operation(description = "Remove um usuário (soft delete). O status passa para DELETED e o usuário deixa de ser acessível.")
+    @Operation(description = "Remove um usuário (soft delete). O usuário deve estar com status INACTIVE antes de ser deletado; caso contrário retorna 422. "
+            + "O status passa para DELETED e o usuário deixa de ser acessível.")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Usuário removido com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
+            @ApiResponse(responseCode = "404", description = "Usuário não encontrado"),
+            @ApiResponse(responseCode = "422", description = "Usuário não está inativo")
     })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteById(
@@ -112,7 +114,7 @@ public class UserController {
                     - **INACTIVE**: desativa um usuário ACTIVE.
 
                     Usuários com status DELETED não podem ser modificados.
-                    Para remover permanentemente um usuário use DELETE /users/{id}.
+                    Para remover um usuário use DELETE /users/{id} — ele precisa estar INACTIVE antes.
                     """
     )
     @ApiResponses({

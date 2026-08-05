@@ -96,34 +96,21 @@ public class Room {
 
     public void activate () {
         if (status == RoomStatus.DELETED) throw new InvalidStateException("Deleted room cannot be modified");
-        if (status == RoomStatus.ARCHIVED) throw new InvalidStateException("Archived room cannot be activated");
         this.status = RoomStatus.AVAILABLE;
     }
 
     public void deactivate () {
         if (status == RoomStatus.DELETED) throw new InvalidStateException("Deleted room cannot be modified");
-        if (status == RoomStatus.ARCHIVED) throw new InvalidStateException("Archived room cannot be deactivated");
         this.status = RoomStatus.INACTIVE;
-    }
-
-    public void archive() {
-        if (status == RoomStatus.DELETED) throw new InvalidStateException("Deleted room cannot be modified");
-        this.status = RoomStatus.ARCHIVED;
-    }
-
-    public void restore() {
-        if (status == RoomStatus.DELETED) throw new InvalidStateException("Deleted room cannot be modified");
-        this.status = RoomStatus.AVAILABLE;
     }
 
     public void putUnderMaintenance() {
         if (status == RoomStatus.DELETED) throw new InvalidStateException("Deleted room cannot be modified");
-        if (status == RoomStatus.ARCHIVED) throw new InvalidStateException("Archived room cannot enter maintenance");
         this.status = RoomStatus.MAINTENANCE;
     }
 
     public void delete() {
-        if (status != RoomStatus.ARCHIVED) throw new InvalidStateException("Room must be archived before deletion");
+        if (status != RoomStatus.INACTIVE) throw new InvalidStateException("Room must be inactive before deletion");
         this.status = RoomStatus.DELETED;
     }
 

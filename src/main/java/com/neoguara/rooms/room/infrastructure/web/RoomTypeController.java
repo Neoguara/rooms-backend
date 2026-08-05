@@ -94,12 +94,11 @@ public class RoomTypeController {
     @Operation(
             description = """
                     Altera o status do tipo de sala. Campo obrigatório: `status`. Transições permitidas:
-                    - **ACTIVE**: ativa um tipo de sala INACTIVE, ou restaura um ARCHIVED.
+                    - **ACTIVE**: ativa um tipo de sala INACTIVE.
                     - **INACTIVE**: desativa um tipo de sala ACTIVE.
-                    - **ARCHIVED**: arquiva o tipo de sala independente do status atual.
 
-                    Transições inválidas retornam 422 (ex: ativar diretamente um tipo ARCHIVED sem restaurar).
-                    Para remover permanentemente use DELETE /room-types/{id} (exige ARCHIVED).
+                    Transições inválidas retornam 422 (ex: alterar o status de um tipo já deletado).
+                    Para remover use DELETE /room-types/{id} (exige INACTIVE).
                     """
     )
     @ApiResponses({
@@ -114,11 +113,11 @@ public class RoomTypeController {
         return ResponseEntity.ok(updateRoomTypeStatusUseCase.execute(id, request.status()));
     }
 
-    @Operation(description = "Remove um tipo de sala (soft delete). O tipo de sala deve estar com status ARCHIVED antes de ser deletado; caso contrário retorna 422.")
+    @Operation(description = "Remove um tipo de sala (soft delete). O tipo de sala deve estar com status INACTIVE antes de ser deletado; caso contrário retorna 422.")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Tipo de sala removido com sucesso"),
             @ApiResponse(responseCode = "404", description = "Tipo de sala não encontrado"),
-            @ApiResponse(responseCode = "422", description = "Tipo de sala não está arquivado")
+            @ApiResponse(responseCode = "422", description = "Tipo de sala não está inativo")
     })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteRoomType(

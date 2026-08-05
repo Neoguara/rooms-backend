@@ -42,9 +42,4 @@ public class UserRepositoryImpl implements UserRepositoryPort {
     public boolean existsByEmail(String email) {
         return jpaRepository.existsByEmailAndStatusNot(email, UserStatus.DELETED);
     }
-
-    @Override
-    public void delete(User user) {
-        jpaRepository.delete(user);
-    }
 }

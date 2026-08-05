@@ -32,9 +32,4 @@ public class BuildingRepositoryImpl implements BuildingRepositoryPort {
     public List<Building> findAll() {
         return jpaRepository.findAllByStatusNot(BuildingStatus.DELETED);
     }
-
-    @Override
-    public void delete(Building building) {
-        jpaRepository.delete(building);
-    }
 }

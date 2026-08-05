@@ -4,10 +4,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = "Novo status do edifício")
 public record UpdateBuildingStatusRequest(
-        @Schema(description = "Status desejado: ACTIVE ativa um edifício INACTIVE ou restaura um ARCHIVED, "
-                + "INACTIVE desativa um edifício ACTIVE, ARCHIVED arquiva o edifício",
+        @Schema(description = "Status desejado: ACTIVE ativa um edifício INACTIVE, "
+                + "INACTIVE desativa um edifício ACTIVE (obrigatório antes de deletar)",
                 requiredMode = Schema.RequiredMode.REQUIRED)
         Status status
 ) {
-    public enum Status { ACTIVE, INACTIVE, ARCHIVED }
+    public enum Status { ACTIVE, INACTIVE }
 }

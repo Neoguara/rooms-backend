@@ -10,5 +10,4 @@ public interface BuildingRepositoryPort {
     Building save(Building building);
     Optional<Building> findById(BuildingId id);
     List<Building> findAll();
-    void delete(Building building);
 }

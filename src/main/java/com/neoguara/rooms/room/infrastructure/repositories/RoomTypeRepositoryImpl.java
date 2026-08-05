@@ -32,9 +32,4 @@ public class RoomTypeRepositoryImpl implements RoomTypeRepositoryPort {
     public List<RoomType> findAll() {
         return jpaRepository.findAllByStatusNot(RoomTypeStatus.DELETED);
     }
-
-    @Override
-    public void delete(RoomType roomType) {
-        jpaRepository.delete(roomType);
-    }
 }

@@ -58,29 +58,16 @@ public class Building {
 
     public void activate() {
         if (status == BuildingStatus.DELETED) throw new InvalidStateException("Deleted building cannot be modified");
-        if (status == BuildingStatus.ARCHIVED) throw new InvalidStateException("Archived building cannot be activated");
         this.status = BuildingStatus.ACTIVE;
     }
 
     public void deactivate() {
         if (status == BuildingStatus.DELETED) throw new InvalidStateException("Deleted building cannot be modified");
-        if (status == BuildingStatus.ARCHIVED) throw new InvalidStateException("Archived building cannot be deactivated");
         this.status = BuildingStatus.INACTIVE;
     }
 
-    public void archive() {
-        if (status == BuildingStatus.DELETED) throw new InvalidStateException("Deleted building cannot be modified");
-        this.status = BuildingStatus.ARCHIVED;
-    }
-
-    public void restore() {
-        if (status == BuildingStatus.DELETED) throw new InvalidStateException("Deleted building cannot be modified");
-        if (status != BuildingStatus.ARCHIVED) throw new InvalidStateException("Only archived building can be restored");
-        this.status = BuildingStatus.ACTIVE;
-    }
-
     public void delete() {
-        if (status != BuildingStatus.ARCHIVED) throw new InvalidStateException("Building must be archived before deletion");
+        if (status != BuildingStatus.INACTIVE) throw new InvalidStateException("Building must be inactive before deletion");
         this.status = BuildingStatus.DELETED;
     }
 

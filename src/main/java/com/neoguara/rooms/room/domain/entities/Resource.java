@@ -57,29 +57,16 @@ public class Resource {
 
     public void activate() {
         if (status == ResourceStatus.DELETED) throw new InvalidStateException("Deleted resource cannot be modified");
-        if (status == ResourceStatus.ARCHIVED) throw new InvalidStateException("Archived resource cannot be activated");
         this.status = ResourceStatus.ACTIVE;
     }
 
     public void deactivate() {
         if (status == ResourceStatus.DELETED) throw new InvalidStateException("Deleted resource cannot be modified");
-        if (status == ResourceStatus.ARCHIVED) throw new InvalidStateException("Archived resource cannot be deactivated");
         this.status = ResourceStatus.INACTIVE;
     }
 
-    public void archive() {
-        if (status == ResourceStatus.DELETED) throw new InvalidStateException("Deleted resource cannot be modified");
-        this.status = ResourceStatus.ARCHIVED;
-    }
-
-    public void restore() {
-        if (status == ResourceStatus.DELETED) throw new InvalidStateException("Deleted resource cannot be modified");
-        if (status != ResourceStatus.ARCHIVED) throw new InvalidStateException("Only archived resource can be restored");
-        this.status = ResourceStatus.ACTIVE;
-    }
-
     public void delete() {
-        if (status != ResourceStatus.ARCHIVED) throw new InvalidStateException("Resource must be archived before deletion");
+        if (status != ResourceStatus.INACTIVE) throw new InvalidStateException("Resource must be inactive before deletion");
         this.status = ResourceStatus.DELETED;
     }
 

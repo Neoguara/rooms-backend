@@ -11,5 +11,4 @@ public interface ResourceRepositoryPort {
     Optional<Resource> findById(ResourceId id);
     List<Resource> findAllById(List<ResourceId> ids);
     List<Resource> findAll();
-    void delete(Resource resource);
 }

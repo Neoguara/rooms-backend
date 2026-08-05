@@ -4,7 +4,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = "Novo status do usuário")
 public record UpdateUserStatusRequest(
-        @Schema(description = "Status desejado: ACTIVE ativa um usuário INACTIVE, INACTIVE desativa um usuário ACTIVE",
+        @Schema(description = "Status desejado: ACTIVE ativa um usuário INACTIVE, "
+                + "INACTIVE desativa um usuário ACTIVE (obrigatório antes de deletar)",
                 requiredMode = Schema.RequiredMode.REQUIRED)
         Status status
 ) {

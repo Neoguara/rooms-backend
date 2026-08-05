@@ -32,9 +32,4 @@ public class RoomRepositoryImpl implements RoomRepositoryPort {
     public List<Room> findAll() {
         return jpaRepository.findAllByStatusNot(RoomStatus.DELETED);
     }
-
-    @Override
-    public void delete(Room room) {
-        jpaRepository.delete(room);
-    }
 }

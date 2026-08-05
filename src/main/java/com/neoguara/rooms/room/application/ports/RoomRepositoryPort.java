@@ -10,5 +10,4 @@ public interface RoomRepositoryPort {
     Room save(Room room);
     Optional<Room> findById(RoomId id);
     List<Room> findAll();
-    void delete(Room room);
 }

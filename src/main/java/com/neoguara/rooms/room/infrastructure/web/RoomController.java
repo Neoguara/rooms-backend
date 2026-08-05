@@ -139,11 +139,11 @@ public class RoomController {
         return ResponseEntity.ok(updateRoomUseCase.execute(id, request));
     }
 
-    @Operation(description = "Remove uma sala (soft delete). A sala deve estar com status ARCHIVED antes de ser deletada; caso contrário retorna 422.")
+    @Operation(description = "Remove uma sala (soft delete). A sala deve estar com status INACTIVE antes de ser deletada; caso contrário retorna 422.")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Sala removida com sucesso"),
             @ApiResponse(responseCode = "404", description = "Sala não encontrada"),
-            @ApiResponse(responseCode = "422", description = "Sala não está arquivada")
+            @ApiResponse(responseCode = "422", description = "Sala não está inativa")
     })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteRoom(
@@ -169,13 +169,12 @@ public class RoomController {
     @Operation(
             description = """
                     Altera o status da sala. Campo obrigatório: `status`. Transições permitidas:
-                    - **AVAILABLE**: ativa uma sala INACTIVE ou MAINTENANCE. Se a sala estiver ARCHIVED, restaura para AVAILABLE.
-                    - **INACTIVE**: desativa uma sala AVAILABLE ou MAINTENANCE. Inválido se ARCHIVED.
-                    - **MAINTENANCE**: coloca a sala em manutenção. Inválido se ARCHIVED.
-                    - **ARCHIVED**: arquiva a sala independente do status atual.
+                    - **AVAILABLE**: ativa uma sala INACTIVE ou MAINTENANCE.
+                    - **INACTIVE**: desativa uma sala AVAILABLE ou MAINTENANCE.
+                    - **MAINTENANCE**: coloca a sala em manutenção.
 
-                    Transições inválidas retornam 422 (ex: tentar desativar ou colocar em manutenção uma sala ARCHIVED).
-                    Para remover permanentemente uma sala use DELETE /rooms/{id}.
+                    Transições inválidas retornam 422 (ex: alterar o status de uma sala já deletada).
+                    Para remover uma sala use DELETE /rooms/{id} — ela precisa estar INACTIVE antes.
                     """
     )
     @ApiResponses({
