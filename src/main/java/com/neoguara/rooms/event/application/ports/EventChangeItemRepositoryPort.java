@@ -9,6 +9,7 @@ import java.util.List;
 public interface EventChangeItemRepositoryPort {
     EventChangeItem save (EventChangeItem eventChangeItem);
     List<EventChangeItem> saveAll (List<EventChangeItem> eventChangeItems);
+    /** Itens do grupo, na ordem em que foram submetidos. */
     List<EventChangeItem> findByEventRequestId(EventRequestId eventRequestId);
     List<EventChangeItem> findByEventRequestIdIn(Collection<EventRequestId> eventRequestIds);
 }

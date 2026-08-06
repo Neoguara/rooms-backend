@@ -13,7 +13,9 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import com.neoguara.rooms.auth.AuthUserDetails;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -98,7 +100,8 @@ public class EventRequestController {
             Submete um grupo de alterações de eventos. Criações, atualizações e cancelamentos podem \
             ser misturados na mesma lista `changes`, e cada alteração é aprovada ou rejeitada \
             individualmente depois.
-            Campos obrigatórios: `userId` e `changes` (com ao menos um item). Campo opcional: `justification`.
+            Campo obrigatório: `changes` (com ao menos um item). Campo opcional: `justification`. \
+            O autor do grupo é o usuário autenticado, obtido do token.
             Cada item de `changes` é identificado pelo campo `type`:
             - `CREATE`: exige `title`, `startAt`, `endAt` (posterior a `startAt`) e `roomId`; não aceita `eventId`.
             - `UPDATE`: exige `eventId` e o estado completo desejado — `title`, `startAt`, `endAt` e `roomId` — \
@@ -112,8 +115,10 @@ public class EventRequestController {
             @ApiResponse(responseCode = "422", description = "Dados inválidos")
     })
     @PostMapping
-    public ResponseEntity<EventRequestResponse> requestEventChanges(@RequestBody SubmitEventRequest request) {
-        var response = requestEventChangesUseCase.execute(request);
+    public ResponseEntity<EventRequestResponse> requestEventChanges(
+            @AuthenticationPrincipal AuthUserDetails principal,
+            @RequestBody SubmitEventRequest request) {
+        var response = requestEventChangesUseCase.execute(principal.getId(), request);
         return ResponseEntity.created(URI.create("/event-requests/" + response.id())).body(response);
     }
 
@@ -122,8 +127,9 @@ public class EventRequestController {
             aprovadas são efetivadas imediatamente sobre os eventos; alterações rejeitadas não \
             alteram nada. Itens que não aparecerem em `decisions` continuam pendentes, e o status \
             do grupo é recalculado a partir dos itens.
-            Campos obrigatórios: `reviewedBy` e `decisions` (com ao menos um item, cada um com \
-            `itemId` e `decision`). Campo opcional por item: `comment`.
+            Campo obrigatório: `decisions` (com ao menos um item, cada um com `itemId` e \
+            `decision`). Campo opcional por item: `comment`. Quem decide é o usuário autenticado, \
+            obtido do token — não é possível decidir em nome de outra pessoa.
             Cada decisão é registrada no histórico de auditoria e nunca é sobrescrita.
             Aprovar exige que o evento esteja no estado compatível com a alteração: `UPDATE` e \
             `CANCEL` só valem sobre eventos ativos, e `REACTIVATE` só sobre eventos cancelados. \
@@ -136,9 +142,10 @@ public class EventRequestController {
     })
     @PostMapping("/{id}/review")
     public ResponseEntity<EventRequestResponse> reviewEventRequest(
+            @AuthenticationPrincipal AuthUserDetails principal,
             @Parameter(description = "ID do grupo de solicitações") @PathVariable UUID id,
             @RequestBody ReviewEventRequest request) {
-        return ResponseEntity.ok(reviewEventRequestUseCase.execute(id, request));
+        return ResponseEntity.ok(reviewEventRequestUseCase.execute(id, principal.getId(), request));
     }
 
     @Operation(description = """

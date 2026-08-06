@@ -31,6 +31,10 @@ public class EventChangeItem {
     @Enumerated(EnumType.STRING)
     private EventChangeItemStatus status;
 
+    /** Posição do item dentro do grupo, preservando a ordem em que foi submetido. */
+    @Column(name = "item_position")
+    private Integer position;
+
     @Embedded
     @AttributeOverrides({
         @AttributeOverride(name = "roomId.id",       column = @Column(name = "old_room_id")),
@@ -59,6 +63,7 @@ public class EventChangeItem {
 
     private EventChangeItem(
             EventRequestId eventRequestId,
+            int position,
             EventChangeType type,
             EventId eventId,
             EventSnapshot before,
@@ -66,6 +71,7 @@ public class EventChangeItem {
     ) {
         this.id = new EventChangeItemId();
         this.eventRequestId = eventRequestId;
+        this.position = position;
         this.type = type;
         this.eventId = eventId;
         this.status = EventChangeItemStatus.PENDING;
@@ -75,32 +81,33 @@ public class EventChangeItem {
 
     private static EventChangeItem validated(
             EventRequestId eventRequestId,
+            int position,
             EventChangeType type,
             EventId eventId,
             EventSnapshot before,
             EventSnapshot after
     ) {
-        EventChangeItem item = new EventChangeItem(eventRequestId, type, eventId, before, after);
+        EventChangeItem item = new EventChangeItem(eventRequestId, position, type, eventId, before, after);
         Notification notification = Notification.create();
         new EventChangeItemValidation().validate(item, notification);
         notification.raiseIfHasErrors();
         return item;
     }
 
-    public static EventChangeItem create(EventRequestId eventRequestId, EventSnapshot after) {
-        return validated(eventRequestId, EventChangeType.CREATE, null, null, after);
+    public static EventChangeItem create(EventRequestId eventRequestId, int position, EventSnapshot after) {
+        return validated(eventRequestId, position, EventChangeType.CREATE, null, null, after);
     }
 
-    public static EventChangeItem update(EventRequestId eventRequestId, Event old, EventSnapshot after) {
-        return validated(eventRequestId, EventChangeType.UPDATE, old.getId(), snapshotOf(old), after);
+    public static EventChangeItem update(EventRequestId eventRequestId, int position, Event old, EventSnapshot after) {
+        return validated(eventRequestId, position, EventChangeType.UPDATE, old.getId(), snapshotOf(old), after);
     }
 
-    public static EventChangeItem cancel(EventRequestId eventRequestId, Event event) {
-        return validated(eventRequestId, EventChangeType.CANCEL, event.getId(), snapshotOf(event), null);
+    public static EventChangeItem cancel(EventRequestId eventRequestId, int position, Event event) {
+        return validated(eventRequestId, position, EventChangeType.CANCEL, event.getId(), snapshotOf(event), null);
     }
 
-    public static EventChangeItem reactivate(EventRequestId eventRequestId, Event event) {
-        return validated(eventRequestId, EventChangeType.REACTIVATE, event.getId(), snapshotOf(event), null);
+    public static EventChangeItem reactivate(EventRequestId eventRequestId, int position, Event event) {
+        return validated(eventRequestId, position, EventChangeType.REACTIVATE, event.getId(), snapshotOf(event), null);
     }
 
     public void approve() {
@@ -124,6 +131,7 @@ public class EventChangeItem {
 
     public EventChangeItemId getId() { return id; }
     public EventRequestId getEventRequestId() { return eventRequestId; }
+    public Integer getPosition() { return position; }
     public EventId getEventId() { return eventId; }
     public EventChangeType getType() { return type; }
     public EventChangeItemStatus getStatus() { return status; }

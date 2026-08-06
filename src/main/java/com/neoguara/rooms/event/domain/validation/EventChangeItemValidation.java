@@ -10,6 +10,8 @@ public class EventChangeItemValidation implements Validator<EventChangeItem> {
     public void validate(EventChangeItem target, Notification notification) {
         notification
                 .addErrorIf(target.getEventRequestId() == null, "eventRequestId is required")
+                .addErrorIf(target.getPosition() == null || target.getPosition() < 0,
+                        "position is required and must not be negative")
                 .addErrorIf(target.getType() == null, "type is required");
 
         if (target.getType() != null) {

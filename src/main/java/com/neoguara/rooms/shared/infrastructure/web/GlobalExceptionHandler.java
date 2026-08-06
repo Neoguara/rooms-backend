@@ -5,7 +5,12 @@ import com.neoguara.rooms.shared.domain.exceptions.ConflictException;
 import com.neoguara.rooms.shared.domain.exceptions.DomainValidationException;
 import com.neoguara.rooms.shared.domain.exceptions.InvalidStateException;
 import com.neoguara.rooms.shared.domain.exceptions.ResourceNotFoundException;
-import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import tools.jackson.databind.DatabindException;
+import tools.jackson.databind.exc.InvalidFormatException;
+import tools.jackson.databind.exc.InvalidTypeIdException;
+import tools.jackson.databind.exc.MismatchedInputException;
+import tools.jackson.databind.exc.UnrecognizedPropertyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -14,8 +19,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -66,18 +71,112 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
-        String message = "Malformed JSON request";
-        if (ex.getCause() instanceof JsonMappingException jme) {
-            String field = jme.getPath().stream()
-                    .map(JsonMappingException.Reference::getFieldName)
-                    .filter(Objects::nonNull)
-                    .reduce((a, b) -> a + "." + b)
-                    .orElse(null);
-            message = field != null
-                    ? "Invalid value for field '%s': %s".formatted(field, jme.getOriginalMessage())
-                    : jme.getOriginalMessage();
+        DatabindException cause = firstDatabindException(ex);
+
+        if (cause instanceof UnrecognizedPropertyException unknown) {
+            String known = unknown.getKnownPropertyIds().stream()
+                    .map(String::valueOf)
+                    .sorted()
+                    .reduce((a, b) -> a + ", " + b)
+                    .orElse("none");
+            return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), "UNKNOWN_FIELD",
+                    "Unknown field '%s'. Accepted fields here: %s".formatted(pathOf(unknown), known));
         }
-        return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), "DESERIALIZATION_ERROR", message);
+
+        if (cause instanceof InvalidTypeIdException invalidType) {
+            String accepted = acceptedTypeIds(invalidType.getBaseType().getRawClass());
+            return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), "UNKNOWN_TYPE",
+                    "Unknown type '%s'%s%s".formatted(
+                            invalidType.getTypeId(),
+                            at(pathOf(invalidType)),
+                            accepted == null ? "" : ". Accepted types: " + accepted));
+        }
+
+        if (cause instanceof InvalidFormatException invalidFormat) {
+            return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), "INVALID_VALUE",
+                    "Invalid value '%s'%s%s".formatted(
+                            abbreviate(String.valueOf(invalidFormat.getValue())),
+                            at(pathOf(invalidFormat)),
+                            expectationOf(invalidFormat.getTargetType())));
+        }
+
+        if (cause instanceof MismatchedInputException mismatch) {
+            return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), "INVALID_VALUE",
+                    "Invalid value%s%s".formatted(
+                            at(pathOf(mismatch)), expectationOf(mismatch.getTargetType())));
+        }
+
+        return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), "DESERIALIZATION_ERROR",
+                "Malformed JSON request");
+    }
+
+    private String at(String path) {
+        return path == null ? "" : " for field '%s'".formatted(path);
+    }
+
+    private String abbreviate(String value) {
+        return value.length() <= 60 ? value : value.substring(0, 57) + "...";
+    }
+
+    /**
+     * Descreve, em termos da API, o que o campo esperava receber. Devolve string vazia para tipos
+     * sem uma descrição melhor do que o próprio nome da classe, que não deve vazar na resposta.
+     */
+    private String expectationOf(Class<?> type) {
+        if (type == null) return "";
+        if (type.isEnum()) {
+            String values = Arrays.stream(type.getEnumConstants())
+                    .map(String::valueOf)
+                    .reduce((a, b) -> a + ", " + b)
+                    .orElse("");
+            return ": expected one of " + values;
+        }
+        String expectation = switch (type.getSimpleName()) {
+            case "LocalDateTime" -> "a date and time like 2026-09-01T10:00:00";
+            case "LocalDate" -> "a date like 2026-09-01";
+            case "LocalTime" -> "a time like 10:00:00";
+            case "UUID" -> "a UUID like 123e4567-e89b-12d3-a456-426614174000";
+            case "Boolean", "boolean" -> "true or false";
+            case "Integer", "int", "Long", "long", "Short", "short", "BigInteger" -> "a whole number";
+            case "Double", "double", "Float", "float", "BigDecimal" -> "a number";
+            case "String" -> "a text value";
+            default -> null;
+        };
+        return expectation == null ? "" : ": expected " + expectation;
+    }
+
+    /** Valores aceitos no discriminador de uma hierarquia polimórfica, lidos de {@code @JsonSubTypes}. */
+    private String acceptedTypeIds(Class<?> baseType) {
+        JsonSubTypes subTypes = baseType.getAnnotation(JsonSubTypes.class);
+        if (subTypes == null) return null;
+        return Arrays.stream(subTypes.value())
+                .map(JsonSubTypes.Type::name)
+                .filter(name -> !name.isBlank())
+                .sorted()
+                .reduce((a, b) -> a + ", " + b)
+                .orElse(null);
+    }
+
+    /** Percorre a cadeia de causas até achar o erro de desserialização, que nem sempre é a causa direta. */
+    private DatabindException firstDatabindException(Throwable ex) {
+        for (Throwable cause = ex.getCause(); cause != null; cause = cause.getCause()) {
+            if (cause instanceof DatabindException databind) return databind;
+        }
+        return null;
+    }
+
+    /** Caminho do campo dentro do JSON, como `changes[0].titulo`. */
+    private String pathOf(DatabindException ex) {
+        StringBuilder path = new StringBuilder();
+        for (DatabindException.Reference reference : ex.getPath()) {
+            if (reference.getPropertyName() != null) {
+                if (!path.isEmpty()) path.append('.');
+                path.append(reference.getPropertyName());
+            } else if (reference.getIndex() >= 0) {
+                path.append('[').append(reference.getIndex()).append(']');
+            }
+        }
+        return path.isEmpty() ? null : path.toString();
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

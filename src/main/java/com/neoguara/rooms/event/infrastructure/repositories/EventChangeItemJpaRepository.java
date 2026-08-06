@@ -13,8 +13,8 @@ import java.util.UUID;
 
 public interface EventChangeItemJpaRepository extends JpaRepository<EventChangeItem, EventChangeItemId> {
 
-    List<EventChangeItem> findByEventRequestId(EventRequestId eventRequestId);
+    List<EventChangeItem> findByEventRequestIdOrderByPositionAsc(EventRequestId eventRequestId);
 
-    @Query("SELECT i FROM EventChangeItem i WHERE i.eventRequestId.id IN :ids")
+    @Query("SELECT i FROM EventChangeItem i WHERE i.eventRequestId.id IN :ids ORDER BY i.position ASC")
     List<EventChangeItem> findByEventRequestIdIn(@Param("ids") Collection<UUID> ids);
 }

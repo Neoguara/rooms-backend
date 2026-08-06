@@ -29,7 +29,7 @@ public class EventChangeItemRepositoryImpl implements EventChangeItemRepositoryP
 
     @Override
     public List<EventChangeItem> findByEventRequestId(EventRequestId eventRequestId) {
-        return jpaRepository.findByEventRequestId(eventRequestId);
+        return jpaRepository.findByEventRequestIdOrderByPositionAsc(eventRequestId);
     }
 
     @Override

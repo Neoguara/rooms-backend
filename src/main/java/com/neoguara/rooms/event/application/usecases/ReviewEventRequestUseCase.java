@@ -45,7 +45,7 @@ public class ReviewEventRequestUseCase {
     }
 
     @Transactional
-    public EventRequestResponse execute(UUID eventRequestId, ReviewEventRequest review) {
+    public EventRequestResponse execute(UUID eventRequestId, UUID reviewedBy, ReviewEventRequest review) {
         var requestId = EventRequestId.of(eventRequestId);
 
         var eventRequest = eventRequestRepository.findById(requestId)
@@ -53,7 +53,7 @@ public class ReviewEventRequestUseCase {
 
         validate(review);
 
-        var decidedBy = UserId.of(review.reviewedBy());
+        var decidedBy = UserId.of(reviewedBy);
         var changeItems = changeItemRepository.findByEventRequestId(requestId);
         Map<UUID, EventChangeItem> itemsById = changeItems.stream()
                 .collect(Collectors.toMap(item -> item.getId().id(), Function.identity()));

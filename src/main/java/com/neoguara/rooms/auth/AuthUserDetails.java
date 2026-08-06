@@ -6,6 +6,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 public class AuthUserDetails implements UserDetails {
 
@@ -17,6 +18,10 @@ public class AuthUserDetails implements UserDetails {
 
     public AuthUserData getData() {
         return data;
+    }
+
+    public UUID getId() {
+        return data.id();
     }
 
     @Override
