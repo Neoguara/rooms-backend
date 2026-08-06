@@ -2,11 +2,13 @@ package com.neoguara.rooms.event.infrastructure.web;
 
 import com.neoguara.rooms.event.application.dtos.EventRequestAuditResponse;
 import com.neoguara.rooms.event.application.dtos.EventRequestResponse;
+import com.neoguara.rooms.event.application.dtos.ReverseEventChangeRequest;
 import com.neoguara.rooms.event.application.dtos.ReviewEventRequest;
 import com.neoguara.rooms.event.application.dtos.SubmitEventRequest;
 import com.neoguara.rooms.event.application.usecases.GetEventRequestAuditUseCase;
 import com.neoguara.rooms.event.application.usecases.GetEventRequestUseCase;
 import com.neoguara.rooms.event.application.usecases.RequestEventChangesUseCase;
+import com.neoguara.rooms.event.application.usecases.ReverseEventChangeUseCase;
 import com.neoguara.rooms.event.application.usecases.ReviewEventRequestUseCase;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -46,6 +48,7 @@ import java.util.UUID;
         | `UPDATE` | `ACTIVE` |
         | `CANCEL` | `ACTIVE` |
         | `REACTIVATE` | `CANCELLED` |
+        | `DISCARD` | `ACTIVE` ou `CANCELLED` |
 
         Por isso a ordem importa: corrigir um evento cancelado exige `REACTIVATE` antes de \
         `UPDATE`. Os dois podem ir no mesmo grupo, nessa ordem.
@@ -58,15 +61,20 @@ import java.util.UUID;
 
         ## Como desfazer uma decisão errada
 
-        Não há como corrigir a decisão no próprio grupo: a correção é sempre um grupo novo.
+        A decisão em si nunca muda. Desfazer é `POST /event-requests/{id}/items/{itemId}/reverse`, \
+        que abre um grupo novo com a alteração contrária já montada e o campo `reversalOf` \
+        apontando para o item revertido. Esse grupo também precisa ser aprovado.
 
-        | Erro | Efeito no evento | Como desfazer |
+        | Item revertido | Alteração gerada | Efeito depois de aprovada |
         |---|---|---|
-        | Rejeitar qualquer item por engano | nenhum | reenviar a mesma alteração em um grupo novo |
-        | Aprovar `CREATE` por engano | evento passa a existir | `CANCEL` em um grupo novo — o evento fica `CANCELLED`, não é apagado |
-        | Aprovar `UPDATE` por engano | evento alterado | `UPDATE` em um grupo novo restaurando os campos `old*`, preservados na auditoria |
-        | Aprovar `CANCEL` por engano | evento cancelado | `REACTIVATE` em um grupo novo |
-        | Aprovar `REACTIVATE` por engano | evento reativado | `CANCEL` em um grupo novo |
+        | `CREATE` aprovado | `DISCARD` | evento vai para `DISCARDED` |
+        | `UPDATE` aprovado | `UPDATE` com os valores `old*` | evento volta ao estado anterior |
+        | `CANCEL` aprovado | `REACTIVATE` | evento volta para `ACTIVE` |
+        | `REACTIVATE` aprovado | `CANCEL` | evento volta para `CANCELLED` |
+        | qualquer tipo rejeitado | a alteração original de novo | nova chance de decidir |
+
+        Um item só pode ser revertido depois de decidido, e uma única vez. `DISCARDED` é \
+        definitivo: para trazer de volta um evento descartado, submeta um `CREATE` novo.
         """)
 @RestController
 @RequestMapping("/event-requests")
@@ -76,17 +84,20 @@ public class EventRequestController {
     private final GetEventRequestAuditUseCase getEventRequestAuditUseCase;
     private final RequestEventChangesUseCase requestEventChangesUseCase;
     private final ReviewEventRequestUseCase reviewEventRequestUseCase;
+    private final ReverseEventChangeUseCase reverseEventChangeUseCase;
 
     EventRequestController(
             GetEventRequestUseCase getEventRequestUseCase,
             GetEventRequestAuditUseCase getEventRequestAuditUseCase,
             RequestEventChangesUseCase requestEventChangesUseCase,
-            ReviewEventRequestUseCase reviewEventRequestUseCase
+            ReviewEventRequestUseCase reviewEventRequestUseCase,
+            ReverseEventChangeUseCase reverseEventChangeUseCase
     ) {
         this.getEventRequestUseCase = getEventRequestUseCase;
         this.getEventRequestAuditUseCase = getEventRequestAuditUseCase;
         this.requestEventChangesUseCase = requestEventChangesUseCase;
         this.reviewEventRequestUseCase = reviewEventRequestUseCase;
+        this.reverseEventChangeUseCase = reverseEventChangeUseCase;
     }
 
     @Operation(description = "Retorna todos os grupos de solicitações com suas alterações.")
@@ -146,6 +157,35 @@ public class EventRequestController {
             @Parameter(description = "ID do grupo de solicitações") @PathVariable UUID id,
             @RequestBody ReviewEventRequest request) {
         return ResponseEntity.ok(reviewEventRequestUseCase.execute(id, principal.getId(), request));
+    }
+
+    @Operation(description = """
+            Abre um grupo novo com a alteração que desfaz a decisão tomada sobre um item, derivada \
+            automaticamente dos snapshots guardados. O grupo gerado começa `PENDING` e passa pela \
+            mesma revisão de qualquer outro — reverter é uma solicitação, não um atalho.
+            Não possui campos obrigatórios: o único campo do corpo, `justification`, é opcional. \
+            O que será feito depende do item revertido:
+            - aprovação de `CREATE` → `DISCARD` do evento criado;
+            - aprovação de `UPDATE` → `UPDATE` restaurando os valores `old*`;
+            - aprovação de `CANCEL` → `REACTIVATE`;
+            - aprovação de `REACTIVATE` → `CANCEL`;
+            - rejeição de qualquer tipo → a alteração original de volta, para nova decisão.
+            Só itens já decididos podem ser revertidos, e cada item aceita uma única reversão.""")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Grupo de reversão registrado com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Grupo, item de alteração ou evento não encontrado"),
+            @ApiResponse(responseCode = "422",
+                    description = "Item ainda pendente, já revertido, ou evento descartado")
+    })
+    @PostMapping("/{id}/items/{itemId}/reverse")
+    public ResponseEntity<EventRequestResponse> reverseEventChange(
+            @AuthenticationPrincipal AuthUserDetails principal,
+            @Parameter(description = "ID do grupo que contém o item") @PathVariable UUID id,
+            @Parameter(description = "ID do item cuja decisão será desfeita") @PathVariable UUID itemId,
+            @RequestBody(required = false) ReverseEventChangeRequest request) {
+        var response = reverseEventChangeUseCase.execute(id, itemId, principal.getId(),
+                request != null ? request : new ReverseEventChangeRequest(null));
+        return ResponseEntity.created(URI.create("/event-requests/" + response.id())).body(response);
     }
 
     @Operation(description = """

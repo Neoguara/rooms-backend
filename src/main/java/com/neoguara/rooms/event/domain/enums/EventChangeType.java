@@ -4,5 +4,7 @@ public enum EventChangeType {
     CREATE,
     UPDATE,
     CANCEL,
-    REACTIVATE
+    REACTIVATE,
+    /** Descarta um evento criado por engano. Não é solicitável direto: só surge ao reverter um CREATE. */
+    DISCARD
 }

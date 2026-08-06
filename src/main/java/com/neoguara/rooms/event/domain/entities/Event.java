@@ -109,6 +109,18 @@ public class Event {
         this.updatedAt = LocalDateTime.now();
     }
 
+    /**
+     * Marca o evento como descartado, para quando sua criação foi aprovada por engano. Difere de
+     * {@link #cancel()}: um cancelamento é uma decisão legítima sobre um evento que existiu, e é
+     * reversível; um descarte diz que o evento nunca deveria ter existido, e é definitivo.
+     */
+    public void discard() {
+        if (this.status != EventStatus.ACTIVE && this.status != EventStatus.CANCELLED)
+            throw new InvalidStateException("Only active or cancelled events can be discarded");
+        this.status = EventStatus.DISCARDED;
+        this.updatedAt = LocalDateTime.now();
+    }
+
     public void reactivate() {
         if (this.status != EventStatus.CANCELLED)
             throw new InvalidStateException("Only cancelled events can be reactivated");

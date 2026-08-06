@@ -63,6 +63,7 @@ public class EventRequestMapper {
                 item.getType().name(),
                 item.getEventId() != null ? item.getEventId().id() : null,
                 item.getStatus().name(),
+                item.getReversalOf() != null ? item.getReversalOf().id() : null,
                 before != null ? before.getRoomId().id() : null,
                 after != null ? after.getRoomId().id() : null,
                 before != null ? before.getTitle() : null,

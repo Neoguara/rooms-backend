@@ -85,15 +85,18 @@ public class ReviewEventRequestUseCase {
         var after = item.getAfter();
 
         switch (item.getType()) {
-            case CREATE -> eventRepository.save(Event.create(
-                    after.getRoomId(),
-                    after.getTitle(),
-                    after.getDescription(),
-                    after.getStartAt(),
-                    after.getEndAt(),
-                    after.isAllDay(),
-                    after.getRecurrenceRule()
-            ));
+            case CREATE -> {
+                var created = eventRepository.save(Event.create(
+                        after.getRoomId(),
+                        after.getTitle(),
+                        after.getDescription(),
+                        after.getStartAt(),
+                        after.getEndAt(),
+                        after.isAllDay(),
+                        after.getRecurrenceRule()
+                ));
+                item.linkCreatedEvent(created.getId());
+            }
             case UPDATE -> {
                 var event = loadEvent(item.getEventId());
                 event.update(
@@ -115,6 +118,11 @@ public class ReviewEventRequestUseCase {
             case REACTIVATE -> {
                 var event = loadEvent(item.getEventId());
                 event.reactivate();
+                eventRepository.save(event);
+            }
+            case DISCARD -> {
+                var event = loadEvent(item.getEventId());
+                event.discard();
                 eventRepository.save(event);
             }
         }

@@ -35,6 +35,11 @@ public class EventChangeItem {
     @Column(name = "item_position")
     private Integer position;
 
+    /** Item cuja decisão esta alteração desfaz. Nulo em alterações que não são reversões. */
+    @Embedded
+    @AttributeOverride(name = "id", column = @Column(name = "reversal_of"))
+    private EventChangeItemId reversalOf;
+
     @Embedded
     @AttributeOverrides({
         @AttributeOverride(name = "roomId.id",       column = @Column(name = "old_room_id")),
@@ -110,6 +115,25 @@ public class EventChangeItem {
         return validated(eventRequestId, position, EventChangeType.REACTIVATE, event.getId(), snapshotOf(event), null);
     }
 
+    public static EventChangeItem discard(EventRequestId eventRequestId, int position, Event event) {
+        return validated(eventRequestId, position, EventChangeType.DISCARD, event.getId(), snapshotOf(event), null);
+    }
+
+    /** Registra que esta alteração existe para desfazer a decisão tomada sobre {@code original}. */
+    public void markAsReversalOf(EventChangeItemId original) {
+        this.reversalOf = original;
+    }
+
+    /**
+     * Guarda qual evento a aprovação deste CREATE acabou de produzir. Sem isso não haveria como
+     * saber, mais tarde, qual evento reverter.
+     */
+    public void linkCreatedEvent(EventId createdEventId) {
+        if (this.type != EventChangeType.CREATE)
+            throw new InvalidStateException("Only CREATE changes produce a new event");
+        this.eventId = createdEventId;
+    }
+
     public void approve() {
         if (this.status != EventChangeItemStatus.PENDING)
             throw new InvalidStateException("Only pending change items can be approved");
@@ -132,6 +156,7 @@ public class EventChangeItem {
     public EventChangeItemId getId() { return id; }
     public EventRequestId getEventRequestId() { return eventRequestId; }
     public Integer getPosition() { return position; }
+    public EventChangeItemId getReversalOf() { return reversalOf; }
     public EventId getEventId() { return eventId; }
     public EventChangeType getType() { return type; }
     public EventChangeItemStatus getStatus() { return status; }

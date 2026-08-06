@@ -2,6 +2,7 @@ package com.neoguara.rooms.event.infrastructure.repositories;
 
 import com.neoguara.rooms.event.application.ports.EventChangeItemRepositoryPort;
 import com.neoguara.rooms.event.domain.entities.EventChangeItem;
+import com.neoguara.rooms.event.domain.valueobjects.EventChangeItemId;
 import com.neoguara.rooms.event.domain.valueobjects.EventRequestId;
 import org.springframework.stereotype.Repository;
 
@@ -30,6 +31,11 @@ public class EventChangeItemRepositoryImpl implements EventChangeItemRepositoryP
     @Override
     public List<EventChangeItem> findByEventRequestId(EventRequestId eventRequestId) {
         return jpaRepository.findByEventRequestIdOrderByPositionAsc(eventRequestId);
+    }
+
+    @Override
+    public boolean hasReversal(EventChangeItemId eventChangeItemId) {
+        return jpaRepository.existsByReversalOf(eventChangeItemId.id());
     }
 
     @Override

@@ -7,25 +7,33 @@ import java.util.UUID;
 
 @Schema(description = """
         Uma alteração solicitada, com o estado do evento antes (`old*`) e depois (`new*`) dela. \
-        Em alterações CREATE os campos `old*` e `eventId` são nulos, em alterações CANCEL e \
-        REACTIVATE os campos `new*` são nulos, e campos opcionais do evento (descrição, dia \
-        inteiro e recorrência) podem ser nulos em qualquer tipo.""")
+        Em alterações CREATE os campos `old*` são nulos e `eventId` só é preenchido após a \
+        aprovação, quando o evento passa a existir; em alterações CANCEL, REACTIVATE e DISCARD os \
+        campos `new*` são nulos; e campos opcionais do evento (descrição, dia inteiro e \
+        recorrência) podem ser nulos em qualquer tipo.""")
 public record EventChangeItemResponse(
         @Schema(description = "ID do item de alteração", requiredMode = Schema.RequiredMode.REQUIRED)
         UUID id,
 
-        @Schema(description = "Tipo da alteração: CREATE, UPDATE, CANCEL ou REACTIVATE",
+        @Schema(description = "Tipo da alteração: CREATE, UPDATE, CANCEL, REACTIVATE ou DISCARD. "
+                + "DISCARD não é solicitável direto: só é gerado ao reverter um CREATE aprovado",
                 example = "CREATE", requiredMode = Schema.RequiredMode.REQUIRED)
         String type,
 
-        @Schema(description = "ID do evento alterado. Nulo em alterações do tipo CREATE, "
-                + "pois o evento só passa a existir após a aprovação",
+        @Schema(description = "ID do evento alterado. Em alterações do tipo CREATE é nulo enquanto "
+                + "a alteração está pendente ou foi rejeitada, e passa a apontar para o evento "
+                + "criado assim que ela é aprovada",
                 requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
         UUID eventId,
 
         @Schema(description = "Status desta alteração: PENDING, APPROVED ou REJECTED",
                 example = "PENDING", requiredMode = Schema.RequiredMode.REQUIRED)
         String status,
+
+        @Schema(description = "ID do item cuja decisão esta alteração desfaz. "
+                + "Nulo em alterações que não são reversões",
+                requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
+        UUID reversalOf,
 
         @Schema(description = "Sala antes da alteração", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
         UUID oldRoomId,
