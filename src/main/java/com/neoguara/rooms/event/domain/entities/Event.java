@@ -87,6 +87,8 @@ public class Event {
             Boolean isAllDay,
             String recurrenceRule
     ) {
+        if (this.status != EventStatus.ACTIVE)
+            throw new InvalidStateException("Only active events can be updated");
         this.roomId = roomId;
         this.title = title;
         this.description = description;
@@ -104,6 +106,13 @@ public class Event {
         if (this.status != EventStatus.ACTIVE)
             throw new InvalidStateException("Only active events can be cancelled");
         this.status = EventStatus.CANCELLED;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public void reactivate() {
+        if (this.status != EventStatus.CANCELLED)
+            throw new InvalidStateException("Only cancelled events can be reactivated");
+        this.status = EventStatus.ACTIVE;
         this.updatedAt = LocalDateTime.now();
     }
 

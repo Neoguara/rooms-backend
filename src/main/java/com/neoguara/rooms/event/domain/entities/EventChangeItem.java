@@ -99,6 +99,10 @@ public class EventChangeItem {
         return validated(eventRequestId, EventChangeType.CANCEL, event.getId(), snapshotOf(event), null);
     }
 
+    public static EventChangeItem reactivate(EventRequestId eventRequestId, Event event) {
+        return validated(eventRequestId, EventChangeType.REACTIVATE, event.getId(), snapshotOf(event), null);
+    }
+
     public void approve() {
         if (this.status != EventChangeItemStatus.PENDING)
             throw new InvalidStateException("Only pending change items can be approved");

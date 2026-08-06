@@ -8,7 +8,8 @@ import java.util.UUID;
 @Schema(description = """
         Alteração do tipo `UPDATE`: descreve o estado completo desejado de um evento existente. \
         `description`, `isAllDay` e `recurrenceRule` são opcionais; os demais campos são \
-        obrigatórios, mesmo os que não foram alterados.""")
+        obrigatórios, mesmo os que não foram alterados. Só é aceita na aprovação se o evento \
+        estiver ativo — para corrigir um evento cancelado, use antes uma alteração `REACTIVATE`.""")
 public record UpdateEventChange(
         @Schema(description = "ID do evento a ser atualizado", requiredMode = Schema.RequiredMode.REQUIRED)
         UUID eventId,

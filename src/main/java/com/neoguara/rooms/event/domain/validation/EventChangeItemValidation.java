@@ -26,6 +26,10 @@ public class EventChangeItemValidation implements Validator<EventChangeItem> {
                         .addErrorIf(target.getEventId() == null, "eventId is required on CANCEL changes")
                         .addErrorIf(target.getBefore() == null, "before is required on CANCEL changes")
                         .addErrorIf(target.getAfter() != null, "after must not be informed on CANCEL changes");
+                case REACTIVATE -> notification
+                        .addErrorIf(target.getEventId() == null, "eventId is required on REACTIVATE changes")
+                        .addErrorIf(target.getBefore() == null, "before is required on REACTIVATE changes")
+                        .addErrorIf(target.getAfter() != null, "after must not be informed on REACTIVATE changes");
             }
         }
 

@@ -7,8 +7,8 @@ import java.util.UUID;
 
 @Schema(description = """
         Uma decisão registrada sobre um item de alteração. Registros nunca são alterados nem \
-        removidos: decidir o mesmo item de novo acrescenta um novo registro. Apenas `comment` \
-        pode vir nulo.""")
+        removidos, e como um item só pode ser decidido enquanto está `PENDING`, cada item acumula \
+        no máximo um registro. Apenas `comment` pode vir nulo.""")
 public record ApprovalResponse(
         @Schema(description = "ID do registro de decisão", requiredMode = Schema.RequiredMode.REQUIRED)
         UUID id,

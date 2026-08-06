@@ -10,8 +10,12 @@ public record EventChangeItemAuditResponse(
                 requiredMode = Schema.RequiredMode.REQUIRED)
         EventChangeItemResponse change,
 
-        @Schema(description = "Decisões tomadas sobre esta alteração, da mais antiga para a mais recente. "
-                + "Lista vazia enquanto ninguém tiver decidido",
+        @Schema(description = """
+                Decisões tomadas sobre esta alteração, da mais antiga para a mais recente. Hoje a \
+                lista tem no máximo um item — vazia enquanto ninguém tiver decidido, com um único \
+                registro depois — porque um item decidido não pode ser decidido de novo. É uma \
+                lista para acomodar, sem quebrar o contrato, um fluxo futuro em que decisões \
+                possam ser revistas.""",
                 requiredMode = Schema.RequiredMode.REQUIRED)
         List<ApprovalResponse> history
 ) {}

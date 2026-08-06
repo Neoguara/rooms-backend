@@ -7,14 +7,14 @@ import java.util.UUID;
 
 @Schema(description = """
         Uma alteração solicitada, com o estado do evento antes (`old*`) e depois (`new*`) dela. \
-        Em alterações CREATE os campos `old*` e `eventId` são nulos, em alterações CANCEL os campos \
-        `new*` são nulos, e campos opcionais do evento (descrição, dia inteiro e recorrência) podem \
-        ser nulos em qualquer tipo.""")
+        Em alterações CREATE os campos `old*` e `eventId` são nulos, em alterações CANCEL e \
+        REACTIVATE os campos `new*` são nulos, e campos opcionais do evento (descrição, dia \
+        inteiro e recorrência) podem ser nulos em qualquer tipo.""")
 public record EventChangeItemResponse(
         @Schema(description = "ID do item de alteração", requiredMode = Schema.RequiredMode.REQUIRED)
         UUID id,
 
-        @Schema(description = "Tipo da alteração: CREATE, UPDATE ou CANCEL",
+        @Schema(description = "Tipo da alteração: CREATE, UPDATE, CANCEL ou REACTIVATE",
                 example = "CREATE", requiredMode = Schema.RequiredMode.REQUIRED)
         String type,
 

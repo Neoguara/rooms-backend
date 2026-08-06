@@ -4,6 +4,7 @@ import com.neoguara.rooms.event.application.dtos.CancelEventChange;
 import com.neoguara.rooms.event.application.dtos.CreateEventChange;
 import com.neoguara.rooms.event.application.dtos.EventChangeRequest;
 import com.neoguara.rooms.event.application.dtos.EventRequestResponse;
+import com.neoguara.rooms.event.application.dtos.ReactivateEventChange;
 import com.neoguara.rooms.event.application.dtos.SubmitEventRequest;
 import com.neoguara.rooms.event.application.dtos.UpdateEventChange;
 import com.neoguara.rooms.event.application.mappers.EventRequestMapper;
@@ -78,6 +79,7 @@ public class RequestEventChangesUseCase {
                             u.startAt(), u.endAt(), u.isAllDay(), u.recurrenceRule())
             );
             case CancelEventChange c -> EventChangeItem.cancel(eventRequestId, loadEvent(c.eventId()));
+            case ReactivateEventChange r -> EventChangeItem.reactivate(eventRequestId, loadEvent(r.eventId()));
         };
     }
 

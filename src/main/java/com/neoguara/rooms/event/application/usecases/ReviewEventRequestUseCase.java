@@ -112,6 +112,11 @@ public class ReviewEventRequestUseCase {
                 event.cancel();
                 eventRepository.save(event);
             }
+            case REACTIVATE -> {
+                var event = loadEvent(item.getEventId());
+                event.reactivate();
+                eventRepository.save(event);
+            }
         }
     }
 

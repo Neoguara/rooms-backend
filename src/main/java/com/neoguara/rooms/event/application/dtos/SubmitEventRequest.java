@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.UUID;
 
 @Schema(description = """
-        Grupo de alterações submetidas de uma só vez. Criações, atualizações e cancelamentos podem \
-        ser misturados na mesma lista `changes`, que deve conter ao menos um item. Apenas \
-        `justification` é opcional.""")
+        Grupo de alterações submetidas de uma só vez. Criações, atualizações, cancelamentos e \
+        reativações podem ser misturados na mesma lista `changes`, que deve conter ao menos um \
+        item e preserva a ordem informada. Apenas `justification` é opcional.""")
 public record SubmitEventRequest(
         @Schema(description = "ID do usuário que está submetendo as alterações",
                 requiredMode = Schema.RequiredMode.REQUIRED)
