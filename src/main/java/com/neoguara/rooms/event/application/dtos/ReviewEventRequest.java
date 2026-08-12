@@ -1,19 +1,23 @@
 package com.neoguara.rooms.event.application.dtos;
 
+import com.neoguara.rooms.event.domain.enums.ApprovalDecision;
 import io.swagger.v3.oas.annotations.media.Schema;
 
-import java.util.List;
-
 @Schema(description = """
-        Decisões tomadas sobre os itens de um grupo. Não é preciso decidir todos os itens de uma \
-        vez: os que não aparecerem em `decisions` continuam pendentes. Cada decisão gera um \
-        registro no histórico de auditoria e é definitiva — um item já decidido não pode ser \
-        decidido de novo, nem pelo mesmo revisor nem por outro. As decisões são aplicadas na \
-        ordem informada, e basta uma falhar para que nenhuma seja gravada.
-        Quem está decidindo é identificado pelo token de autenticação, não pelo corpo da \
-        requisição.""")
+        Decisão tomada sobre um grupo de alterações. A decisão vale para o grupo inteiro: aprovar \
+        efetiva todas as alterações dele, na ordem em que foram submetidas, e rejeitar não efetiva \
+        nenhuma. Não é possível aprovar parte de um grupo — quem quiser separar as alterações deve \
+        submetê-las em grupos diferentes.
+        A decisão é definitiva: um grupo já decidido não pode ser decidido de novo, nem pelo mesmo \
+        revisor nem por outro. Quem está decidindo é identificado pelo token de autenticação, não \
+        pelo corpo da requisição.""")
 public record ReviewEventRequest(
-        @Schema(description = "Decisões por item. Deve conter ao menos um item",
+        @Schema(description = "Decisão tomada sobre o grupo", example = "APPROVED",
                 requiredMode = Schema.RequiredMode.REQUIRED)
-        List<EventChangeItemDecision> decisions
+        ApprovalDecision decision,
+
+        @Schema(description = "Comentário de quem decidiu, preservado no histórico de auditoria",
+                example = "Sala já ocupada nesse horário",
+                requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
+        String comment
 ) {}

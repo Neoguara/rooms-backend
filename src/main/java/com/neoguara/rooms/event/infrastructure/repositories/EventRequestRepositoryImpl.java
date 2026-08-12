@@ -29,4 +29,9 @@ public class EventRequestRepositoryImpl implements EventRequestRepositoryPort {
     public List<EventRequest> findAll() {
         return repository.findAll();
     }
+
+    @Override
+    public boolean hasReversal(EventRequestId eventRequestId) {
+        return repository.existsByReversalOf(eventRequestId.id());
+    }
 }

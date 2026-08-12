@@ -10,4 +10,7 @@ public interface EventRequestRepositoryPort {
     EventRequest save(EventRequest eventRequest);
     Optional<EventRequest> findById(EventRequestId id);
     List<EventRequest> findAll();
+
+    /** Indica se já existe um grupo criado para desfazer a decisão deste grupo. */
+    boolean hasReversal(EventRequestId eventRequestId);
 }

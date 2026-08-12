@@ -5,14 +5,11 @@ import com.neoguara.rooms.event.application.mappers.EventRequestMapper;
 import com.neoguara.rooms.event.application.ports.ApprovalRepositoryPort;
 import com.neoguara.rooms.event.application.ports.EventChangeItemRepositoryPort;
 import com.neoguara.rooms.event.application.ports.EventRequestRepositoryPort;
-import com.neoguara.rooms.event.domain.entities.Approval;
-import com.neoguara.rooms.event.domain.entities.EventChangeItem;
 import com.neoguara.rooms.event.domain.valueobjects.EventRequestId;
 import com.neoguara.rooms.shared.domain.exceptions.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 public class GetEventRequestAuditUseCase {
@@ -37,13 +34,10 @@ public class GetEventRequestAuditUseCase {
         var eventRequest = repository.findById(requestId)
                 .orElseThrow(() -> new ResourceNotFoundException("Event request", eventRequestId));
 
-        var changeItems = changeItemRepository.findByEventRequestId(requestId);
-
-        var approvalsByItem = approvalRepository
-                .findByEventChangeItemIdIn(changeItems.stream().map(EventChangeItem::getId).toList())
-                .stream()
-                .collect(Collectors.groupingBy(Approval::getEventChangeItemId));
-
-        return EventRequestMapper.toAuditResponse(eventRequest, changeItems, approvalsByItem);
+        return EventRequestMapper.toAuditResponse(
+                eventRequest,
+                changeItemRepository.findByEventRequestId(requestId),
+                approvalRepository.findByEventRequestId(requestId)
+        );
     }
 }

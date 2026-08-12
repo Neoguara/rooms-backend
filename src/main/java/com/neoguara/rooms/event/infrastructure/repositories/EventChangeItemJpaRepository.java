@@ -17,7 +17,4 @@ public interface EventChangeItemJpaRepository extends JpaRepository<EventChangeI
 
     @Query("SELECT i FROM EventChangeItem i WHERE i.eventRequestId.id IN :ids ORDER BY i.position ASC")
     List<EventChangeItem> findByEventRequestIdIn(@Param("ids") Collection<UUID> ids);
-
-    @Query("SELECT COUNT(i) > 0 FROM EventChangeItem i WHERE i.reversalOf.id = :id")
-    boolean existsByReversalOf(@Param("id") UUID id);
 }

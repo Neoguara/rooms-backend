@@ -1,6 +1,5 @@
 package com.neoguara.rooms.event.domain.entities;
 
-import com.neoguara.rooms.event.domain.enums.EventChangeItemStatus;
 import com.neoguara.rooms.event.domain.enums.EventChangeType;
 import com.neoguara.rooms.event.domain.validation.EventChangeItemValidation;
 import com.neoguara.rooms.event.domain.valueobjects.EventChangeItemId;
@@ -11,6 +10,10 @@ import com.neoguara.rooms.shared.domain.exceptions.InvalidStateException;
 import com.neoguara.rooms.shared.domain.validation.Notification;
 import jakarta.persistence.*;
 
+/**
+ * Uma alteração a ser feita em um evento. Não tem status próprio: quem é aprovado ou rejeitado é
+ * o {@link EventRequest} que a contém, e é dele que ela herda a situação em que está.
+ */
 @Entity
 @Table(name = "event_change_items")
 public class EventChangeItem {
@@ -28,14 +31,14 @@ public class EventChangeItem {
     @Enumerated(EnumType.STRING)
     private EventChangeType type;
 
-    @Enumerated(EnumType.STRING)
-    private EventChangeItemStatus status;
-
     /** Posição do item dentro do grupo, preservando a ordem em que foi submetido. */
     @Column(name = "item_position")
     private Integer position;
 
-    /** Item cuja decisão esta alteração desfaz. Nulo em alterações que não são reversões. */
+    /**
+     * Item que esta alteração desfaz. Nulo em alterações que não são reversões. Guarda o par exato
+     * dentro do grupo revertido, que a reversão reordena e portanto não daria para inferir.
+     */
     @Embedded
     @AttributeOverride(name = "id", column = @Column(name = "reversal_of"))
     private EventChangeItemId reversalOf;
@@ -79,7 +82,6 @@ public class EventChangeItem {
         this.position = position;
         this.type = type;
         this.eventId = eventId;
-        this.status = EventChangeItemStatus.PENDING;
         this.before = before;
         this.after = after;
     }
@@ -134,18 +136,6 @@ public class EventChangeItem {
         this.eventId = createdEventId;
     }
 
-    public void approve() {
-        if (this.status != EventChangeItemStatus.PENDING)
-            throw new InvalidStateException("Only pending change items can be approved");
-        this.status = EventChangeItemStatus.APPROVED;
-    }
-
-    public void reject() {
-        if (this.status != EventChangeItemStatus.PENDING)
-            throw new InvalidStateException("Only pending change items can be rejected");
-        this.status = EventChangeItemStatus.REJECTED;
-    }
-
     private static EventSnapshot snapshotOf(Event event) {
         return EventSnapshot.of(
             event.getRoomId(), event.getTitle(), event.getDescription(),
@@ -159,7 +149,6 @@ public class EventChangeItem {
     public EventChangeItemId getReversalOf() { return reversalOf; }
     public EventId getEventId() { return eventId; }
     public EventChangeType getType() { return type; }
-    public EventChangeItemStatus getStatus() { return status; }
     public EventSnapshot getBefore() { return before; }
     public EventSnapshot getAfter() { return after; }
 }

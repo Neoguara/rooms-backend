@@ -6,8 +6,8 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Schema(description = """
-        Uma decisão registrada sobre um item de alteração. Registros nunca são alterados nem \
-        removidos, e como um item só pode ser decidido enquanto está `PENDING`, cada item acumula \
+        Uma decisão registrada sobre um grupo de alterações. Registros nunca são alterados nem \
+        removidos, e como um grupo só pode ser decidido enquanto está `PENDING`, cada grupo acumula \
         no máximo um registro. Apenas `comment` pode vir nulo.""")
 public record ApprovalResponse(
         @Schema(description = "ID do registro de decisão", requiredMode = Schema.RequiredMode.REQUIRED)

@@ -7,6 +7,7 @@ import java.util.UUID;
 
 @Schema(description = """
         Uma alteração solicitada, com o estado do evento antes (`old*`) e depois (`new*`) dela. \
+        Não tem status próprio: quem é aprovado ou rejeitado é o grupo que a contém. \
         Em alterações CREATE os campos `old*` são nulos e `eventId` só é preenchido após a \
         aprovação, quando o evento passa a existir; em alterações CANCEL, REACTIVATE e DISCARD os \
         campos `new*` são nulos; e campos opcionais do evento (descrição, dia inteiro e \
@@ -26,11 +27,7 @@ public record EventChangeItemResponse(
                 requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
         UUID eventId,
 
-        @Schema(description = "Status desta alteração: PENDING, APPROVED ou REJECTED",
-                example = "PENDING", requiredMode = Schema.RequiredMode.REQUIRED)
-        String status,
-
-        @Schema(description = "ID do item cuja decisão esta alteração desfaz. "
+        @Schema(description = "ID do item que esta alteração desfaz. "
                 + "Nulo em alterações que não são reversões",
                 requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
         UUID reversalOf,

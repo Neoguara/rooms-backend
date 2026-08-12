@@ -3,7 +3,7 @@ package com.neoguara.rooms.event.domain.entities;
 import com.neoguara.rooms.event.domain.enums.ApprovalDecision;
 import com.neoguara.rooms.event.domain.validation.ApprovalValidation;
 import com.neoguara.rooms.event.domain.valueobjects.ApprovalId;
-import com.neoguara.rooms.event.domain.valueobjects.EventChangeItemId;
+import com.neoguara.rooms.event.domain.valueobjects.EventRequestId;
 import com.neoguara.rooms.event.domain.valueobjects.UserId;
 import com.neoguara.rooms.shared.domain.validation.Notification;
 import jakarta.persistence.*;
@@ -11,8 +11,8 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 /**
- * Registro imutável de uma decisão tomada sobre um item de alteração. Nunca é atualizado:
- * cada aprovação ou rejeição insere uma nova linha, formando o histórico de auditoria.
+ * Registro imutável da decisão tomada sobre um grupo de alterações. Nunca é atualizado: cada
+ * aprovação ou rejeição insere uma nova linha, formando o histórico de auditoria.
  */
 @Entity
 @Table(name = "approvals")
@@ -21,8 +21,8 @@ public class Approval {
     private ApprovalId id;
 
     @Embedded
-    @AttributeOverride(name = "id", column = @Column(name = "event_change_item_id"))
-    private EventChangeItemId eventChangeItemId;
+    @AttributeOverride(name = "id", column = @Column(name = "event_request_id"))
+    private EventRequestId eventRequestId;
 
     @Embedded
     @AttributeOverride(name = "id", column = @Column(name = "user_id"))
@@ -38,13 +38,13 @@ public class Approval {
     Approval() {}
 
     private Approval(
-            EventChangeItemId eventChangeItemId,
+            EventRequestId eventRequestId,
             UserId decidedBy,
             ApprovalDecision decision,
             String comment
     ) {
         this.id = new ApprovalId();
-        this.eventChangeItemId = eventChangeItemId;
+        this.eventRequestId = eventRequestId;
         this.decidedBy = decidedBy;
         this.decision = decision;
         this.comment = comment;
@@ -52,12 +52,12 @@ public class Approval {
     }
 
     public static Approval of(
-            EventChangeItemId eventChangeItemId,
+            EventRequestId eventRequestId,
             UserId decidedBy,
             ApprovalDecision decision,
             String comment
     ) {
-        Approval approval = new Approval(eventChangeItemId, decidedBy, decision, comment);
+        Approval approval = new Approval(eventRequestId, decidedBy, decision, comment);
         Notification notification = Notification.create();
         new ApprovalValidation().validate(approval, notification);
         notification.raiseIfHasErrors();
@@ -65,7 +65,7 @@ public class Approval {
     }
 
     public ApprovalId getId() { return id; }
-    public EventChangeItemId getEventChangeItemId() { return eventChangeItemId; }
+    public EventRequestId getEventRequestId() { return eventRequestId; }
     public UserId getDecidedBy() { return decidedBy; }
     public ApprovalDecision getDecision() { return decision; }
     public String getComment() { return comment; }

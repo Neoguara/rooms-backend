@@ -6,7 +6,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
-@Schema(description = "Grupo de alterações solicitadas. Apenas `justification` pode vir nula.")
+@Schema(description = """
+        Grupo de alterações solicitadas, aprovado ou rejeitado por inteiro. Apenas `justification` \
+        e `reversalOf` podem vir nulos.""")
 public record EventRequestResponse(
         @Schema(description = "ID do grupo", requiredMode = Schema.RequiredMode.REQUIRED)
         UUID id,
@@ -15,11 +17,16 @@ public record EventRequestResponse(
         UUID createdBy,
 
         @Schema(description = """
-                Status do grupo, derivado dos itens: `PENDING` (nenhum item decidido), `IN_REVIEW` \
-                (parte decidida), `APPROVED` (todos aprovados), `REJECTED` (todos rejeitados) ou \
-                `PARTIALLY_APPROVED` (todos decididos, com aprovações e rejeições)""",
+                Status do grupo: `PENDING` (ainda não decidido), `APPROVED` (todas as alterações \
+                foram efetivadas) ou `REJECTED` (nenhuma foi). Como a decisão vale para o grupo \
+                inteiro, não existe estado parcial""",
                 example = "PENDING", requiredMode = Schema.RequiredMode.REQUIRED)
         String status,
+
+        @Schema(description = "ID do grupo cuja decisão este grupo desfaz. "
+                + "Nulo em grupos que não são reversões",
+                requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
+        UUID reversalOf,
 
         @Schema(description = "Justificativa informada no grupo. Nula quando não informada",
                 requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
@@ -28,6 +35,7 @@ public record EventRequestResponse(
         @Schema(description = "Data de criação do grupo", requiredMode = Schema.RequiredMode.REQUIRED)
         LocalDateTime createdAt,
 
-        @Schema(description = "Alterações que compõem o grupo", requiredMode = Schema.RequiredMode.REQUIRED)
+        @Schema(description = "Alterações que compõem o grupo, na ordem em que serão aplicadas",
+                requiredMode = Schema.RequiredMode.REQUIRED)
         List<EventChangeItemResponse> changes
 ) {}

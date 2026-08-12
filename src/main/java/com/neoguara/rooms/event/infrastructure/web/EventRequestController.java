@@ -2,13 +2,13 @@ package com.neoguara.rooms.event.infrastructure.web;
 
 import com.neoguara.rooms.event.application.dtos.EventRequestAuditResponse;
 import com.neoguara.rooms.event.application.dtos.EventRequestResponse;
-import com.neoguara.rooms.event.application.dtos.ReverseEventChangeRequest;
+import com.neoguara.rooms.event.application.dtos.ReverseEventRequest;
 import com.neoguara.rooms.event.application.dtos.ReviewEventRequest;
 import com.neoguara.rooms.event.application.dtos.SubmitEventRequest;
 import com.neoguara.rooms.event.application.usecases.GetEventRequestAuditUseCase;
 import com.neoguara.rooms.event.application.usecases.GetEventRequestUseCase;
 import com.neoguara.rooms.event.application.usecases.RequestEventChangesUseCase;
-import com.neoguara.rooms.event.application.usecases.ReverseEventChangeUseCase;
+import com.neoguara.rooms.event.application.usecases.ReverseEventRequestUseCase;
 import com.neoguara.rooms.event.application.usecases.ReviewEventRequestUseCase;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -25,21 +25,31 @@ import java.util.List;
 import java.util.UUID;
 
 @Tag(name = "Event Requests", description = """
-        Alterações em eventos não são aplicadas direto: são submetidas em grupo, decididas item a \
-        item e só então efetivadas.
+        Alterações em eventos não são aplicadas direto: são submetidas em grupo, decididas em grupo \
+        e só então efetivadas.
 
         ## Ciclo de vida
 
-        1. `POST /event-requests` registra um grupo com uma ou mais alterações, todas `PENDING`.
-        2. `POST /event-requests/{id}/review` aprova ou rejeita cada item. Aprovar efetiva a \
-        alteração sobre o evento na mesma transação; rejeitar não altera nada.
-        3. O status do grupo nunca é informado nem armazenado — é sempre derivado dos itens: \
-        `PENDING`, `IN_REVIEW`, `APPROVED`, `REJECTED` ou `PARTIALLY_APPROVED`.
-        4. `GET /event-requests/{id}/audit` mostra cada alteração com as decisões tomadas sobre ela.
+        1. `POST /event-requests` registra um grupo com uma ou mais alterações. O grupo nasce \
+        `PENDING`.
+        2. `POST /event-requests/{id}/review` aprova ou rejeita **o grupo inteiro**. Aprovar \
+        efetiva todas as alterações do grupo na mesma transação, na ordem em que foram submetidas; \
+        rejeitar não altera nada.
+        3. `GET /event-requests/{id}/audit` mostra as alterações do grupo e a decisão tomada.
+
+        ## O grupo é a unidade de aprovação
+
+        Não existe aprovar parte de um grupo: o status é `PENDING`, `APPROVED` ou `REJECTED`, sem \
+        estado parcial. Quem submete decide o que é indivisível — alterações que precisam valer \
+        juntas vão no mesmo grupo, alterações que podem ser decididas em separado vão em grupos \
+        diferentes.
+
+        Como consequência, se qualquer alteração do grupo não puder ser aplicada, a aprovação \
+        inteira falha e nenhuma das outras é gravada.
 
         ## Estado exigido do evento
 
-        Aprovar só funciona se o evento estiver no estado compatível com o tipo da alteração. A \
+        Aprovar só funciona se cada evento estiver no estado compatível com o tipo da alteração. A \
         verificação acontece no momento da aprovação, não no da submissão:
 
         | Tipo | Exige o evento em |
@@ -50,30 +60,33 @@ import java.util.UUID;
         | `REACTIVATE` | `CANCELLED` |
         | `DISCARD` | `ACTIVE` ou `CANCELLED` |
 
-        Por isso a ordem importa: corrigir um evento cancelado exige `REACTIVATE` antes de \
-        `UPDATE`. Os dois podem ir no mesmo grupo, nessa ordem.
+        Por isso a ordem dentro do grupo importa: corrigir um evento cancelado exige `REACTIVATE` \
+        antes de `UPDATE`. Os dois vão no mesmo grupo, nessa ordem.
 
         ## Decisões são definitivas
 
-        Um item só pode ser decidido enquanto estiver `PENDING`. Decidir de novo — para reverter, \
-        ou por outro revisor — responde `422 INVALID_STATE` e não altera nada. Se qualquer decisão \
-        da chamada falhar, nenhuma das outras é gravada.
+        Um grupo só pode ser decidido enquanto estiver `PENDING`. Decidir de novo — para reverter, \
+        ou por outro revisor — responde `422 INVALID_STATE` e não altera nada.
 
         ## Como desfazer uma decisão errada
 
-        A decisão em si nunca muda. Desfazer é `POST /event-requests/{id}/items/{itemId}/reverse`, \
-        que abre um grupo novo com a alteração contrária já montada e o campo `reversalOf` \
-        apontando para o item revertido. Esse grupo também precisa ser aprovado.
+        A decisão em si nunca muda. Desfazer é `POST /event-requests/{id}/reverse`, que abre um \
+        grupo novo com as alterações contrárias já montadas e o campo `reversalOf` apontando para \
+        o grupo revertido. Esse grupo também precisa ser aprovado.
 
-        | Item revertido | Alteração gerada | Efeito depois de aprovada |
+        | Alteração revertida | Alteração gerada | Efeito depois de aprovada |
         |---|---|---|
         | `CREATE` aprovado | `DISCARD` | evento vai para `DISCARDED` |
         | `UPDATE` aprovado | `UPDATE` com os valores `old*` | evento volta ao estado anterior |
         | `CANCEL` aprovado | `REACTIVATE` | evento volta para `ACTIVE` |
         | `REACTIVATE` aprovado | `CANCEL` | evento volta para `CANCELLED` |
-        | qualquer tipo rejeitado | a alteração original de novo | nova chance de decidir |
+        | grupo rejeitado | as alterações originais de novo | nova chance de decidir |
 
-        Um item só pode ser revertido depois de decidido, e uma única vez. `DISCARDED` é \
+        Reverter um grupo aprovado gera as alterações contrárias **na ordem inversa**, porque \
+        desfazer um grupo é desfazer por primeiro o que ele fez por último. Reverter um grupo \
+        rejeitado repete as alterações originais na ordem original.
+
+        Um grupo só pode ser revertido depois de decidido, e uma única vez. `DISCARDED` é \
         definitivo: para trazer de volta um evento descartado, submeta um `CREATE` novo.
         """)
 @RestController
@@ -84,20 +97,20 @@ public class EventRequestController {
     private final GetEventRequestAuditUseCase getEventRequestAuditUseCase;
     private final RequestEventChangesUseCase requestEventChangesUseCase;
     private final ReviewEventRequestUseCase reviewEventRequestUseCase;
-    private final ReverseEventChangeUseCase reverseEventChangeUseCase;
+    private final ReverseEventRequestUseCase reverseEventRequestUseCase;
 
     EventRequestController(
             GetEventRequestUseCase getEventRequestUseCase,
             GetEventRequestAuditUseCase getEventRequestAuditUseCase,
             RequestEventChangesUseCase requestEventChangesUseCase,
             ReviewEventRequestUseCase reviewEventRequestUseCase,
-            ReverseEventChangeUseCase reverseEventChangeUseCase
+            ReverseEventRequestUseCase reverseEventRequestUseCase
     ) {
         this.getEventRequestUseCase = getEventRequestUseCase;
         this.getEventRequestAuditUseCase = getEventRequestAuditUseCase;
         this.requestEventChangesUseCase = requestEventChangesUseCase;
         this.reviewEventRequestUseCase = reviewEventRequestUseCase;
-        this.reverseEventChangeUseCase = reverseEventChangeUseCase;
+        this.reverseEventRequestUseCase = reverseEventRequestUseCase;
     }
 
     @Operation(description = "Retorna todos os grupos de solicitações com suas alterações.")
@@ -109,8 +122,9 @@ public class EventRequestController {
 
     @Operation(description = """
             Submete um grupo de alterações de eventos. Criações, atualizações e cancelamentos podem \
-            ser misturados na mesma lista `changes`, e cada alteração é aprovada ou rejeitada \
-            individualmente depois.
+            ser misturados na mesma lista `changes`, mas o grupo é decidido por inteiro depois: \
+            alterações que precisam ser aprovadas ou rejeitadas em separado devem ir em grupos \
+            diferentes.
             Campo obrigatório: `changes` (com ao menos um item). Campo opcional: `justification`. \
             O autor do grupo é o usuário autenticado, obtido do token.
             Cada item de `changes` é identificado pelo campo `type`:
@@ -134,22 +148,21 @@ public class EventRequestController {
     }
 
     @Operation(description = """
-            Aprova ou rejeita alterações do grupo, uma a uma, em uma única chamada. Alterações \
-            aprovadas são efetivadas imediatamente sobre os eventos; alterações rejeitadas não \
-            alteram nada. Itens que não aparecerem em `decisions` continuam pendentes, e o status \
-            do grupo é recalculado a partir dos itens.
-            Campo obrigatório: `decisions` (com ao menos um item, cada um com `itemId` e \
-            `decision`). Campo opcional por item: `comment`. Quem decide é o usuário autenticado, \
-            obtido do token — não é possível decidir em nome de outra pessoa.
-            Cada decisão é registrada no histórico de auditoria e nunca é sobrescrita.
-            Aprovar exige que o evento esteja no estado compatível com a alteração: `UPDATE` e \
+            Aprova ou rejeita o grupo inteiro. Aprovar efetiva todas as alterações do grupo \
+            imediatamente, na ordem em que foram submetidas; rejeitar não altera nenhum evento. \
+            Não é possível decidir parte de um grupo.
+            Campo obrigatório: `decision`. Campo opcional: `comment`. Quem decide é o usuário \
+            autenticado, obtido do token — não é possível decidir em nome de outra pessoa.
+            A decisão é registrada no histórico de auditoria e nunca é sobrescrita.
+            Aprovar exige que cada evento esteja no estado compatível com a alteração: `UPDATE` e \
             `CANCEL` só valem sobre eventos ativos, e `REACTIVATE` só sobre eventos cancelados. \
-            Se qualquer decisão da chamada falhar, nenhuma das outras é gravada.""")
+            Se uma alteração do grupo falhar, nenhuma das outras é gravada e o grupo continua \
+            `PENDING`.""")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Decisões registradas com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Grupo, item de alteração ou evento não encontrado"),
+            @ApiResponse(responseCode = "200", description = "Decisão registrada com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Grupo ou evento não encontrado"),
             @ApiResponse(responseCode = "422",
-                    description = "Dados inválidos, item já decidido ou evento em estado incompatível")
+                    description = "Dados inválidos, grupo já decidido ou evento em estado incompatível")
     })
     @PostMapping("/{id}/review")
     public ResponseEntity<EventRequestResponse> reviewEventRequest(
@@ -160,37 +173,39 @@ public class EventRequestController {
     }
 
     @Operation(description = """
-            Abre um grupo novo com a alteração que desfaz a decisão tomada sobre um item, derivada \
-            automaticamente dos snapshots guardados. O grupo gerado começa `PENDING` e passa pela \
-            mesma revisão de qualquer outro — reverter é uma solicitação, não um atalho.
+            Abre um grupo novo com as alterações que desfazem a decisão tomada sobre outro grupo, \
+            derivadas automaticamente dos snapshots guardados. O grupo gerado começa `PENDING` e \
+            passa pela mesma revisão de qualquer outro — reverter é uma solicitação, não um atalho.
             Não possui campos obrigatórios: o único campo do corpo, `justification`, é opcional. \
-            O que será feito depende do item revertido:
-            - aprovação de `CREATE` → `DISCARD` do evento criado;
-            - aprovação de `UPDATE` → `UPDATE` restaurando os valores `old*`;
-            - aprovação de `CANCEL` → `REACTIVATE`;
-            - aprovação de `REACTIVATE` → `CANCEL`;
-            - rejeição de qualquer tipo → a alteração original de volta, para nova decisão.
-            Só itens já decididos podem ser revertidos, e cada item aceita uma única reversão.""")
+            O que será feito depende da decisão revertida.
+            Reverter um grupo aprovado gera, na ordem inversa, a operação contrária de cada \
+            alteração:
+            - `CREATE` → `DISCARD` do evento criado;
+            - `UPDATE` → `UPDATE` restaurando os valores `old*`;
+            - `CANCEL` → `REACTIVATE`;
+            - `REACTIVATE` → `CANCEL`.
+            Reverter um grupo rejeitado repete as alterações originais, na ordem original, para \
+            nova decisão.
+            Só grupos já decididos podem ser revertidos, e cada grupo aceita uma única reversão.""")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Grupo de reversão registrado com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Grupo, item de alteração ou evento não encontrado"),
+            @ApiResponse(responseCode = "404", description = "Grupo ou evento não encontrado"),
             @ApiResponse(responseCode = "422",
-                    description = "Item ainda pendente, já revertido, ou evento descartado")
+                    description = "Grupo ainda pendente, já revertido, ou evento descartado")
     })
-    @PostMapping("/{id}/items/{itemId}/reverse")
-    public ResponseEntity<EventRequestResponse> reverseEventChange(
+    @PostMapping("/{id}/reverse")
+    public ResponseEntity<EventRequestResponse> reverseEventRequest(
             @AuthenticationPrincipal AuthUserDetails principal,
-            @Parameter(description = "ID do grupo que contém o item") @PathVariable UUID id,
-            @Parameter(description = "ID do item cuja decisão será desfeita") @PathVariable UUID itemId,
-            @RequestBody(required = false) ReverseEventChangeRequest request) {
-        var response = reverseEventChangeUseCase.execute(id, itemId, principal.getId(),
-                request != null ? request : new ReverseEventChangeRequest(null));
+            @Parameter(description = "ID do grupo cuja decisão será desfeita") @PathVariable UUID id,
+            @RequestBody(required = false) ReverseEventRequest request) {
+        var response = reverseEventRequestUseCase.execute(id, principal.getId(),
+                request != null ? request : new ReverseEventRequest(null));
         return ResponseEntity.created(URI.create("/event-requests/" + response.id())).body(response);
     }
 
     @Operation(description = """
-            Retorna o grupo com a trilha de auditoria de cada alteração: todas as decisões tomadas, \
-            por quem, quando e com qual comentário, da mais antiga para a mais recente.
+            Retorna o grupo com suas alterações e a trilha de auditoria da decisão tomada sobre \
+            ele: qual foi, por quem, quando e com qual comentário.
             Não possui corpo: o único dado obrigatório é o `id` do grupo, informado na URL.""")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Histórico retornado com sucesso"),

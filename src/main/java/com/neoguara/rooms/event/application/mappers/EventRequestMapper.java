@@ -1,18 +1,14 @@
 package com.neoguara.rooms.event.application.mappers;
 
 import com.neoguara.rooms.event.application.dtos.ApprovalResponse;
-import com.neoguara.rooms.event.application.dtos.EventChangeItemAuditResponse;
 import com.neoguara.rooms.event.application.dtos.EventChangeItemResponse;
 import com.neoguara.rooms.event.application.dtos.EventRequestAuditResponse;
 import com.neoguara.rooms.event.application.dtos.EventRequestResponse;
 import com.neoguara.rooms.event.domain.entities.Approval;
 import com.neoguara.rooms.event.domain.entities.EventChangeItem;
 import com.neoguara.rooms.event.domain.entities.EventRequest;
-import com.neoguara.rooms.event.domain.enums.EventRequestStatus;
-import com.neoguara.rooms.event.domain.valueobjects.EventChangeItemId;
 
 import java.util.List;
-import java.util.Map;
 
 public class EventRequestMapper {
 
@@ -22,7 +18,8 @@ public class EventRequestMapper {
         return new EventRequestResponse(
                 eventRequest.getId().id(),
                 eventRequest.getCreatedBy().id(),
-                statusOf(changeItems).name(),
+                eventRequest.getStatus().name(),
+                eventRequest.getReversalOf() != null ? eventRequest.getReversalOf().id() : null,
                 eventRequest.getJustification(),
                 eventRequest.getCreatedAt(),
                 changeItems.stream().map(EventRequestMapper::toItemResponse).toList()
@@ -32,27 +29,18 @@ public class EventRequestMapper {
     public static EventRequestAuditResponse toAuditResponse(
             EventRequest eventRequest,
             List<EventChangeItem> changeItems,
-            Map<EventChangeItemId, List<Approval>> approvalsByItem
+            List<Approval> approvals
     ) {
         return new EventRequestAuditResponse(
                 eventRequest.getId().id(),
                 eventRequest.getCreatedBy().id(),
-                statusOf(changeItems).name(),
+                eventRequest.getStatus().name(),
+                eventRequest.getReversalOf() != null ? eventRequest.getReversalOf().id() : null,
                 eventRequest.getJustification(),
                 eventRequest.getCreatedAt(),
-                changeItems.stream()
-                        .map(item -> new EventChangeItemAuditResponse(
-                                toItemResponse(item),
-                                approvalsByItem.getOrDefault(item.getId(), List.of()).stream()
-                                        .map(EventRequestMapper::toApprovalResponse)
-                                        .toList()
-                        ))
-                        .toList()
+                changeItems.stream().map(EventRequestMapper::toItemResponse).toList(),
+                approvals.stream().map(EventRequestMapper::toApprovalResponse).toList()
         );
-    }
-
-    private static EventRequestStatus statusOf(List<EventChangeItem> changeItems) {
-        return EventRequestStatus.from(changeItems.stream().map(EventChangeItem::getStatus).toList());
     }
 
     private static EventChangeItemResponse toItemResponse(EventChangeItem item) {
@@ -62,7 +50,6 @@ public class EventRequestMapper {
                 item.getId().id(),
                 item.getType().name(),
                 item.getEventId() != null ? item.getEventId().id() : null,
-                item.getStatus().name(),
                 item.getReversalOf() != null ? item.getReversalOf().id() : null,
                 before != null ? before.getRoomId().id() : null,
                 after != null ? after.getRoomId().id() : null,

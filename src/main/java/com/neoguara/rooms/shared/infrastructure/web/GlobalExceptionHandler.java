@@ -13,17 +13,53 @@ import tools.jackson.databind.exc.MismatchedInputException;
 import tools.jackson.databind.exc.UnrecognizedPropertyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.Arrays;
 import java.util.List;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    /**
+     * Responde 404 para URLs que não existem. Sem este tratamento o 404 do Spring vira um forward
+     * para {@code /error}, que o filtro de autenticação não processa — a resposta que chegaria ao
+     * cliente seria um 403 enganoso, sugerindo falta de permissão em vez de rota inexistente.
+     */
+    @ExceptionHandler(NoResourceFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleNoResourceFound(NoResourceFoundException ex) {
+        return notFound(ex.getHttpMethod().name(), ex.getResourcePath());
+    }
+
+    @ExceptionHandler(NoHandlerFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleNoHandlerFound(NoHandlerFoundException ex) {
+        return notFound(ex.getHttpMethod(), ex.getRequestURL());
+    }
+
+    /** Responde 405 quando a URL existe mas não aceita o método usado, pelo mesmo motivo. */
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
+    public ErrorResponse handleMethodNotSupported(HttpRequestMethodNotSupportedException ex) {
+        String supported = ex.getSupportedMethods() == null
+                ? "none"
+                : String.join(", ", ex.getSupportedMethods());
+        return new ErrorResponse(HttpStatus.METHOD_NOT_ALLOWED.value(), "METHOD_NOT_ALLOWED",
+                "Method %s is not supported here. Supported methods: %s".formatted(ex.getMethod(), supported));
+    }
+
+    private static ErrorResponse notFound(String method, String path) {
+        return new ErrorResponse(HttpStatus.NOT_FOUND.value(), "NOT_FOUND",
+                "No endpoint %s %s".formatted(method, path.startsWith("/") ? path : "/" + path));
+    }
 
     @ExceptionHandler(DomainValidationException.class)
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)

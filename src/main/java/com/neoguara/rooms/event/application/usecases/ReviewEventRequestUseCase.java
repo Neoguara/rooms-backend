@@ -18,12 +18,13 @@ import com.neoguara.rooms.shared.domain.validation.Notification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Map;
 import java.util.UUID;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
+/**
+ * Decide um grupo inteiro de alterações. Aprovar efetiva todas as alterações do grupo, na ordem em
+ * que foram submetidas; rejeitar não efetiva nenhuma. Não há decisão parcial: o grupo é a unidade
+ * de aprovação, então basta uma alteração não poder ser aplicada para que nada seja gravado.
+ */
 @Service
 public class ReviewEventRequestUseCase {
 
@@ -53,34 +54,25 @@ public class ReviewEventRequestUseCase {
 
         validate(review);
 
-        var decidedBy = UserId.of(reviewedBy);
         var changeItems = changeItemRepository.findByEventRequestId(requestId);
-        Map<UUID, EventChangeItem> itemsById = changeItems.stream()
-                .collect(Collectors.toMap(item -> item.getId().id(), Function.identity()));
 
-        for (var decision : review.decisions()) {
-            var item = itemsById.get(decision.itemId());
-            if (item == null)
-                throw new ResourceNotFoundException(
-                        "Change item in event request " + eventRequestId, decision.itemId());
-
-            switch (decision.decision()) {
-                case APPROVED -> {
-                    item.approve();
-                    apply(item);
-                }
-                case REJECTED -> item.reject();
+        switch (review.decision()) {
+            case APPROVED -> {
+                eventRequest.approve();
+                changeItems.forEach(this::apply);
+                changeItemRepository.saveAll(changeItems);
             }
-
-            changeItemRepository.save(item);
-            approvalRepository.save(
-                    Approval.of(item.getId(), decidedBy, decision.decision(), decision.comment()));
+            case REJECTED -> eventRequest.reject();
         }
+
+        eventRequestRepository.save(eventRequest);
+        approvalRepository.save(
+                Approval.of(requestId, UserId.of(reviewedBy), review.decision(), review.comment()));
 
         return EventRequestMapper.toResponse(eventRequest, changeItems);
     }
 
-    /** Efetiva sobre o evento a alteração descrita pelo item recém-aprovado. */
+    /** Efetiva sobre o evento a alteração descrita pelo item do grupo recém-aprovado. */
     private void apply(EventChangeItem item) {
         var after = item.getAfter();
 
@@ -135,17 +127,7 @@ public class ReviewEventRequestUseCase {
 
     private void validate(ReviewEventRequest review) {
         Notification notification = Notification.create();
-
-        List<?> decisions = review.decisions();
-        notification.addErrorIf(decisions == null || decisions.isEmpty(),
-                "decisions must contain at least one item");
-
-        if (review.decisions() != null) {
-            review.decisions().forEach(decision -> notification
-                    .addErrorIf(decision.itemId() == null, "itemId is required")
-                    .addErrorIf(decision.decision() == null, "decision is required"));
-        }
-
+        notification.addErrorIf(review.decision() == null, "decision is required");
         notification.raiseIfHasErrors();
     }
 }
