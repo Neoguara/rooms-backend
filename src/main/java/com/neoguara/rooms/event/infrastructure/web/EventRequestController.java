@@ -113,7 +113,12 @@ public class EventRequestController {
         this.reverseEventRequestUseCase = reverseEventRequestUseCase;
     }
 
-    @Operation(description = "Retorna todos os grupos de solicitações com suas alterações.")
+    @Operation(description = """
+            Retorna todos os grupos de solicitações com suas alterações.
+            Grupos pendentes trazem em `conflicts` os choques de sala que causariam se fossem \
+            aprovados naquele instante, para que a decisão não dependa de conferir a agenda à mão. \
+            É um aviso calculado na hora da leitura, não uma recusa: a agenda pode mudar até a \
+            aprovação, e é lá que o conflito de fato barra a alteração.""")
     @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso")
     @GetMapping
     public ResponseEntity<List<EventRequestResponse>> listEventRequests() {

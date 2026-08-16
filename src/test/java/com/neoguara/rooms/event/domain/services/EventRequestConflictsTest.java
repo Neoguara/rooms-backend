@@ -141,6 +141,32 @@ class EventRequestConflictsTest {
         assertEquals("Planejamento", conflicts.getFirst().occupant().title());
     }
 
+    /**
+     * Depois de aprovado, o CREATE passa a responder pelo evento que produziu — senão a criação
+     * apareceria disputando a sala com o próprio evento que ela criou.
+     */
+    @Test
+    void approvedCreationDoesNotCompeteWithTheEventItProduced() {
+        Event created = event(ROOM, "Planejamento", TEN, NOON);
+        var create = EventChangeItem.create(group, 0, snapshot(ROOM, "Planejamento", TEN, NOON));
+        create.linkCreatedEvent(created.getId());
+
+        assertTrue(EventRequestConflicts.preview(List.of(create), agendaWith(created)).isEmpty());
+    }
+
+    @Test
+    void claimsCoverOnlyWhatTheItemsTakeHoldOf() {
+        Event occupant = event(ROOM, "Retrospectiva", TEN, NOON);
+        var create = EventChangeItem.create(group, 0, snapshot(ROOM, "Planejamento", NINE, TEN));
+        var cancel = EventChangeItem.cancel(group, 1, occupant);
+
+        var claims = EventRequestConflicts.claims(List.of(create, cancel));
+
+        assertEquals(1, claims.size());
+        assertEquals(NINE, claims.getFirst().startAt());
+        assertEquals(TEN, claims.getFirst().endAt());
+    }
+
     @Test
     void cancelledEventsInTheAgendaDoNotHoldTheRoom() {
         Event cancelled = event(ROOM, "Retrospectiva", TEN, NOON);

@@ -20,4 +20,10 @@ public interface EventRepositoryPort {
      * pode vir na lista: descartá-lo é decisão de domínio, não da consulta.
      */
     List<Event> findOverlapping(RoomId roomId, LocalDateTime startAt, LocalDateTime endAt);
+
+    /**
+     * Eventos que seguram <em>qualquer</em> sala dentro do intervalo. Serve para carregar a agenda
+     * de uma vez quando muitas verificações seguidas viriam a seguir.
+     */
+    List<Event> findOccupyingBetween(LocalDateTime from, LocalDateTime to);
 }

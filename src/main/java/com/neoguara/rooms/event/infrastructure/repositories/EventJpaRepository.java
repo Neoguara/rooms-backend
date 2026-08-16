@@ -38,4 +38,17 @@ public interface EventJpaRepository extends JpaRepository<Event, EventId> {
             @Param("startAt") LocalDateTime startAt,
             @Param("endAt") LocalDateTime endAt
     );
+
+    @Query("""
+            SELECT e FROM Event e
+            WHERE e.status IN :statuses
+              AND e.startAt < :to
+              AND e.endAt > :from
+            ORDER BY e.startAt
+            """)
+    List<Event> findOccupyingBetween(
+            @Param("statuses") Collection<EventStatus> statuses,
+            @Param("from") LocalDateTime from,
+            @Param("to") LocalDateTime to
+    );
 }

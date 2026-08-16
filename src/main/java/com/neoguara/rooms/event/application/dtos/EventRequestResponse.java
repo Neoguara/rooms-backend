@@ -40,8 +40,9 @@ public record EventRequestResponse(
         List<EventChangeItemResponse> changes,
 
         @Schema(description = """
-                Choques de sala antecipados no momento da submissão, como aviso. Vem sempre vazia \
-                nas demais leituras do grupo, que não recalculam a agenda""",
+                Choques de sala que o grupo causaria se fosse aprovado agora, calculados contra a \
+                agenda no momento da leitura. É aviso, não recusa. Vem sempre vazia em grupos já \
+                decididos, onde não há o que antecipar, e na auditoria""",
                 requiredMode = Schema.RequiredMode.REQUIRED)
         List<EventConflictResponse> conflicts
 ) {}

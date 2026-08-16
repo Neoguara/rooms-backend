@@ -6,6 +6,7 @@ import com.neoguara.rooms.event.domain.valueobjects.EventSnapshot;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -26,6 +27,14 @@ import java.util.UUID;
 public final class EventRequestConflicts {
 
     private EventRequestConflicts() {}
+
+    /** Tudo que os itens passariam a segurar. Serve para saber que janela da agenda carregar. */
+    public static List<OccupiedSlot> claims(List<EventChangeItem> items) {
+        return items.stream()
+                .map(EventRequestConflicts::claimedBy)
+                .filter(Objects::nonNull)
+                .toList();
+    }
 
     public static List<EventConflict> preview(List<EventChangeItem> items, RoomOccupancy occupancy) {
         List<EventConflict> conflicts = new ArrayList<>();
@@ -71,15 +80,21 @@ public final class EventRequestConflicts {
 
     /**
      * A sala e o intervalo que o item passa a segurar, ou {@code null} nos itens que só liberam.
-     * Um CREATE ainda não tem evento, então responde pela identidade da própria alteração.
+     * Um CREATE ainda não aprovado não tem evento, e responde pela identidade da própria alteração;
+     * depois de aprovado passa a responder pelo evento que produziu, senão apareceria disputando a
+     * sala com a própria criação.
      */
     private static OccupiedSlot claimedBy(EventChangeItem item) {
         return switch (item.getType()) {
-            case CREATE -> slot(item.getId().id(), item.getAfter());
+            case CREATE -> slot(identityOf(item), item.getAfter());
             case UPDATE -> slot(item.getEventId().id(), item.getAfter());
             case REACTIVATE -> slot(item.getEventId().id(), item.getBefore());
             case CANCEL, DISCARD -> null;
         };
+    }
+
+    private static UUID identityOf(EventChangeItem item) {
+        return item.getEventId() != null ? item.getEventId().id() : item.getId().id();
     }
 
     private static OccupiedSlot slot(UUID id, EventSnapshot snapshot) {

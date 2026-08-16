@@ -51,4 +51,9 @@ public class EventRepositoryImpl implements EventRepositoryPort {
         return jpaRepository.findOverlapping(roomId.id(), EventStatus.occupying(), startAt, endAt);
     }
 
+    @Override
+    public List<Event> findOccupyingBetween(LocalDateTime from, LocalDateTime to) {
+        return jpaRepository.findOccupyingBetween(EventStatus.occupying(), from, to);
+    }
+
 }
