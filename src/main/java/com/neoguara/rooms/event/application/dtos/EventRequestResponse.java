@@ -37,5 +37,11 @@ public record EventRequestResponse(
 
         @Schema(description = "Alterações que compõem o grupo, na ordem em que serão aplicadas",
                 requiredMode = Schema.RequiredMode.REQUIRED)
-        List<EventChangeItemResponse> changes
+        List<EventChangeItemResponse> changes,
+
+        @Schema(description = """
+                Choques de sala antecipados no momento da submissão, como aviso. Vem sempre vazia \
+                nas demais leituras do grupo, que não recalculam a agenda""",
+                requiredMode = Schema.RequiredMode.REQUIRED)
+        List<EventConflictResponse> conflicts
 ) {}

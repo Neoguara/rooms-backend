@@ -10,6 +10,8 @@ import com.neoguara.rooms.event.domain.entities.Event;
 import com.neoguara.rooms.event.domain.entities.EventChangeItem;
 import com.neoguara.rooms.event.domain.entities.EventRequest;
 import com.neoguara.rooms.event.domain.enums.EventRequestStatus;
+import com.neoguara.rooms.event.domain.services.EventRequestConflicts;
+import com.neoguara.rooms.event.domain.services.RoomOccupancy;
 import com.neoguara.rooms.event.domain.valueobjects.EventId;
 import com.neoguara.rooms.event.domain.valueobjects.EventRequestId;
 import com.neoguara.rooms.event.domain.valueobjects.UserId;
@@ -33,15 +35,18 @@ public class ReverseEventRequestUseCase {
     private final EventRepositoryPort eventRepository;
     private final EventRequestRepositoryPort eventRequestRepository;
     private final EventChangeItemRepositoryPort changeItemRepository;
+    private final RoomOccupancy roomOccupancy;
 
     ReverseEventRequestUseCase(
             EventRepositoryPort eventRepository,
             EventRequestRepositoryPort eventRequestRepository,
-            EventChangeItemRepositoryPort changeItemRepository
+            EventChangeItemRepositoryPort changeItemRepository,
+            RoomOccupancy roomOccupancy
     ) {
         this.eventRepository = eventRepository;
         this.eventRequestRepository = eventRequestRepository;
         this.changeItemRepository = changeItemRepository;
+        this.roomOccupancy = roomOccupancy;
     }
 
     @Transactional
@@ -67,7 +72,8 @@ public class ReverseEventRequestUseCase {
         eventRequestRepository.save(reversal);
         changeItemRepository.saveAll(reversalItems);
 
-        return EventRequestMapper.toResponse(reversal, reversalItems);
+        return EventRequestMapper.toResponse(
+                reversal, reversalItems, EventRequestConflicts.preview(reversalItems, roomOccupancy));
     }
 
     /**

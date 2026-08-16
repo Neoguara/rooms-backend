@@ -2,9 +2,11 @@ package com.neoguara.rooms.event.application.mappers;
 
 import com.neoguara.rooms.event.application.dtos.ApprovalResponse;
 import com.neoguara.rooms.event.application.dtos.EventChangeItemResponse;
+import com.neoguara.rooms.event.application.dtos.EventConflictResponse;
 import com.neoguara.rooms.event.application.dtos.EventRequestAuditResponse;
 import com.neoguara.rooms.event.application.dtos.EventRequestResponse;
 import com.neoguara.rooms.event.domain.entities.Approval;
+import com.neoguara.rooms.event.domain.services.EventConflict;
 import com.neoguara.rooms.event.domain.entities.EventChangeItem;
 import com.neoguara.rooms.event.domain.entities.EventRequest;
 
@@ -15,6 +17,15 @@ public class EventRequestMapper {
     private EventRequestMapper() {}
 
     public static EventRequestResponse toResponse(EventRequest eventRequest, List<EventChangeItem> changeItems) {
+        return toResponse(eventRequest, changeItems, List.of());
+    }
+
+    /** Resposta de uma submissão, que leva junto os choques de sala antecipados como aviso. */
+    public static EventRequestResponse toResponse(
+            EventRequest eventRequest,
+            List<EventChangeItem> changeItems,
+            List<EventConflict> conflicts
+    ) {
         return new EventRequestResponse(
                 eventRequest.getId().id(),
                 eventRequest.getCreatedBy().id(),
@@ -22,7 +33,8 @@ public class EventRequestMapper {
                 eventRequest.getReversalOf() != null ? eventRequest.getReversalOf().id() : null,
                 eventRequest.getJustification(),
                 eventRequest.getCreatedAt(),
-                changeItems.stream().map(EventRequestMapper::toItemResponse).toList()
+                changeItems.stream().map(EventRequestMapper::toItemResponse).toList(),
+                conflicts.stream().map(EventConflictResponse::from).toList()
         );
     }
 

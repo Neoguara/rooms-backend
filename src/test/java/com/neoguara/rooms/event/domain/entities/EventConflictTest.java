@@ -44,7 +44,7 @@ class EventConflictTest {
         );
 
         assertEquals(1, ex.getConflicts().size());
-        assertEquals(existing.getId(), ex.getConflicts().getFirst().eventId());
+        assertEquals(existing.getId().id(), ex.getConflicts().getFirst().occupant().id());
     }
 
     @Test

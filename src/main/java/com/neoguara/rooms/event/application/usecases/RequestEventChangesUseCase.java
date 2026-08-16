@@ -14,6 +14,8 @@ import com.neoguara.rooms.event.application.ports.EventRequestRepositoryPort;
 import com.neoguara.rooms.event.domain.entities.Event;
 import com.neoguara.rooms.event.domain.entities.EventChangeItem;
 import com.neoguara.rooms.event.domain.entities.EventRequest;
+import com.neoguara.rooms.event.domain.services.EventRequestConflicts;
+import com.neoguara.rooms.event.domain.services.RoomOccupancy;
 import com.neoguara.rooms.event.domain.valueobjects.EventId;
 import com.neoguara.rooms.event.domain.valueobjects.EventRequestId;
 import com.neoguara.rooms.event.domain.valueobjects.EventSnapshot;
@@ -34,15 +36,18 @@ public class RequestEventChangesUseCase {
     private final EventRepositoryPort eventRepository;
     private final EventRequestRepositoryPort eventRequestRepository;
     private final EventChangeItemRepositoryPort changeItemRepository;
+    private final RoomOccupancy roomOccupancy;
 
     public RequestEventChangesUseCase(
             EventRepositoryPort eventRepository,
             EventRequestRepositoryPort eventRequestRepository,
-            EventChangeItemRepositoryPort changeItemRepository
+            EventChangeItemRepositoryPort changeItemRepository,
+            RoomOccupancy roomOccupancy
     ) {
         this.eventRepository = eventRepository;
         this.eventRequestRepository = eventRequestRepository;
         this.changeItemRepository = changeItemRepository;
+        this.roomOccupancy = roomOccupancy;
     }
 
     @Transactional
@@ -64,7 +69,8 @@ public class RequestEventChangesUseCase {
         eventRequestRepository.save(eventRequest);
         changeItemRepository.saveAll(changeItems);
 
-        return EventRequestMapper.toResponse(eventRequest, changeItems);
+        return EventRequestMapper.toResponse(
+                eventRequest, changeItems, EventRequestConflicts.preview(changeItems, roomOccupancy));
     }
 
     private EventChangeItem toChangeItem(EventRequestId eventRequestId, int position, EventChangeRequest change) {

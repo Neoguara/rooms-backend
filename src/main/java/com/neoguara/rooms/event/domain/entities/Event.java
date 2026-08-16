@@ -3,6 +3,7 @@ package com.neoguara.rooms.event.domain.entities;
 import com.neoguara.rooms.event.domain.enums.EventStatus;
 import com.neoguara.rooms.event.domain.exceptions.EventConflictException;
 import com.neoguara.rooms.event.domain.services.EventConflict;
+import com.neoguara.rooms.event.domain.services.OccupiedSlot;
 import com.neoguara.rooms.event.domain.services.RoomOccupancy;
 import com.neoguara.rooms.event.domain.validation.EventValidation;
 import com.neoguara.rooms.event.domain.valueobjects.EventId;
@@ -161,22 +162,12 @@ public class Event {
      * implementação de {@link RoomOccupancy} que chegue.
      */
     private void requireFreeSlot(RoomOccupancy occupancy) {
-        List<EventConflict> conflicts = occupancy.occupying(roomId, startAt, endAt).stream()
-                .filter(other -> !other.getId().equals(this.id))
+        List<OccupiedSlot> occupants = occupancy.occupying(roomId, startAt, endAt).stream()
                 .filter(other -> other.getStatus().occupiesRoom())
-                .filter(other -> other.getRoomId().equals(this.roomId))
-                .filter(this::overlaps)
-                .map(EventConflict::of)
+                .map(OccupiedSlot::of)
                 .toList();
+        List<EventConflict> conflicts = EventConflict.against(OccupiedSlot.of(this), occupants);
         if (!conflicts.isEmpty()) throw new EventConflictException(conflicts);
-    }
-
-    /**
-     * Intervalo semiaberto: eventos colados, em que um termina exatamente quando o outro começa,
-     * não disputam a sala.
-     */
-    private boolean overlaps(Event other) {
-        return this.startAt.isBefore(other.endAt) && this.endAt.isAfter(other.startAt);
     }
 
     public EventId getId() {return id;}
