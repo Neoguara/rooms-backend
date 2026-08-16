@@ -1,7 +1,6 @@
 package com.neoguara.rooms.event.infrastructure.adapters;
 
 import com.neoguara.rooms.event.application.ports.EventRepositoryPort;
-import com.neoguara.rooms.event.domain.enums.EventStatus;
 import com.neoguara.rooms.room.application.ports.RoomAvailabilityPort;
 import org.springframework.stereotype.Component;
 
@@ -21,6 +20,6 @@ public class EventAvailabilityAdapter implements RoomAvailabilityPort {
 
     @Override
     public Set<UUID> findOccupiedRoomIds(LocalDateTime startAt, LocalDateTime endAt) {
-        return new HashSet<>(eventRepository.findOccupiedRoomIds(EventStatus.ACTIVE, startAt, endAt));
+        return new HashSet<>(eventRepository.findOccupiedRoomIds(startAt, endAt));
     }
 }

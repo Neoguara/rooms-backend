@@ -1,6 +1,9 @@
 package com.neoguara.rooms.event.domain.entities;
 
 import com.neoguara.rooms.event.domain.enums.EventStatus;
+import com.neoguara.rooms.event.domain.exceptions.EventConflictException;
+import com.neoguara.rooms.event.domain.services.EventConflict;
+import com.neoguara.rooms.event.domain.services.RoomOccupancy;
 import com.neoguara.rooms.event.domain.validation.EventValidation;
 import com.neoguara.rooms.event.domain.valueobjects.EventId;
 import com.neoguara.rooms.event.domain.valueobjects.RoomId;
@@ -9,6 +12,7 @@ import com.neoguara.rooms.shared.domain.validation.Notification;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "events")
@@ -61,7 +65,8 @@ public class Event {
             LocalDateTime startAt,
             LocalDateTime endAt,
             Boolean isAllDay,
-            String recurrenceRule
+            String recurrenceRule,
+            RoomOccupancy occupancy
     ) {
         Event event = new Event(
                 roomId,
@@ -75,6 +80,7 @@ public class Event {
         Notification notification = Notification.create();
         new EventValidation().validate(event, notification);
         notification.raiseIfHasErrors();
+        event.requireFreeSlot(occupancy);
         return event;
     }
 
@@ -85,7 +91,8 @@ public class Event {
             LocalDateTime startAt,
             LocalDateTime endAt,
             Boolean isAllDay,
-            String recurrenceRule
+            String recurrenceRule,
+            RoomOccupancy occupancy
     ) {
         if (this.status != EventStatus.ACTIVE)
             throw new InvalidStateException("Only active events can be updated");
@@ -100,6 +107,7 @@ public class Event {
         Notification notification = Notification.create();
         new EventValidation().validate(this, notification);
         notification.raiseIfHasErrors();
+        requireFreeSlot(occupancy);
     }
 
     public void cancel() {
@@ -121,11 +129,16 @@ public class Event {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public void reactivate() {
+    /**
+     * Exige a agenda porque reativar volta a ocupar a sala, e o horário pode ter sido tomado
+     * enquanto o evento estava cancelado.
+     */
+    public void reactivate(RoomOccupancy occupancy) {
         if (this.status != EventStatus.CANCELLED)
             throw new InvalidStateException("Only cancelled events can be reactivated");
         this.status = EventStatus.ACTIVE;
         this.updatedAt = LocalDateTime.now();
+        requireFreeSlot(occupancy);
     }
 
     public void complete() {
@@ -140,6 +153,30 @@ public class Event {
             throw new InvalidStateException("Only cancelled or completed events can be archived");
         this.status = EventStatus.ARCHIVED;
         this.updatedAt = LocalDateTime.now();
+    }
+
+    /**
+     * Recusa o horário se alguém já segura a sala nele. A consulta apenas estreita a busca; quem
+     * decide o que é choque é este método, para que a regra continue valendo qualquer que seja a
+     * implementação de {@link RoomOccupancy} que chegue.
+     */
+    private void requireFreeSlot(RoomOccupancy occupancy) {
+        List<EventConflict> conflicts = occupancy.occupying(roomId, startAt, endAt).stream()
+                .filter(other -> !other.getId().equals(this.id))
+                .filter(other -> other.getStatus().occupiesRoom())
+                .filter(other -> other.getRoomId().equals(this.roomId))
+                .filter(this::overlaps)
+                .map(EventConflict::of)
+                .toList();
+        if (!conflicts.isEmpty()) throw new EventConflictException(conflicts);
+    }
+
+    /**
+     * Intervalo semiaberto: eventos colados, em que um termina exatamente quando o outro começa,
+     * não disputam a sala.
+     */
+    private boolean overlaps(Event other) {
+        return this.startAt.isBefore(other.endAt) && this.endAt.isAfter(other.startAt);
     }
 
     public EventId getId() {return id;}

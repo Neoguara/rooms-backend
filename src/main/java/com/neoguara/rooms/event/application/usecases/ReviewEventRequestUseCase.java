@@ -10,6 +10,7 @@ import com.neoguara.rooms.event.application.ports.EventRequestRepositoryPort;
 import com.neoguara.rooms.event.domain.entities.Approval;
 import com.neoguara.rooms.event.domain.entities.Event;
 import com.neoguara.rooms.event.domain.entities.EventChangeItem;
+import com.neoguara.rooms.event.domain.services.RoomOccupancy;
 import com.neoguara.rooms.event.domain.valueobjects.EventId;
 import com.neoguara.rooms.event.domain.valueobjects.EventRequestId;
 import com.neoguara.rooms.event.domain.valueobjects.UserId;
@@ -32,17 +33,20 @@ public class ReviewEventRequestUseCase {
     private final EventRequestRepositoryPort eventRequestRepository;
     private final EventChangeItemRepositoryPort changeItemRepository;
     private final ApprovalRepositoryPort approvalRepository;
+    private final RoomOccupancy roomOccupancy;
 
     public ReviewEventRequestUseCase(
             EventRepositoryPort eventRepository,
             EventRequestRepositoryPort eventRequestRepository,
             EventChangeItemRepositoryPort changeItemRepository,
-            ApprovalRepositoryPort approvalRepository
+            ApprovalRepositoryPort approvalRepository,
+            RoomOccupancy roomOccupancy
     ) {
         this.eventRepository = eventRepository;
         this.eventRequestRepository = eventRequestRepository;
         this.changeItemRepository = changeItemRepository;
         this.approvalRepository = approvalRepository;
+        this.roomOccupancy = roomOccupancy;
     }
 
     @Transactional
@@ -85,7 +89,8 @@ public class ReviewEventRequestUseCase {
                         after.getStartAt(),
                         after.getEndAt(),
                         after.isAllDay(),
-                        after.getRecurrenceRule()
+                        after.getRecurrenceRule(),
+                        roomOccupancy
                 ));
                 item.linkCreatedEvent(created.getId());
             }
@@ -98,7 +103,8 @@ public class ReviewEventRequestUseCase {
                         after.getStartAt(),
                         after.getEndAt(),
                         after.isAllDay(),
-                        after.getRecurrenceRule()
+                        after.getRecurrenceRule(),
+                        roomOccupancy
                 );
                 eventRepository.save(event);
             }
@@ -109,7 +115,7 @@ public class ReviewEventRequestUseCase {
             }
             case REACTIVATE -> {
                 var event = loadEvent(item.getEventId());
-                event.reactivate();
+                event.reactivate(roomOccupancy);
                 eventRepository.save(event);
             }
             case DISCARD -> {

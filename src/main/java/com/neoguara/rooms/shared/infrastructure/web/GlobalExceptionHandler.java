@@ -80,7 +80,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ConflictException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse handleConflict(ConflictException ex) {
-        return new ErrorResponse(HttpStatus.CONFLICT.value(), "CONFLICT", ex.getMessage());
+        return ex.getErrors().isEmpty()
+                ? new ErrorResponse(HttpStatus.CONFLICT.value(), "CONFLICT", ex.getMessage())
+                : new ErrorResponse(HttpStatus.CONFLICT.value(), "CONFLICT", ex.getErrors());
     }
 
     @ExceptionHandler(InvalidStateException.class)
