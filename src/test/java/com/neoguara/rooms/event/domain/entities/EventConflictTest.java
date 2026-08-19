@@ -31,7 +31,7 @@ class EventConflictTest {
     }
 
     private Event event(RoomId roomId, LocalDateTime startAt, LocalDateTime endAt, RoomOccupancy occupancy) {
-        return Event.create(roomId, "Reunião", null, startAt, endAt, false, null, occupancy);
+        return Event.create(roomId, "Reunião", null, startAt, endAt, false, null, null, occupancy);
     }
 
     @Test

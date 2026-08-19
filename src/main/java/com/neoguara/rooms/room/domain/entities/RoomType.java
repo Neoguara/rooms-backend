@@ -6,6 +6,8 @@ import com.neoguara.rooms.room.domain.valueobjects.RoomTypeId;
 import com.neoguara.rooms.shared.domain.exceptions.InvalidStateException;
 import com.neoguara.rooms.shared.domain.validation.Notification;
 import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 
@@ -22,6 +24,7 @@ public class RoomType {
     private String defaultCapacity;
     private String color;
     private String icon;
+    @Enumerated(EnumType.STRING)
     private RoomTypeStatus status;
 
     private LocalDateTime createdAt;

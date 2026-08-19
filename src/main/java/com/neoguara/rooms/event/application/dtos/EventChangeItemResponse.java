@@ -76,5 +76,15 @@ public record EventChangeItemResponse(
 
         @Schema(description = "Regra de recorrência depois da alteração",
                 requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
-        String newRecurrenceRule
+        String newRecurrenceRule,
+
+        @Schema(description = "Série antes da alteração",
+                requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
+        UUID oldSeriesId,
+
+        @Schema(description = """
+                Série depois da alteração. Itens que compartilham este id vieram da expansão de uma \
+                mesma recorrência e produzirão as ocorrências de uma mesma série""",
+                requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
+        UUID newSeriesId
 ) {}

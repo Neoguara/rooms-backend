@@ -32,6 +32,7 @@ public class Room {
     private Integer floor;
     private Integer capacity;
 
+    @Enumerated(EnumType.STRING)
     private RoomStatus status;
 
     private LocalDateTime createdAt;

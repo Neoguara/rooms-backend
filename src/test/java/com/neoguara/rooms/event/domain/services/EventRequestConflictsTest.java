@@ -33,11 +33,11 @@ class EventRequestConflictsTest {
     }
 
     private Event event(RoomId roomId, String title, LocalDateTime startAt, LocalDateTime endAt) {
-        return Event.create(roomId, title, null, startAt, endAt, false, null, FREE);
+        return Event.create(roomId, title, null, startAt, endAt, false, null, null, FREE);
     }
 
     private EventSnapshot snapshot(RoomId roomId, String title, LocalDateTime startAt, LocalDateTime endAt) {
-        return EventSnapshot.of(roomId, title, null, startAt, endAt, false, null);
+        return EventSnapshot.of(roomId, title, null, startAt, endAt, false, null, null);
     }
 
     @Test

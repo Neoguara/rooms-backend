@@ -8,6 +8,7 @@ import com.neoguara.rooms.event.domain.services.RoomOccupancy;
 import com.neoguara.rooms.event.domain.validation.EventValidation;
 import com.neoguara.rooms.event.domain.valueobjects.EventId;
 import com.neoguara.rooms.event.domain.valueobjects.RoomId;
+import com.neoguara.rooms.event.domain.valueobjects.SeriesId;
 import com.neoguara.rooms.shared.domain.exceptions.InvalidStateException;
 import com.neoguara.rooms.shared.domain.validation.Notification;
 import jakarta.persistence.*;
@@ -30,7 +31,16 @@ public class Event {
     private LocalDateTime endAt;
     private Boolean isAllDay;
     private String recurrenceRule;
+    @Enumerated(EnumType.STRING)
     private EventStatus status;
+
+    /**
+     * Liga esta ocorrência às irmãs geradas pela mesma regra. Nulo em evento avulso — a coluna
+     * existe justamente para distinguir os dois casos sem tabela à parte.
+     */
+    @Embedded
+    @AttributeOverride(name = "id", column = @Column(name = "series_id"))
+    private SeriesId seriesId;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -44,7 +54,8 @@ public class Event {
             LocalDateTime startAt,
             LocalDateTime endAt,
             Boolean isAllDay,
-            String recurrenceRule
+            String recurrenceRule,
+            SeriesId seriesId
     ) {
         this.id = new EventId();
         this.roomId = roomId;
@@ -54,6 +65,7 @@ public class Event {
         this.endAt = endAt;
         this.isAllDay = isAllDay;
         this.recurrenceRule = recurrenceRule;
+        this.seriesId = seriesId;
         this.status = EventStatus.ACTIVE;
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
@@ -67,6 +79,7 @@ public class Event {
             LocalDateTime endAt,
             Boolean isAllDay,
             String recurrenceRule,
+            SeriesId seriesId,
             RoomOccupancy occupancy
     ) {
         Event event = new Event(
@@ -76,7 +89,8 @@ public class Event {
                 startAt,
                 endAt,
                 isAllDay,
-                recurrenceRule
+                recurrenceRule,
+                seriesId
         );
         Notification notification = Notification.create();
         new EventValidation().validate(event, notification);
@@ -85,6 +99,10 @@ public class Event {
         return event;
     }
 
+    /**
+     * Não recebe {@code seriesId} de propósito: editar uma ocorrência não a tira da série. Uma
+     * ocorrência que passa a divergir das irmãs continua sendo parte da mesma recorrência.
+     */
     public void update(
             RoomId roomId,
             String title,
@@ -97,6 +115,7 @@ public class Event {
     ) {
         if (this.status != EventStatus.ACTIVE)
             throw new InvalidStateException("Only active events can be updated");
+        requireNotElapsed("updated");
         this.roomId = roomId;
         this.title = title;
         this.description = description;
@@ -114,6 +133,7 @@ public class Event {
     public void cancel() {
         if (this.status != EventStatus.ACTIVE)
             throw new InvalidStateException("Only active events can be cancelled");
+        requireNotElapsed("cancelled");
         this.status = EventStatus.CANCELLED;
         this.updatedAt = LocalDateTime.now();
     }
@@ -122,6 +142,10 @@ public class Event {
      * Marca o evento como descartado, para quando sua criação foi aprovada por engano. Difere de
      * {@link #cancel()}: um cancelamento é uma decisão legítima sobre um evento que existiu, e é
      * reversível; um descarte diz que o evento nunca deveria ter existido, e é definitivo.
+     *
+     * <p>É a única alteração que um evento já terminado ainda aceita. Descartar não reescreve a
+     * agenda: apaga um registro que nunca deveria estar nela, e sem isso uma aprovação indevida
+     * sobre data passada ficaria impossível de reverter.
      */
     public void discard() {
         if (this.status != EventStatus.ACTIVE && this.status != EventStatus.CANCELLED)
@@ -137,6 +161,7 @@ public class Event {
     public void reactivate(RoomOccupancy occupancy) {
         if (this.status != EventStatus.CANCELLED)
             throw new InvalidStateException("Only cancelled events can be reactivated");
+        requireNotElapsed("reactivated");
         this.status = EventStatus.ACTIVE;
         this.updatedAt = LocalDateTime.now();
         requireFreeSlot(occupancy);
@@ -154,6 +179,16 @@ public class Event {
             throw new InvalidStateException("Only cancelled or completed events can be archived");
         this.status = EventStatus.ARCHIVED;
         this.updatedAt = LocalDateTime.now();
+    }
+
+    /** Um evento já terminado é registro do que aconteceu, e a agenda de ontem não se reescreve. */
+    public boolean hasElapsed() {
+        return endAt != null && endAt.isBefore(LocalDateTime.now());
+    }
+
+    private void requireNotElapsed(String operation) {
+        if (hasElapsed())
+            throw new InvalidStateException("Events that have already ended cannot be " + operation);
     }
 
     /**
@@ -178,6 +213,7 @@ public class Event {
     public LocalDateTime getEndAt() {return endAt;}
     public Boolean isAllDay() {return isAllDay;}
     public String getRecurrenceRule() {return recurrenceRule;}
+    public SeriesId getSeriesId() {return seriesId;}
     public LocalDateTime getCreatedAt() {return createdAt;}
     public LocalDateTime getUpdatedAt() {return updatedAt;}
     public Boolean getAllDay() {return isAllDay;}

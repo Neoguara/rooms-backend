@@ -51,7 +51,8 @@ public class EventChangeItem {
         @AttributeOverride(name = "startAt",         column = @Column(name = "old_start_at")),
         @AttributeOverride(name = "endAt",           column = @Column(name = "old_end_at")),
         @AttributeOverride(name = "isAllDay",        column = @Column(name = "old_is_all_day")),
-        @AttributeOverride(name = "recurrenceRule",  column = @Column(name = "old_recurrence_rule"))
+        @AttributeOverride(name = "recurrenceRule",  column = @Column(name = "old_recurrence_rule")),
+        @AttributeOverride(name = "seriesId.id",     column = @Column(name = "old_series_id"))
     })
     private EventSnapshot before;
 
@@ -63,7 +64,8 @@ public class EventChangeItem {
         @AttributeOverride(name = "startAt",         column = @Column(name = "new_start_at")),
         @AttributeOverride(name = "endAt",           column = @Column(name = "new_end_at")),
         @AttributeOverride(name = "isAllDay",        column = @Column(name = "new_is_all_day")),
-        @AttributeOverride(name = "recurrenceRule",  column = @Column(name = "new_recurrence_rule"))
+        @AttributeOverride(name = "recurrenceRule",  column = @Column(name = "new_recurrence_rule")),
+        @AttributeOverride(name = "seriesId.id",     column = @Column(name = "new_series_id"))
     })
     private EventSnapshot after;
 
@@ -139,7 +141,8 @@ public class EventChangeItem {
     private static EventSnapshot snapshotOf(Event event) {
         return EventSnapshot.of(
             event.getRoomId(), event.getTitle(), event.getDescription(),
-            event.getStartAt(), event.getEndAt(), event.isAllDay(), event.getRecurrenceRule()
+            event.getStartAt(), event.getEndAt(), event.isAllDay(), event.getRecurrenceRule(),
+            event.getSeriesId()
         );
     }
 

@@ -5,6 +5,7 @@ import com.neoguara.rooms.event.domain.entities.Event;
 import com.neoguara.rooms.event.domain.enums.EventStatus;
 import com.neoguara.rooms.event.domain.valueobjects.EventId;
 import com.neoguara.rooms.event.domain.valueobjects.RoomId;
+import com.neoguara.rooms.event.domain.valueobjects.SeriesId;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -54,6 +55,11 @@ public class EventRepositoryImpl implements EventRepositoryPort {
     @Override
     public List<Event> findOccupyingBetween(LocalDateTime from, LocalDateTime to) {
         return jpaRepository.findOccupyingBetween(EventStatus.occupying(), from, to);
+    }
+
+    @Override
+    public List<Event> findBySeriesId(SeriesId seriesId) {
+        return jpaRepository.findBySeriesId(seriesId.id());
     }
 
 }

@@ -24,7 +24,7 @@ class LoadedOccupancyTest {
     private static final RoomOccupancy FREE = (roomId, startAt, endAt) -> List.of();
 
     private Event event(RoomId roomId, LocalDateTime startAt, LocalDateTime endAt) {
-        return Event.create(roomId, "Reunião", null, startAt, endAt, false, null, FREE);
+        return Event.create(roomId, "Reunião", null, startAt, endAt, false, null, null, FREE);
     }
 
     @Test

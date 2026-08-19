@@ -3,6 +3,7 @@ package com.neoguara.rooms.event.application.ports;
 import com.neoguara.rooms.event.domain.entities.Event;
 import com.neoguara.rooms.event.domain.valueobjects.EventId;
 import com.neoguara.rooms.event.domain.valueobjects.RoomId;
+import com.neoguara.rooms.event.domain.valueobjects.SeriesId;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -26,4 +27,7 @@ public interface EventRepositoryPort {
      * de uma vez quando muitas verificações seguidas viriam a seguir.
      */
     List<Event> findOccupyingBetween(LocalDateTime from, LocalDateTime to);
+
+    /** Ocorrências de uma mesma recorrência, em ordem cronológica. */
+    List<Event> findBySeriesId(SeriesId seriesId);
 }

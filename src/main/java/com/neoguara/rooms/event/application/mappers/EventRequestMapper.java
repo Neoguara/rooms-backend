@@ -76,7 +76,9 @@ public class EventRequestMapper {
                 before != null ? before.isAllDay() : null,
                 after != null ? after.isAllDay() : null,
                 before != null ? before.getRecurrenceRule() : null,
-                after != null ? after.getRecurrenceRule() : null
+                after != null ? after.getRecurrenceRule() : null,
+                before != null && before.getSeriesId() != null ? before.getSeriesId().id() : null,
+                after != null && after.getSeriesId() != null ? after.getSeriesId().id() : null
         );
     }
 

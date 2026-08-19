@@ -16,11 +16,14 @@ public class EventSnapshot {
     private Boolean isAllDay;
     private String recurrenceRule;
 
+    @Embedded
+    private SeriesId seriesId;
+
     EventSnapshot() {}
 
     private EventSnapshot(RoomId roomId, String title, String description,
                           LocalDateTime startAt, LocalDateTime endAt,
-                          Boolean isAllDay, String recurrenceRule) {
+                          Boolean isAllDay, String recurrenceRule, SeriesId seriesId) {
         this.roomId = roomId;
         this.title = title;
         this.description = description;
@@ -28,12 +31,13 @@ public class EventSnapshot {
         this.endAt = endAt;
         this.isAllDay = isAllDay;
         this.recurrenceRule = recurrenceRule;
+        this.seriesId = seriesId;
     }
 
     public static EventSnapshot of(RoomId roomId, String title, String description,
                                    LocalDateTime startAt, LocalDateTime endAt,
-                                   Boolean isAllDay, String recurrenceRule) {
-        return new EventSnapshot(roomId, title, description, startAt, endAt, isAllDay, recurrenceRule);
+                                   Boolean isAllDay, String recurrenceRule, SeriesId seriesId) {
+        return new EventSnapshot(roomId, title, description, startAt, endAt, isAllDay, recurrenceRule, seriesId);
     }
 
     public RoomId getRoomId() { return roomId; }
@@ -43,4 +47,5 @@ public class EventSnapshot {
     public LocalDateTime getEndAt() { return endAt; }
     public Boolean isAllDay() { return isAllDay; }
     public String getRecurrenceRule() { return recurrenceRule; }
+    public SeriesId getSeriesId() { return seriesId; }
 }

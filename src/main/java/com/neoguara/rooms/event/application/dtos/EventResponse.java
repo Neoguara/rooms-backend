@@ -35,6 +35,13 @@ public record EventResponse(
                 requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
         String recurrenceRule,
 
+        @Schema(description = """
+                ID da série que agrupa as ocorrências geradas por uma mesma regra de recorrência. \
+                Nulo em evento avulso. Não existe recurso próprio de série: para listar as irmãs, \
+                filtre os eventos por este id""",
+                requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
+        UUID seriesId,
+
         @Schema(description = "Status do evento: ACTIVE, CANCELLED, COMPLETED ou ARCHIVED",
                 example = "ACTIVE", requiredMode = Schema.RequiredMode.REQUIRED)
         String status,

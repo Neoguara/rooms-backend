@@ -51,4 +51,7 @@ public interface EventJpaRepository extends JpaRepository<Event, EventId> {
             @Param("from") LocalDateTime from,
             @Param("to") LocalDateTime to
     );
+
+    @Query("SELECT e FROM Event e WHERE e.seriesId.id = :seriesId ORDER BY e.startAt")
+    List<Event> findBySeriesId(@Param("seriesId") UUID seriesId);
 }

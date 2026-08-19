@@ -55,11 +55,11 @@ class GetEventRequestUseCaseTest {
     }
 
     private EventSnapshot snapshot(LocalDateTime startAt, LocalDateTime endAt) {
-        return EventSnapshot.of(ROOM, "Planejamento", null, startAt, endAt, false, null);
+        return EventSnapshot.of(ROOM, "Planejamento", null, startAt, endAt, false, null, null);
     }
 
     private Event occupant(LocalDateTime startAt, LocalDateTime endAt) {
-        return Event.create(ROOM, "Retrospectiva", null, startAt, endAt, false, null, FREE);
+        return Event.create(ROOM, "Retrospectiva", null, startAt, endAt, false, null, null, FREE);
     }
 
     @Test

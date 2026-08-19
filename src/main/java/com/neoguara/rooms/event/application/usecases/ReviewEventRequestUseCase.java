@@ -90,6 +90,7 @@ public class ReviewEventRequestUseCase {
                         after.getEndAt(),
                         after.isAllDay(),
                         after.getRecurrenceRule(),
+                        after.getSeriesId(),
                         roomOccupancy
                 ));
                 item.linkCreatedEvent(created.getId());
