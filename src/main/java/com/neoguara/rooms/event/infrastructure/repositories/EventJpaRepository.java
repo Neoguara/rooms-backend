@@ -54,4 +54,32 @@ public interface EventJpaRepository extends JpaRepository<Event, EventId> {
 
     @Query("SELECT e FROM Event e WHERE e.seriesId.id = :seriesId ORDER BY e.startAt")
     List<Event> findBySeriesId(@Param("seriesId") UUID seriesId);
+
+    @Query("""
+            SELECT e FROM Event e
+            WHERE e.status <> :excluded
+              AND e.startAt < :to
+              AND e.endAt > :from
+            ORDER BY e.startAt
+            """)
+    List<Event> findExistingBetween(
+            @Param("excluded") EventStatus excluded,
+            @Param("from") LocalDateTime from,
+            @Param("to") LocalDateTime to
+    );
+
+    @Query("""
+            SELECT e FROM Event e
+            WHERE e.roomId.id = :roomId
+              AND e.status <> :excluded
+              AND e.startAt < :to
+              AND e.endAt > :from
+            ORDER BY e.startAt
+            """)
+    List<Event> findExistingBetweenByRoom(
+            @Param("roomId") UUID roomId,
+            @Param("excluded") EventStatus excluded,
+            @Param("from") LocalDateTime from,
+            @Param("to") LocalDateTime to
+    );
 }

@@ -100,6 +100,17 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-validation</artifactId>
 		</dependency>
+		<!--
+			Geracao de PDF dos relatorios. Fixado na linha 2.x de proposito: nela todas as
+			dependencias sao <optional>, entao o projeto ganha um jar e nada mais. A 3.x traz
+			brotli4j como dependencia obrigatoria, com biblioteca nativa junto, o que e caro
+			demais para desenhar uma tabela.
+		-->
+		<dependency>
+			<groupId>com.github.librepdf</groupId>
+			<artifactId>openpdf</artifactId>
+			<version>2.4.0</version>
+		</dependency>
 	</dependencies>
 	<dependencyManagement>
 		<dependencies>

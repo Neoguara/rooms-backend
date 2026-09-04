@@ -62,4 +62,14 @@ public class EventRepositoryImpl implements EventRepositoryPort {
         return jpaRepository.findBySeriesId(seriesId.id());
     }
 
+    @Override
+    public List<Event> findExistingBetween(LocalDateTime from, LocalDateTime to) {
+        return jpaRepository.findExistingBetween(EventStatus.DISCARDED, from, to);
+    }
+
+    @Override
+    public List<Event> findExistingBetweenByRoom(RoomId roomId, LocalDateTime from, LocalDateTime to) {
+        return jpaRepository.findExistingBetweenByRoom(roomId.id(), EventStatus.DISCARDED, from, to);
+    }
+
 }

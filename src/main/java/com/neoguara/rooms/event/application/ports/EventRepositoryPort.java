@@ -30,4 +30,17 @@ public interface EventRepositoryPort {
 
     /** Ocorrências de uma mesma recorrência, em ordem cronológica. */
     List<Event> findBySeriesId(SeriesId seriesId);
+
+    /**
+     * Eventos que de fato existiram no intervalo, em ordem cronológica: tudo menos
+     * {@code DISCARDED}. Cancelado entra — saber que uma reserva foi desmarcada faz parte do
+     * histórico da sala —, mas descartado não, porque é o evento que nunca deveria ter existido.
+     *
+     * <p>Diferente de {@link #findOccupyingBetween}, que responde quem <em>segura</em> a sala e por
+     * isso obedece a {@code EventStatus.occupiesRoom()}. Aqui a pergunta é outra: o que aconteceu.
+     */
+    List<Event> findExistingBetween(LocalDateTime from, LocalDateTime to);
+
+    /** Mesma leitura de {@link #findExistingBetween}, restrita a uma sala. */
+    List<Event> findExistingBetweenByRoom(RoomId roomId, LocalDateTime from, LocalDateTime to);
 }

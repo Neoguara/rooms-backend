@@ -69,12 +69,6 @@ papel: é decisão legítima, reversível, e libera a sala. `DISCARD` não é so
 reverter um `CREATE` aprovado por engano. Não crie endpoint `DELETE /events/{id}`; ele furaria a
 regra de que toda escrita passa por aprovação.
 
-**Evento que já terminou não aceita alteração.** `Event.hasElapsed()` congela `update`, `cancel` e
-`reactivate` quando `endAt` já passou — a agenda de ontem é registro, não dado editável.
-`discard()` é a exceção deliberada: sem ela, uma aprovação indevida sobre data passada seria
-irreversível. Consequência que vale saber: **reverter decisão sobre evento vencido deixou de
-funcionar**, porque a reversão de `CANCEL` é um `REACTIVATE` e a de `UPDATE` é outro `UPDATE`.
-
 `Event.complete()` e `Event.archive()` **não têm chamador** — `COMPLETED` e `ARCHIVED` são
 inalcançáveis, e ficaram assim por decisão. Por isso `EventStatus.occupiesRoom()` cita um estado que
 nunca ocorre.
