@@ -115,7 +115,6 @@ public class Event {
     ) {
         if (this.status != EventStatus.ACTIVE)
             throw new InvalidStateException("Only active events can be updated");
-        requireNotElapsed("updated");
         this.roomId = roomId;
         this.title = title;
         this.description = description;
@@ -133,7 +132,6 @@ public class Event {
     public void cancel() {
         if (this.status != EventStatus.ACTIVE)
             throw new InvalidStateException("Only active events can be cancelled");
-        requireNotElapsed("cancelled");
         this.status = EventStatus.CANCELLED;
         this.updatedAt = LocalDateTime.now();
     }
@@ -143,9 +141,8 @@ public class Event {
      * {@link #cancel()}: um cancelamento é uma decisão legítima sobre um evento que existiu, e é
      * reversível; um descarte diz que o evento nunca deveria ter existido, e é definitivo.
      *
-     * <p>É a única alteração que um evento já terminado ainda aceita. Descartar não reescreve a
-     * agenda: apaga um registro que nunca deveria estar nela, e sem isso uma aprovação indevida
-     * sobre data passada ficaria impossível de reverter.
+     * <p>Descartar não reescreve a agenda: apaga um registro que nunca deveria estar nela, e sem
+     * isso uma aprovação indevida ficaria impossível de reverter.
      */
     public void discard() {
         if (this.status != EventStatus.ACTIVE && this.status != EventStatus.CANCELLED)
@@ -161,7 +158,6 @@ public class Event {
     public void reactivate(RoomOccupancy occupancy) {
         if (this.status != EventStatus.CANCELLED)
             throw new InvalidStateException("Only cancelled events can be reactivated");
-        requireNotElapsed("reactivated");
         this.status = EventStatus.ACTIVE;
         this.updatedAt = LocalDateTime.now();
         requireFreeSlot(occupancy);
@@ -179,16 +175,6 @@ public class Event {
             throw new InvalidStateException("Only cancelled or completed events can be archived");
         this.status = EventStatus.ARCHIVED;
         this.updatedAt = LocalDateTime.now();
-    }
-
-    /** Um evento já terminado é registro do que aconteceu, e a agenda de ontem não se reescreve. */
-    public boolean hasElapsed() {
-        return endAt != null && endAt.isBefore(LocalDateTime.now());
-    }
-
-    private void requireNotElapsed(String operation) {
-        if (hasElapsed())
-            throw new InvalidStateException("Events that have already ended cannot be " + operation);
     }
 
     /**

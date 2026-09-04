@@ -17,7 +17,7 @@ import java.util.UUID;
         alcances em lote, `startAt` e `endAt` valem como **deslocamento**: a diferença entre o \
         `startAt` informado e o do evento em `eventId` é aplicada à data de cada ocorrência, que \
         recebe o horário e a duração novos. É assim que uma série de terça inteira passa para \
-        quarta. Ocorrências já terminadas ficam de fora do lote.""")
+        quarta.""")
 public record UpdateEventChange(
         @Schema(description = "ID do evento a ser atualizado", requiredMode = Schema.RequiredMode.REQUIRED)
         UUID eventId,

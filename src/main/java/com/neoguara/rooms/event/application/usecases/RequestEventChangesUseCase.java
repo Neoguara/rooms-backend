@@ -228,11 +228,11 @@ public class RequestEventChangesUseCase {
     }
 
     /**
-     * Resolve quais eventos o alcance atinge. Em lote, ocorrências fora do estado exigido ou já
-     * terminadas são descartadas: o grupo vale todo ou nada, e uma ocorrência antiga — ou cancelada
-     * antes, em separado — não pode derrubar a operação sobre o resto da série. Em
-     * {@code THIS_OCCURRENCE} nada é filtrado: ali o pedido é sobre aquele evento, e um estado
-     * incompatível deve falhar na aprovação, como sempre.
+     * Resolve quais eventos o alcance atinge. Em lote, ocorrências fora do estado exigido são
+     * descartadas: o grupo vale todo ou nada, e uma ocorrência cancelada antes, em separado, não
+     * pode derrubar a operação sobre o resto da série. Ocorrências já terminadas seguem no lote —
+     * evento vencido também aceita alteração. Em {@code THIS_OCCURRENCE} nada é filtrado: ali o
+     * pedido é sobre aquele evento, e um estado incompatível deve falhar na aprovação, como sempre.
      */
     private SeriesTargets targetsOf(Event event, ChangeScope scope, EventStatus applicableTo) {
         ChangeScope effective = scope == null ? ChangeScope.THIS_OCCURRENCE : scope;
@@ -247,13 +247,11 @@ public class RequestEventChangesUseCase {
                 .filter(occurrence -> effective == ChangeScope.ALL_OCCURRENCES
                         || !occurrence.getStartAt().isBefore(event.getStartAt()))
                 .filter(occurrence -> occurrence.getStatus() == applicableTo)
-                .filter(occurrence -> !occurrence.hasElapsed())
                 .toList();
 
         if (applicable.isEmpty())
             throw new InvalidStateException(
-                    "No occurrence in scope " + effective + " is in state " + applicableTo
-                            + " and still to come");
+                    "No occurrence in scope " + effective + " is in state " + applicableTo);
 
         return new SeriesTargets(effective, series, applicable);
     }

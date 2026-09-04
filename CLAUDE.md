@@ -69,6 +69,10 @@ papel: é decisão legítima, reversível, e libera a sala. `DISCARD` não é so
 reverter um `CREATE` aprovado por engano. Não crie endpoint `DELETE /events/{id}`; ele furaria a
 regra de que toda escrita passa por aprovação.
 
+**Evento passado não é congelado.** `update`, `cancel` e `reactivate` olham só o estado, nunca o
+relógio: corrigir a agenda de ontem é pedido legítimo. A guarda `hasElapsed()` que recusava isso foi
+removida por decisão — não a reintroduza.
+
 `Event.complete()` e `Event.archive()` **não têm chamador** — `COMPLETED` e `ARCHIVED` são
 inalcançáveis, e ficaram assim por decisão. Por isso `EventStatus.occupiesRoom()` cita um estado que
 nunca ocorre.
@@ -121,9 +125,10 @@ ocorrências, e série maior é recusada em vez de truncada.
 tem teste para isso.
 
 `ChangeScope` (`THIS_OCCURRENCE`, `THIS_AND_FOLLOWING`, `ALL_OCCURRENCES`) vale para `CANCEL`,
-`REACTIVATE` e `UPDATE`. Em lote, ocorrências fora do estado exigido **ou já vencidas** são
-descartadas, não viram erro: como o grupo vale todo ou nada, um cancelamento avulso anterior — ou
-uma ocorrência antiga — derrubaria a operação sobre o resto da série.
+`REACTIVATE` e `UPDATE`. Em lote, ocorrências fora do estado exigido são descartadas, não viram
+erro: como o grupo vale todo ou nada, um cancelamento avulso anterior derrubaria a operação sobre o
+resto da série. Ocorrências já vencidas **não** são filtradas — evento passado aceita alteração
+como qualquer outro.
 
 **`UPDATE` em lote desloca, não reposiciona.** `startAt`/`endAt` valem como diferença em relação ao
 evento em `eventId`: cada ocorrência recebe `data + N dias`, no horário e duração novos. É assim que
